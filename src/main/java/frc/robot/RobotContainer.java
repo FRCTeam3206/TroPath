@@ -75,7 +75,7 @@ public class RobotContainer implements Logged{
     //         () -> m_robotDrive.setX(),
     //         m_robotDrive));
     
-    m_driverController.button(1).whileTrue(new PathingCommand(m_robotDrive,3,2));
+    m_driverController.button(1).whileTrue(new PathingCommand(new Pose2d(4,8,new Rotation2d(1.5)),m_robotDrive,3,4.8,1,1).setStoppingDistAllowance(.5));
   }
 
   /**

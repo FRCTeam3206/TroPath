@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -20,26 +21,35 @@ public class PathingCommand extends Command{
     Pathfinder pathfinder;
     TrajectoryConfig config = new TrajectoryConfig(1 /* Max vel */, 9999 /* Max accel */);
     DriveSubsystem drive;
-    double velocity=0;
-    TrapezoidProfile profile;
+    double velocity,rotationalVelocity=0;
+    TrapezoidProfile translationProfile,rotationProfile;
     double maxVelocity,maxAcceleration;
-    public PathingCommand(DriveSubsystem drive, double maxVelocity, double maxAcceleration){
+    double stoppingDistAllowance=0;
+    Pose2d pose;
+    public PathingCommand(Pose2d pose,DriveSubsystem drive, double maxVelocity, double maxAcceleration, double maxRotationalVelocity, double maxRotationalAcceleration){
         this.drive=drive;
-        profile=new TrapezoidProfile(new Constraints(maxVelocity, maxAcceleration));
+        translationProfile=new TrapezoidProfile(new Constraints(maxVelocity, maxAcceleration));
+        rotationProfile=new TrapezoidProfile(new Constraints(maxRotationalVelocity, maxRotationalAcceleration));
         this.maxVelocity=maxVelocity;
         this.maxAcceleration=maxAcceleration;
+        this.pose=pose;
         pathfinder=new PathfinderBuilder(Field.CHARGED_UP_2023).setRobotLength(.9).setRobotWidth(.9).setCornerDist(Math.sqrt(maxVelocity*maxVelocity+maxVelocity*maxVelocity/maxAcceleration/maxAcceleration)).build();
+    }
+    public PathingCommand setStoppingDistAllowance(double stoppingDistAllowance){
+        this.stoppingDistAllowance=stoppingDistAllowance;
+        return this;
     }
     boolean done=false;
     public void execute(){
+        double deltaRotation=drive.getPose().getRotation().minus(pose.getRotation()).getRadians();
+        rotationalVelocity=rotationProfile.calculate(.02, new TrapezoidProfile.State(deltaRotation,rotationalVelocity), new TrapezoidProfile.State(0,0)).velocity;
         Trajectory path=null;
         try {
-            path = pathfinder.generateTrajectory(drive.getPose(), new Pose2d(8, 4, new Rotation2d()), config);
+            path = pathfinder.generateTrajectory(drive.getPose(), pose, config);
         } catch (ImpossiblePathException e) {
-            drive.drive(0, 0, 0, true, false);
+            drive.drive(0, 0, rotationalVelocity, true, false);
             velocity=0;
-            SmartDashboard.putNumber("Velocity",0);
-            done=true;
+            done=rotationalVelocity<1E-4;
             return;
         }
           State thisState=path.getStates().get(0);
@@ -47,16 +57,21 @@ public class PathingCommand extends Command{
           double dX=nextState.poseMeters.getX()-thisState.poseMeters.getX();
           double dY=nextState.poseMeters.getY()-thisState.poseMeters.getY();
           double total=Math.abs(dX)+Math.abs(dY);
-          velocity=profile.calculate(.02, new TrapezoidProfile.State(0,velocity), getNextState(path)).velocity;
+          velocity=translationProfile.calculate(.02, new TrapezoidProfile.State(0,velocity), getNextState(path)).velocity;
           getNextState(path);
           double xSpeed=dX/total*velocity;
           double ySpeed=dY/total*velocity;
-          drive.driveSpeed(xSpeed, ySpeed, 0, true, false);
-    }
+          
+
+          
+    
+          drive.driveSpeed(xSpeed, ySpeed, rotationalVelocity, true, false);
+        }
     private TrapezoidProfile.State getNextState(Trajectory path){
         for(State state:path.getStates()){
             if(state.curvatureRadPerMeter<1E-4)continue;
-            double maxAllowedVelocity=Math.PI/2/Math.abs(state.curvatureRadPerMeter)/Math.sqrt(1+Math.pow(maxAcceleration,-2));
+            double stopDist=Math.PI/2/Math.abs(state.curvatureRadPerMeter)+stoppingDistAllowance;
+            double maxAllowedVelocity=stopDist/Math.sqrt(1+Math.pow(maxAcceleration,-2));
             if(maxAllowedVelocity<maxVelocity){
                 return new TrapezoidProfile.State(state.timeSeconds,maxAllowedVelocity);
             }
