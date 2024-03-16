@@ -15,7 +15,7 @@ import me.nabdev.pathfinding.structures.ImpossiblePathException;
 import me.nabdev.pathfinding.utilities.FieldLoader.Field;
 
 public class PathingCommand extends Command{
-    Pathfinder pathfinder = new PathfinderBuilder(Field.CHARGED_UP_2023).build();
+    Pathfinder pathfinder = new PathfinderBuilder(Field.CHARGED_UP_2023).setRobotLength(.9).build();
     TrajectoryConfig config = new TrajectoryConfig(1 /* Max vel */, 9999 /* Max accel */);
     DriveSubsystem drive;
     double velocity=0;
