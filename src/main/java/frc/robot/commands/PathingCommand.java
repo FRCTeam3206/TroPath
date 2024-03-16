@@ -39,7 +39,6 @@ public class PathingCommand extends Command{
           velocity=profile.calculate(.02, new TrapezoidProfile.State(0,velocity), new TrapezoidProfile.State(myPath.getTotalTimeSeconds(),0)).velocity;
           double xSpeed=dX/total*velocity;
           double ySpeed=dY/total*velocity;
-          System.out.println(velocity);
           drive.drive(xSpeed, ySpeed, 0, true, false);
     }
 }

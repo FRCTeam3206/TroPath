@@ -18,7 +18,6 @@ import com.revrobotics.RelativeEncoder;
 import frc.robot.Robot;
 import frc.robot.Constants.ModuleConstants;
 import monologue.Logged;
-import monologue.Annotations.Log;
 
 public class MAXSwerveModule implements Logged {
   private final CANSparkMax m_drivingSparkMax;
