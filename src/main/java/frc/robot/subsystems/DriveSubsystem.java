@@ -120,7 +120,8 @@ public class DriveSubsystem extends SubsystemBase implements Logged{
         pose);
     simOdometryPose = pose;
   }
-
+  SlewRateLimiter xLimiter=new SlewRateLimiter(2.4);
+  SlewRateLimiter yLimiter=new SlewRateLimiter(2.4);
   private void updateOdometry() {
     m_odometry.update(
         m_gyro.getRotation2d(),
@@ -142,8 +143,8 @@ public class DriveSubsystem extends SubsystemBase implements Logged{
       simOdometryPose =
           simOdometryPose.exp(
               new Twist2d(
-                  speeds.vxMetersPerSecond * timeDelta,
-                  speeds.vyMetersPerSecond * timeDelta,
+                  xLimiter.calculate(speeds.vxMetersPerSecond) * timeDelta,
+                  yLimiter.calculate(speeds.vyMetersPerSecond) * timeDelta,
                   speeds.omegaRadiansPerSecond * timeDelta));
     }
   }
@@ -229,7 +230,9 @@ public class DriveSubsystem extends SubsystemBase implements Logged{
     m_rearRight.setDesiredState(swerveModuleStates[3]);
     this.log("Desired Swerve States", swerveModuleStates);
   }
-
+  public void driveSpeed(double xSpeed, double ySpeed, double rot, boolean fieldRelative, boolean rateLimit) {
+    drive(xSpeed/DriveConstants.kMaxSpeedMetersPerSecond,ySpeed/DriveConstants.kMaxSpeedMetersPerSecond,rot/DriveConstants.kMaxSpeedMetersPerSecond,fieldRelative,rateLimit);
+  }
   /**
    * Sets the wheels into an X formation to prevent movement.
    */
