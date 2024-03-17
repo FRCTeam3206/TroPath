@@ -37,7 +37,7 @@ public class RobotContainer implements Logged{
    */
   public RobotContainer() {
     // Configure the button bindings
-    PathingCommand.setRobotProfile(new RobotProfile(48,3.0/39.37,.9,.9,new Motor(2.6,1,5676).gear(Motor.REV_HIGH)));
+    PathingCommand.setRobotProfile(new RobotProfile(48,3.0/39.37,.9,.9,Motor.NEO.gear(Motor.REV_HIGH)));
     System.out.println(PathingCommand.getRobotProfile());
     PathingCommand.setRobot(()->m_robotDrive.getPose(), m_robotDrive::driveSpeed);
     configureButtonBindings();

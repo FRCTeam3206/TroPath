@@ -17,7 +17,7 @@ public class RobotProfile {
         this.wheelBase = wheelBase;
 
         maxVelocity=driveMotor.getFreeSpeed()*Math.PI*wheelDiameter/60;
-        maxAcceleration=driveMotor.getMaxStallTorque()/(wheelDiameter/2)/robotMass;
+        maxAcceleration=driveMotor.getRealStallTorque()/(wheelDiameter/2)/robotMass*4;//We have four swerve modules
 
         double robotRadius=2*Math.max(trackLength,wheelBase)/Math.sqrt(2);
         maxRotationalVelocity=maxVelocity/robotRadius;
