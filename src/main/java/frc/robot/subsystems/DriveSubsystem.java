@@ -11,6 +11,7 @@ import edu.wpi.first.hal.simulation.SimDeviceDataJNI;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -230,8 +231,8 @@ public class DriveSubsystem extends SubsystemBase implements Logged{
     m_rearRight.setDesiredState(swerveModuleStates[3]);
     this.log("Desired Swerve States", swerveModuleStates);
   }
-  public void driveSpeed(double xSpeed, double ySpeed, double rot, boolean fieldRelative, boolean rateLimit) {
-    drive(xSpeed/DriveConstants.kMaxSpeedMetersPerSecond,ySpeed/DriveConstants.kMaxSpeedMetersPerSecond,rot/DriveConstants.kMaxAngularSpeed,fieldRelative,rateLimit);
+  public void driveSpeed(Transform2d speeds) {
+    drive(speeds.getX()/DriveConstants.kMaxSpeedMetersPerSecond,speeds.getY()/DriveConstants.kMaxSpeedMetersPerSecond,speeds.getRotation().getRadians()/DriveConstants.kMaxAngularSpeed,true,false);
   }
   /**
    * Sets the wheels into an X formation to prevent movement.

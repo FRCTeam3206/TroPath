@@ -5,27 +5,19 @@
 package frc.robot;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.trajectory.TrajectoryConfig;
-import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.XboxController;
-import frc.robot.Constants.AutoConstants;
-import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.PathingCommand;
+import frc.robot.robotprofile.Motor;
+import frc.robot.robotprofile.RobotProfile;
 import frc.robot.subsystems.DriveSubsystem;
 import monologue.Logged;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import java.util.List;
 
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -45,6 +37,9 @@ public class RobotContainer implements Logged{
    */
   public RobotContainer() {
     // Configure the button bindings
+    PathingCommand.setRobotProfile(new RobotProfile(48,3.0/39.37,.9,.9,new Motor(2.6,1,5676).gear(4.7)));
+    System.out.println(PathingCommand.getRobotProfile());
+    PathingCommand.setRobot(()->m_robotDrive.getPose(), m_robotDrive::driveSpeed);
     configureButtonBindings();
 
     // Configure default commands
@@ -58,6 +53,7 @@ public class RobotContainer implements Logged{
                 -MathUtil.applyDeadband(m_driverController.getRightX(), OIConstants.kDriveDeadband),
                 true, true),
             m_robotDrive));
+    
   }
 
   /**
@@ -75,7 +71,7 @@ public class RobotContainer implements Logged{
     //         () -> m_robotDrive.setX(),
     //         m_robotDrive));
     
-    m_driverController.button(1).whileTrue(new PathingCommand(new Pose2d(4,8,new Rotation2d(1.5)),m_robotDrive,3,4.8,1,1,false).setStoppingDistAllowance(.5));
+    m_driverController.button(1).whileTrue(new PathingCommand(new Pose2d(2,3,new Rotation2d(Math.PI))));
   }
 
   /**
@@ -84,7 +80,7 @@ public class RobotContainer implements Logged{
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return new PathingCommand(new Pose2d(6,4,new Rotation2d(0)),m_robotDrive,3,4.8,1,1,true)
-    .andThen(new PathingCommand(new Pose2d(2,2,new Rotation2d(3.1415926535897)),m_robotDrive,3,4.8,1,1,true));
+    return new PathingCommand(new Pose2d(6,4,new Rotation2d()))
+    .andThen(new PathingCommand(new Pose2d(2,2,new Rotation2d(3.1415926535897))));
   }
 }

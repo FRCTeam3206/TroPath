@@ -1,41 +1,52 @@
 package frc.robot.commands;
 
-import edu.wpi.first.math.controller.PIDController;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.robotprofile.RobotProfile;
 import me.nabdev.pathfinding.Pathfinder;
 import me.nabdev.pathfinding.PathfinderBuilder;
 import me.nabdev.pathfinding.structures.ImpossiblePathException;
 import me.nabdev.pathfinding.utilities.FieldLoader.Field;
 
 public class PathingCommand extends Command{
+    private static RobotProfile robotProfile;
+    private static Supplier<Pose2d> robotPose;
+    private static Consumer<Transform2d> drive;
     Pathfinder pathfinder;
     TrajectoryConfig config = new TrajectoryConfig(1 /* Max vel */, 9999 /* Max accel */);
-    DriveSubsystem drive;
     double velocity,rotationalVelocity=0;
     TrapezoidProfile translationProfile,rotationProfile;
     double maxVelocity,maxAcceleration;
     double stoppingDistAllowance=0;
     boolean finish=false;
     Pose2d pose;
-    public PathingCommand(Pose2d pose,DriveSubsystem drive, double maxVelocity, double maxAcceleration, double maxRotationalVelocity, double maxRotationalAcceleration,boolean finish){
-        this.drive=drive;
-        translationProfile=new TrapezoidProfile(new Constraints(maxVelocity, maxAcceleration));
-        rotationProfile=new TrapezoidProfile(new Constraints(maxRotationalVelocity, maxRotationalAcceleration));
-        this.maxVelocity=maxVelocity;
-        this.maxAcceleration=maxAcceleration;
+    public PathingCommand(Pose2d pose){
         this.pose=pose;
-        this.finish=finish;
-        pathfinder=new PathfinderBuilder(Field.CHARGED_UP_2023).setRobotLength(.9).setRobotWidth(.9).setCornerDist(Math.sqrt(maxVelocity*maxVelocity+maxVelocity*maxVelocity/maxAcceleration/maxAcceleration)).build();
+        this.maxVelocity=robotProfile.getMaxVelocity();
+        this.maxAcceleration=robotProfile.getMaxAcceleration();
+        translationProfile=new TrapezoidProfile(new Constraints(maxVelocity, maxAcceleration));
+        rotationProfile=new TrapezoidProfile(new Constraints(robotProfile.getMaxRotationalVelocity(), robotProfile.getMaxRotationalAcceleration()));
+        pathfinder=new PathfinderBuilder(Field.CHARGED_UP_2023).setRobotLength(robotProfile.getTrackLength()).setRobotWidth(robotProfile.getWheelBase()).setCornerDist(Math.sqrt(maxVelocity*maxVelocity+maxVelocity*maxVelocity/maxAcceleration/maxAcceleration)).build();
+    }
+    public static void setRobot(Supplier<Pose2d> robotPose,Consumer<Transform2d> drive){
+        PathingCommand.robotPose=robotPose;
+        PathingCommand.drive=drive;
+    }
+    public static void setRobotProfile(RobotProfile robotProfile) {
+        PathingCommand.robotProfile = robotProfile;
+    }
+    public static RobotProfile getRobotProfile(){
+        return robotProfile;
     }
     public PathingCommand setStoppingDistAllowance(double stoppingDistAllowance){
         this.stoppingDistAllowance=stoppingDistAllowance;
@@ -43,13 +54,14 @@ public class PathingCommand extends Command{
     }
     boolean done=false;
     public void execute(){
-        double deltaRotation=drive.getPose().getRotation().minus(pose.getRotation()).getRadians();
+        double deltaRotation;
+        deltaRotation = robotPose.get().getRotation().minus(pose.getRotation()).getRadians();
         rotationalVelocity=rotationProfile.calculate(.02, new TrapezoidProfile.State(deltaRotation,rotationalVelocity), new TrapezoidProfile.State(0,0)).velocity;
         Trajectory path=null;
         try {
-            path = pathfinder.generateTrajectory(drive.getPose(), pose, config);
+                path = pathfinder.generateTrajectory(robotPose.get(), pose, config);
         } catch (ImpossiblePathException e) {
-            drive.drive(0, 0, rotationalVelocity, true, false);
+            drive.accept(new Transform2d(0, 0, new Rotation2d(rotationalVelocity)));
             velocity=0;
             done=rotationalVelocity<1E-4&&finish;
             return;
@@ -67,7 +79,7 @@ public class PathingCommand extends Command{
 
           
     
-          drive.driveSpeed(xSpeed, ySpeed, rotationalVelocity, true, false);
+          drive.accept(new Transform2d(xSpeed,ySpeed,new Rotation2d(rotationalVelocity)));
         }
     private TrapezoidProfile.State getNextState(Trajectory path){
         for(State state:path.getStates()){
