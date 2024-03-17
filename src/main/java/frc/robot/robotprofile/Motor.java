@@ -38,4 +38,5 @@ public class Motor {
         realStallTorque*=gearRatio;
         return this;
     }
+    public static final double SDS_L1=8.14,SDS_L2=6.75,SDS_L3=6.12,SDS_L4=5.14,REV_LOW=5.5,REV_MED=5.08,REV_HIGH=4.71,REV_EHIGH_1=4.5,REV_EHIGH_2=4.29,REV_EHIGH_3=4.00,REV_EHIGH_4=3.75,REV_EHIGH_5=3.56;
 }
