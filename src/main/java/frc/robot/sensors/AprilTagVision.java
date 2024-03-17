@@ -1,7 +1,5 @@
 package frc.robot.sensors;
 
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -10,7 +8,6 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import frc.robot.Constants.VisionConstants;
-import java.io.IOException;
 import java.util.Optional;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
@@ -25,16 +22,9 @@ public class AprilTagVision {
   public AprilTagVision(
       String cameraName, Transform3d distToCamera, SwerveDrivePoseEstimator swervePoseEstimator) {
     camera = new PhotonCamera(cameraName);
-    AprilTagFieldLayout fieldLayout;
-    try {
-      fieldLayout =
-          AprilTagFieldLayout.loadFromResource(AprilTagFields.k2024Crescendo.m_resourceFile);
-    } catch (IOException e) {
-      fieldLayout = VisionConstants.kAprilTagLayout;
-    }
     photonEstimator =
         new PhotonPoseEstimator(
-            fieldLayout,
+            VisionConstants.kAprilTagFieldLayout,
             PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
             camera,
             distToCamera);

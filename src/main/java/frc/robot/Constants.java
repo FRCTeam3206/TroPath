@@ -4,10 +4,21 @@
 
 package frc.robot;
 
+import java.util.List;
+
 import com.revrobotics.CANSparkBase.IdleMode;
 
+import edu.wpi.first.apriltag.AprilTag;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 
@@ -138,5 +149,30 @@ public final class Constants {
 
   public static final class NeoMotorConstants {
     public static final double kFreeSpeedRpm = 5676;
+  }
+
+  public static final class VisionConstants {
+    public static final Matrix<N3, N1> kStateStandardDeviations = VecBuilder.fill(0.5, 0.5, 0.5);
+    public static final Matrix<N3, N1> kVisionStandardDeviations = VecBuilder.fill(0.5, 0.5, 0.5);
+    public static final Matrix<N3, N1> kSingleTagStandardDeviations = VecBuilder.fill(4, 4, 8);
+    public static final Matrix<N3, N1> kMultiTagStandardDeviations = VecBuilder.fill(0.5, 0.5, 1);
+
+    // Camera 1
+    public static final String kCamera1Name = "Camera1";
+    // Described by PhotonCamera constructor as:
+    // Transform3d from the center of the robot to the camera mount position (ie, robot ➔ camera) in the Robot Coordinate System.
+    public static final Transform3d kDistToCamera1 = new Transform3d();
+
+    public static final double kFieldLength = 4;
+    public static final double kFieldWidth = 4;
+
+    public static final AprilTag[] kAprilTags = {
+      new AprilTag(1, new Pose3d(0, 2, 1, new Rotation3d(0, 0, 0))),
+      new AprilTag(2, new Pose3d(2, 0, 1, new Rotation3d(0, 0, Math.PI / 2))),
+      new AprilTag(3, new Pose3d(4, 2, 1, new Rotation3d(0, 0, Math.PI))),
+      new AprilTag(4, new Pose3d(2, 4, 1, new Rotation3d(0, 0, Math.PI * 1.5)))
+    };
+
+    public static final AprilTagFieldLayout kAprilTagFieldLayout = new AprilTagFieldLayout(List.of(kAprilTags), kFieldLength, kFieldWidth);
   }
 }
