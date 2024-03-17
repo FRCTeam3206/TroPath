@@ -22,21 +22,18 @@ public class PathingCommand extends Command{
     private static RobotProfile robotProfile;
     private static Supplier<Pose2d> robotPose;
     private static Consumer<Transform2d> drive;
-    Pathfinder pathfinder;
-    TrajectoryConfig config = new TrajectoryConfig(1 /* Max vel */, 9999 /* Max accel */);
-    double velocity,rotationalVelocity=0;
-    TrapezoidProfile translationProfile,rotationProfile;
-    double maxVelocity,maxAcceleration;
-    double stoppingDistAllowance=0;
-    boolean finish=false;
-    Pose2d pose;
+    private static Pathfinder pathfinder;
+    private TrajectoryConfig config = new TrajectoryConfig(1 /* Max vel */, 9999 /* Max accel */);
+    private double velocity,rotationalVelocity=0;
+    private TrapezoidProfile translationProfile,rotationProfile;
+    private double stoppingDistAllowance=0;
+    private boolean finish=false;
+    private Pose2d pose;
+    private static double maxStopDist;
     public PathingCommand(Pose2d pose){
         this.pose=pose;
-        this.maxVelocity=robotProfile.getMaxVelocity();
-        this.maxAcceleration=robotProfile.getMaxAcceleration();
-        translationProfile=new TrapezoidProfile(new Constraints(maxVelocity, maxAcceleration));
+        translationProfile=new TrapezoidProfile(new Constraints(robotProfile.getMaxVelocity(), robotProfile.getMaxAcceleration()));
         rotationProfile=new TrapezoidProfile(new Constraints(robotProfile.getMaxRotationalVelocity(), robotProfile.getMaxRotationalAcceleration()));
-        pathfinder=new PathfinderBuilder(Field.CHARGED_UP_2023).setRobotLength(robotProfile.getTrackLength()).setRobotWidth(robotProfile.getWheelBase()).setCornerDist(Math.sqrt(maxVelocity*maxVelocity+maxVelocity*maxVelocity/maxAcceleration/maxAcceleration)).build();
     }
     public static void setRobot(Supplier<Pose2d> robotPose,Consumer<Transform2d> drive){
         PathingCommand.robotPose=robotPose;
@@ -44,6 +41,8 @@ public class PathingCommand extends Command{
     }
     public static void setRobotProfile(RobotProfile robotProfile) {
         PathingCommand.robotProfile = robotProfile;
+        maxStopDist=robotProfile.getMaxVelocity()*Math.sqrt(1+Math.pow(robotProfile.getMaxAcceleration(),-2));
+        pathfinder=new PathfinderBuilder(Field.CHARGED_UP_2023).setRobotLength(robotProfile.getLength()).setRobotWidth(robotProfile.getWidth()).setCornerDist(maxStopDist).build();
     }
     public static RobotProfile getRobotProfile(){
         return robotProfile;
@@ -85,8 +84,8 @@ public class PathingCommand extends Command{
         for(State state:path.getStates()){
             if(state.curvatureRadPerMeter<1E-4)continue;
             double stopDist=Math.PI/2/Math.abs(state.curvatureRadPerMeter)+stoppingDistAllowance;
-            double maxAllowedVelocity=stopDist/Math.sqrt(1+Math.pow(maxAcceleration,-2));
-            if(maxAllowedVelocity<maxVelocity){
+            double maxAllowedVelocity=stopDist/Math.sqrt(1+Math.pow(robotProfile.getMaxAcceleration(),-2));
+            if(maxAllowedVelocity<robotProfile.getMaxVelocity()){
                 return new TrapezoidProfile.State(state.timeSeconds,maxAllowedVelocity);
             }
         }

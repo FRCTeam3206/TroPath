@@ -1,7 +1,7 @@
 package frc.robot.robotprofile;
 
 public class RobotProfile {
-    private double maxVelocity,maxAcceleration,maxRotationalVelocity,maxRotationalAcceleration,trackLength,wheelBase;
+    private double maxVelocity,maxAcceleration,maxRotationalVelocity,maxRotationalAcceleration,length,width;
     
     public RobotProfile(double maxVelocity, double maxAcceleration, double maxRotationalVelocity,
             double maxRotationalAcceleration, double trackLength, double wheelBase) {
@@ -9,12 +9,12 @@ public class RobotProfile {
         this.maxAcceleration = maxAcceleration;
         this.maxRotationalVelocity = maxRotationalVelocity;
         this.maxRotationalAcceleration = maxRotationalAcceleration;
-        this.trackLength = trackLength;
-        this.wheelBase = wheelBase;
+        this.length = trackLength;
+        this.width = wheelBase;
     }
     public RobotProfile(double robotMass,double wheelDiameter,double trackLength, double wheelBase,Motor driveMotor){
-        this.trackLength = trackLength;
-        this.wheelBase = wheelBase;
+        this.length = trackLength;
+        this.width = wheelBase;
 
         maxVelocity=driveMotor.getFreeSpeed()*Math.PI*wheelDiameter/60;
         maxAcceleration=driveMotor.getRealStallTorque()/(wheelDiameter/2)/robotMass*4;//We have four swerve modules
@@ -55,26 +55,26 @@ public class RobotProfile {
         this.maxRotationalAcceleration = maxRotationalAcceleration;
     }
 
-    public double getTrackLength() {
-        return trackLength;
+    public double getLength() {
+        return length;
     }
 
-    public void setTrackLength(double trackLength) {
-        this.trackLength = trackLength;
+    public void setLength(double trackLength) {
+        this.length = trackLength;
     }
 
-    public double getWheelBase() {
-        return wheelBase;
+    public double getWidth() {
+        return width;
     }
 
-    public void setWheelBase(double wheelBase) {
-        this.wheelBase = wheelBase;
+    public void setWidth(double wheelBase) {
+        this.width = wheelBase;
     }
     @Override
     public String toString() {
         return "RobotProfile [maxVelocity=" + maxVelocity + ", maxAcceleration=" + maxAcceleration
                 + ", maxRotationalVelocity=" + maxRotationalVelocity + ", maxRotationalAcceleration="
-                + maxRotationalAcceleration + ", trackLength=" + trackLength + ", wheelBase=" + wheelBase + "]";
+                + maxRotationalAcceleration + ", length=" + length + ", width=" + width + "]";
     }
     
 }
