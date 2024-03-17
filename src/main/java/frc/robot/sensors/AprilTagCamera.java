@@ -13,13 +13,13 @@ import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 
-public class AprilTagVision {
+public class AprilTagCamera {
   private final PhotonCamera camera;
   private final PhotonPoseEstimator photonEstimator;
   SwerveDrivePoseEstimator swervePoseEstimator;
   private double lastEstTimestamp = 0;
 
-  public AprilTagVision(
+  public AprilTagCamera(
       String cameraName, Transform3d distToCamera, SwerveDrivePoseEstimator swervePoseEstimator) {
     camera = new PhotonCamera(cameraName);
     photonEstimator =
