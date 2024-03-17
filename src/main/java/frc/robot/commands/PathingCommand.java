@@ -25,14 +25,16 @@ public class PathingCommand extends Command{
     TrapezoidProfile translationProfile,rotationProfile;
     double maxVelocity,maxAcceleration;
     double stoppingDistAllowance=0;
+    boolean finish=false;
     Pose2d pose;
-    public PathingCommand(Pose2d pose,DriveSubsystem drive, double maxVelocity, double maxAcceleration, double maxRotationalVelocity, double maxRotationalAcceleration){
+    public PathingCommand(Pose2d pose,DriveSubsystem drive, double maxVelocity, double maxAcceleration, double maxRotationalVelocity, double maxRotationalAcceleration,boolean finish){
         this.drive=drive;
         translationProfile=new TrapezoidProfile(new Constraints(maxVelocity, maxAcceleration));
         rotationProfile=new TrapezoidProfile(new Constraints(maxRotationalVelocity, maxRotationalAcceleration));
         this.maxVelocity=maxVelocity;
         this.maxAcceleration=maxAcceleration;
         this.pose=pose;
+        this.finish=finish;
         pathfinder=new PathfinderBuilder(Field.CHARGED_UP_2023).setRobotLength(.9).setRobotWidth(.9).setCornerDist(Math.sqrt(maxVelocity*maxVelocity+maxVelocity*maxVelocity/maxAcceleration/maxAcceleration)).build();
     }
     public PathingCommand setStoppingDistAllowance(double stoppingDistAllowance){
@@ -49,7 +51,7 @@ public class PathingCommand extends Command{
         } catch (ImpossiblePathException e) {
             drive.drive(0, 0, rotationalVelocity, true, false);
             velocity=0;
-            done=rotationalVelocity<1E-4;
+            done=rotationalVelocity<1E-4&&finish;
             return;
         }
           State thisState=path.getStates().get(0);
@@ -79,6 +81,6 @@ public class PathingCommand extends Command{
         return new TrapezoidProfile.State(path.getTotalTimeSeconds()-(path.getStates().get(path.getStates().size()-1).timeSeconds-path.getStates().get(path.getStates().size()-2).timeSeconds), 0);
     }
     public boolean isFinished(){
-        return false;
+        return done;
     }
 }
