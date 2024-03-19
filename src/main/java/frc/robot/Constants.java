@@ -167,10 +167,7 @@ public final class Constants {
     public static final double kFieldWidth = 4;
 
     public static final AprilTag[] kAprilTags = {
-      new AprilTag(1, new Pose3d(0, 2, 1, new Rotation3d(0, 0, 0))),
-      new AprilTag(2, new Pose3d(2, 0, 1, new Rotation3d(0, 0, Math.PI / 2))),
-      new AprilTag(3, new Pose3d(4, 2, 1, new Rotation3d(0, 0, Math.PI))),
-      new AprilTag(4, new Pose3d(2, 4, 1, new Rotation3d(0, 0, Math.PI * 1.5)))
+      new AprilTag(4, new Pose3d(1.5, 4.75, .75, new Rotation3d(0, 0, 0)))
     };
 
     public static final AprilTagFieldLayout kAprilTagFieldLayout = new AprilTagFieldLayout(List.of(kAprilTags), kFieldLength, kFieldWidth);
