@@ -4,19 +4,17 @@
 
 package frc.robot.subsystems;
 
+import com.revrobotics.AbsoluteEncoder;
+import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkAbsoluteEncoder.Type;
+import com.revrobotics.SparkPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkLowLevel.MotorType;
-import com.revrobotics.SparkAbsoluteEncoder.Type;
-import com.revrobotics.SparkPIDController;
-import com.revrobotics.AbsoluteEncoder;
-import com.revrobotics.RelativeEncoder;
-
-import frc.robot.Robot;
 import frc.robot.Constants.ModuleConstants;
+import frc.robot.Robot;
 import monologue.Logged;
 
 public class MAXSwerveModule implements Logged {
@@ -33,10 +31,9 @@ public class MAXSwerveModule implements Logged {
   private SwerveModuleState m_desiredState = new SwerveModuleState(0.0, new Rotation2d());
 
   /**
-   * Constructs a MAXSwerveModule and configures the driving and turning motor,
-   * encoder, and PID controller. This configuration is specific to the REV
-   * MAXSwerve Module built with NEOs, SPARKS MAX, and a Through Bore
-   * Encoder.
+   * Constructs a MAXSwerveModule and configures the driving and turning motor, encoder, and PID
+   * controller. This configuration is specific to the REV MAXSwerve Module built with NEOs, SPARKS
+   * MAX, and a Through Bore Encoder.
    */
   public MAXSwerveModule(int drivingCANId, int turningCANId, double chassisAngularOffset) {
     m_drivingSparkMax = new CANSparkMax(drivingCANId, MotorType.kBrushless);
@@ -76,8 +73,10 @@ public class MAXSwerveModule implements Logged {
     // to 10 degrees will go through 0 rather than the other direction which is a
     // longer route.
     m_turningPIDController.setPositionPIDWrappingEnabled(true);
-    m_turningPIDController.setPositionPIDWrappingMinInput(ModuleConstants.kTurningEncoderPositionPIDMinInput);
-    m_turningPIDController.setPositionPIDWrappingMaxInput(ModuleConstants.kTurningEncoderPositionPIDMaxInput);
+    m_turningPIDController.setPositionPIDWrappingMinInput(
+        ModuleConstants.kTurningEncoderPositionPIDMinInput);
+    m_turningPIDController.setPositionPIDWrappingMaxInput(
+        ModuleConstants.kTurningEncoderPositionPIDMaxInput);
 
     // Set the PID gains for the driving motor. Note these are example gains, and you
     // may need to tune them for your own robot!
@@ -85,8 +84,8 @@ public class MAXSwerveModule implements Logged {
     m_drivingPIDController.setI(ModuleConstants.kDrivingI);
     m_drivingPIDController.setD(ModuleConstants.kDrivingD);
     m_drivingPIDController.setFF(ModuleConstants.kDrivingFF);
-    m_drivingPIDController.setOutputRange(ModuleConstants.kDrivingMinOutput,
-        ModuleConstants.kDrivingMaxOutput);
+    m_drivingPIDController.setOutputRange(
+        ModuleConstants.kDrivingMinOutput, ModuleConstants.kDrivingMaxOutput);
 
     // Set the PID gains for the turning motor. Note these are example gains, and you
     // may need to tune them for your own robot!
@@ -94,8 +93,8 @@ public class MAXSwerveModule implements Logged {
     m_turningPIDController.setI(ModuleConstants.kTurningI);
     m_turningPIDController.setD(ModuleConstants.kTurningD);
     m_turningPIDController.setFF(ModuleConstants.kTurningFF);
-    m_turningPIDController.setOutputRange(ModuleConstants.kTurningMinOutput,
-        ModuleConstants.kTurningMaxOutput);
+    m_turningPIDController.setOutputRange(
+        ModuleConstants.kTurningMinOutput, ModuleConstants.kTurningMaxOutput);
 
     m_drivingSparkMax.setIdleMode(ModuleConstants.kDrivingMotorIdleMode);
     m_turningSparkMax.setIdleMode(ModuleConstants.kTurningMotorIdleMode);
@@ -122,10 +121,11 @@ public class MAXSwerveModule implements Logged {
     // relative to the chassis.
     if (Robot.isSimulation()) {
       // No physics here, just assume that the module state is the desired state
-      return new SwerveModuleState(m_desiredState.speedMetersPerSecond,
-          new Rotation2d(m_desiredState.angle.getRadians()));
+      return new SwerveModuleState(
+          m_desiredState.speedMetersPerSecond, new Rotation2d(m_desiredState.angle.getRadians()));
     }
-    return new SwerveModuleState(m_drivingEncoder.getVelocity(),
+    return new SwerveModuleState(
+        m_drivingEncoder.getVelocity(),
         new Rotation2d(m_turningEncoder.getPosition() - m_chassisAngularOffset));
   }
 
@@ -151,15 +151,19 @@ public class MAXSwerveModule implements Logged {
     // Apply chassis angular offset to the desired state.
     SwerveModuleState correctedDesiredState = new SwerveModuleState();
     correctedDesiredState.speedMetersPerSecond = desiredState.speedMetersPerSecond;
-    correctedDesiredState.angle = desiredState.angle.plus(Rotation2d.fromRadians(m_chassisAngularOffset));
+    correctedDesiredState.angle =
+        desiredState.angle.plus(Rotation2d.fromRadians(m_chassisAngularOffset));
 
     // Optimize the reference state to avoid spinning further than 90 degrees.
-    SwerveModuleState optimizedDesiredState = SwerveModuleState.optimize(correctedDesiredState,
-        new Rotation2d(m_turningEncoder.getPosition()));
+    SwerveModuleState optimizedDesiredState =
+        SwerveModuleState.optimize(
+            correctedDesiredState, new Rotation2d(m_turningEncoder.getPosition()));
 
     // Command driving and turning SPARKS MAX towards their respective setpoints.
-    m_drivingPIDController.setReference(optimizedDesiredState.speedMetersPerSecond, CANSparkMax.ControlType.kVelocity);
-    m_turningPIDController.setReference(optimizedDesiredState.angle.getRadians(), CANSparkMax.ControlType.kPosition);
+    m_drivingPIDController.setReference(
+        optimizedDesiredState.speedMetersPerSecond, CANSparkMax.ControlType.kVelocity);
+    m_turningPIDController.setReference(
+        optimizedDesiredState.angle.getRadians(), CANSparkMax.ControlType.kPosition);
 
     m_desiredState = desiredState;
   }
