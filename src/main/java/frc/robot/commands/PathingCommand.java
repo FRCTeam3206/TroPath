@@ -100,6 +100,7 @@ public class PathingCommand extends Command {
         translationProfile.calculate(
                 .02, new TrapezoidProfile.State(0, velocity), getNextState(path))
             .velocity;
+    SmartDashboard.putNumber("Velocity",velocity);
     getNextState(path);
     double xSpeed = dX / total * velocity;
     double ySpeed = dY / total * velocity;
@@ -108,12 +109,12 @@ public class PathingCommand extends Command {
   }
 
   private TrapezoidProfile.State getNextState(Trajectory path) {
-
+    SmartDashboard.putNumber("Curveture",path.getStates().get(1).curvatureRadPerMeter);
     for (State state : path.getStates()) {
       if (state.curvatureRadPerMeter < 1E-4) continue;
       double stopDist = 1 / Math.abs(state.curvatureRadPerMeter) + stoppingDistAllowance;
       double maxAllowedVelocity =
-          Math.sqrt(stopDist/2/robotProfile.getMaxAcceleration());
+          Math.sqrt(stopDist*2*robotProfile.getMaxAcceleration());
       if (maxAllowedVelocity < robotProfile.getMaxVelocity()) {
         return new TrapezoidProfile.State(state.timeSeconds, maxAllowedVelocity);
       }

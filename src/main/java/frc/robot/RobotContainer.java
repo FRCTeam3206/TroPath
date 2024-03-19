@@ -37,7 +37,7 @@ public class RobotContainer implements Logged {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the button bindings
-    PathingCommand.setRobotProfile(new RobotProfile(2, 3, 2, 2, .9, .9));
+    PathingCommand.setRobotProfile(new RobotProfile(2, 2, 2, 2, .9, .9));
     System.out.println(PathingCommand.getRobotProfile());
     PathingCommand.setRobot(() -> m_robotDrive.getPose(), m_robotDrive::driveSpeed);
     configureButtonBindings();
@@ -75,7 +75,7 @@ public class RobotContainer implements Logged {
 
     m_driverController
         .button(1)
-        .whileTrue(new PathingCommand(new Pose2d(4.7, 5.7, new Rotation2d(Math.PI))));
+        .whileTrue(new PathingCommand(new Pose2d(5.7, 4.7, new Rotation2d(Math.PI))));
   }
 
   /**
