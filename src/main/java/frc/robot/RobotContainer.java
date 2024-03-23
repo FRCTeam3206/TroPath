@@ -75,7 +75,7 @@ public class RobotContainer implements Logged {
 
     m_driverController
         .button(1)
-        .whileTrue(new PathingCommand(new Pose2d(5.7, 4.7, new Rotation2d(Math.PI))));
+        .whileTrue(new PathingCommand(new Pose2d(2.5,7, new Rotation2d(Math.PI))));
   }
 
   /**
