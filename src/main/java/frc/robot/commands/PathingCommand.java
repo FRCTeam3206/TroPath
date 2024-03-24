@@ -23,18 +23,16 @@ import me.nabdev.pathfinding.utilities.FieldLoader.Field;
 
 public class PathingCommand extends Command {
   private static RobotProfile robotProfile;
-  private static Supplier<Pose2d> robotPose;
+  private Supplier<Pose2d> robotPose;
   private static Consumer<Transform2d> drive;
   private static Pathfinder pathfinder;
-  private TrajectoryConfig config = new TrajectoryConfig(1 /* Max vel */, 9999 /* Max accel */);
   private double velocity, rotationalVelocity = 0;
   private TrapezoidProfile translationProfile, rotationProfile;
-  private double stoppingDistAllowance = 0;
-  private boolean finish = false;
   private Pose2d pose;
   private static double maxStopDist;
   private Field2d nextPose=new Field2d();
-  public PathingCommand(Pose2d pose) {
+  private Field2d finalPose=new Field2d();
+  public PathingCommand(Pose2d pose, Supplier<Pose2d> robotPose) {
     this.pose = pose;
     translationProfile =
         new TrapezoidProfile(
@@ -44,11 +42,12 @@ public class PathingCommand extends Command {
             new Constraints(
                 robotProfile.getMaxRotationalVelocity(),
                 robotProfile.getMaxRotationalAcceleration()));
-    SmartDashboard.putData(nextPose);
+    SmartDashboard.putData("Next Pose",nextPose);
+    SmartDashboard.putData("FInal Pose",finalPose);
+    this.robotPose=robotPose;
   }
 
   public static void setRobot(Supplier<Pose2d> robotPose, Consumer<Transform2d> drive) {
-    PathingCommand.robotPose = robotPose;
     PathingCommand.drive = drive;
   }
 
@@ -68,14 +67,10 @@ public class PathingCommand extends Command {
     return robotProfile;
   }
 
-  public PathingCommand setStoppingDistAllowance(double stoppingDistAllowance) {
-    this.stoppingDistAllowance = stoppingDistAllowance;
-    return this;
-  }
-
   boolean done = false;
 
   public void execute() {
+    finalPose.setRobotPose(pose);
     double deltaRotation;
     deltaRotation = robotPose.get().getRotation().minus(pose.getRotation()).getRadians();
     rotationalVelocity =
@@ -100,10 +95,9 @@ public class PathingCommand extends Command {
       usedPose=path.get(0).asPose2d();
       nextTargetPose=path.get(1).asPose2d();
     }
-    System.out.println(robotPose.get());
-    Transform2d delta=nextTargetPose.minus(usedPose);
+    Transform2d delta=nextTargetPose.minus(robotPose.get());
     nextPose.setRobotPose(nextTargetPose);
-    double dX=delta.getX(),dY=delta.getY();
+    double dX=-delta.getX(),dY=-delta.getY();
     SmartDashboard.putNumber("Move dX", dX);
     SmartDashboard.putNumber("Move dY", dY);
     double total = Math.abs(dX) + Math.abs(dY);
@@ -138,12 +132,13 @@ public class PathingCommand extends Command {
       }
       double angle=angle(lastPose, pose, nextPose);
       if(i==0)SmartDashboard.putNumber("Angle",angle);
-      double stopDist = nextDistance*Math.PI/angle/2;
+      if(angle<1E-4)continue;
+      double stopDist = nextDistance/angle;
       double maxAllowedVelocity =
           Math.sqrt(stopDist*2*robotProfile.getMaxAcceleration());
-      // if (maxAllowedVelocity < robotProfile.getMaxVelocity()) {
-      //   return new TrapezoidProfile.State(cumulativeDistance, maxAllowedVelocity);
-      // }
+       if (maxAllowedVelocity < robotProfile.getMaxVelocity()) {
+         return new TrapezoidProfile.State(cumulativeDistance, maxAllowedVelocity);
+       }
       
       cumulativeDistance+=nextDistance;
       lastPose=pose;

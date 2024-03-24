@@ -75,7 +75,7 @@ public class RobotContainer implements Logged {
 
     m_driverController
         .button(1)
-        .whileTrue(new PathingCommand(new Pose2d(2.5,7, new Rotation2d(Math.PI))));
+        .whileTrue(new PathingCommand(new Pose2d(2.5,7, new Rotation2d(Math.PI)),()->m_robotDrive.getPose()));
   }
 
   /**
@@ -84,7 +84,6 @@ public class RobotContainer implements Logged {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return new PathingCommand(new Pose2d(6, 4, new Rotation2d()))
-        .andThen(new PathingCommand(new Pose2d(2, 2, new Rotation2d(3.1415926535897))));
+    return new RunCommand(null, null);
   }
 }
