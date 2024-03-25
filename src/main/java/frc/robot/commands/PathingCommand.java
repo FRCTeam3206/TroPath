@@ -45,6 +45,7 @@ public class PathingCommand extends Command {
     SmartDashboard.putData("Next Pose",nextPose);
     SmartDashboard.putData("FInal Pose",finalPose);
     this.robotPose=robotPose;
+    System.out.println(angle(new Pose2d(0, 0, new Rotation2d()),new Pose2d(1, 0, new Rotation2d()),new Pose2d(2, 1, new Rotation2d())));
   }
 
   public static void setRobot(Supplier<Pose2d> robotPose, Consumer<Transform2d> drive) {
@@ -95,9 +96,8 @@ public class PathingCommand extends Command {
       usedPose=path.get(0).asPose2d();
       nextTargetPose=path.get(1).asPose2d();
     }
-    Transform2d delta=nextTargetPose.minus(robotPose.get());
     nextPose.setRobotPose(nextTargetPose);
-    double dX=-delta.getX(),dY=-delta.getY();
+    double dX=nextTargetPose.getX()-robotPose.get().getX(),dY=nextTargetPose.getY()-robotPose.get().getY();
     SmartDashboard.putNumber("Move dX", dX);
     SmartDashboard.putNumber("Move dY", dY);
     double total = Math.abs(dX) + Math.abs(dY);
@@ -120,10 +120,10 @@ public class PathingCommand extends Command {
 
   private TrapezoidProfile.State getNextState(Path path) {
     Pose2d lastPose=path.get(0).asPose2d();
-    int i=0;
+    int i=1;
     ArrayList<Pose2d> poses=path.asPose2dList();
     double cumulativeDistance=0;
-    for (Pose2d pose : poses.subList(0, poses.size()-1)) {
+    for (Pose2d pose : poses.subList(1, poses.size()-1)) {
       Pose2d nextPose=poses.get(i+1);
       double nextDistance=nextPose.getTranslation().getDistance(pose.getTranslation());
       if(cumulativeDistance>robotProfile.getMaxVelocity()*robotProfile.getMaxVelocity()/robotProfile.getMaxAcceleration()/2){
@@ -131,12 +131,19 @@ public class PathingCommand extends Command {
         continue;//Don't do extra math, just find the distance of the path
       }
       double angle=angle(lastPose, pose, nextPose);
-      if(i==0)SmartDashboard.putNumber("Angle",angle);
+      
       if(angle<1E-4)continue;
       double stopDist = nextDistance/angle;
       double maxAllowedVelocity =
           Math.sqrt(stopDist*2*robotProfile.getMaxAcceleration());
        if (maxAllowedVelocity < robotProfile.getMaxVelocity()) {
+         System.out.println(lastPose);
+         System.out.println(pose);
+         System.out.println(nextPose);
+         System.out.println("---------------------------------------------");
+         SmartDashboard.putNumber("Angle",angle);
+         SmartDashboard.putNumber("Distance Away",cumulativeDistance);
+         SmartDashboard.putNumber("Stop Dist",stopDist);
          return new TrapezoidProfile.State(cumulativeDistance, maxAllowedVelocity);
        }
       
@@ -152,7 +159,7 @@ public class PathingCommand extends Command {
     double d1=pose1.getTranslation().getDistance(pose2.getTranslation());
     double d2=pose2.getTranslation().getDistance(pose3.getTranslation());
     double d3=pose3.getTranslation().getDistance(pose1.getTranslation());
-    return Math.PI-Math.acos((d1*d1+d3*d3-d2*d2)/(2*d1*d3));
+    return Math.PI-Math.acos((d1*d1+d2*d2-d3*d3)/(2*d1*d2));
   }
   public boolean isFinished() {
     return done;
