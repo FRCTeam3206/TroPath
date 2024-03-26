@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.RelativeTo;
 import frc.robot.commands.PathingCommand;
+import frc.robot.robotprofile.Motor;
 import frc.robot.robotprofile.RobotProfile;
 import frc.robot.subsystems.DriveSubsystem;
 import monologue.Logged;
@@ -37,7 +38,7 @@ public class RobotContainer implements Logged {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the button bindings
-    PathingCommand.setDefaultRobotProfile(new RobotProfile(2, 2, 2, 2, .9, .9));
+    PathingCommand.setDefaultRobotProfile(new RobotProfile(50,3/39.37, .9, .9,Motor.NEO.gear(Motor.REV_HIGH)));
     System.out.println(PathingCommand.getDefaultRobotProfile());
     PathingCommand.setRobot(() -> m_robotDrive.getPose(), m_robotDrive::driveSpeed);
     configureButtonBindings();
@@ -75,7 +76,7 @@ public class RobotContainer implements Logged {
 
     m_driverController
         .button(1)
-        .whileTrue(new PathingCommand(new Pose2d(2.5,7, new Rotation2d(Math.PI/2)),()->m_robotDrive.getPose()));
+        .whileTrue(new PathingCommand(new Pose2d(2.3,7, new Rotation2d(Math.PI/2)),()->m_robotDrive.getPose()));
   }
 
   /**

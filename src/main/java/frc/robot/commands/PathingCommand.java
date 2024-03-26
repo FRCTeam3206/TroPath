@@ -125,7 +125,6 @@ public class PathingCommand extends Command {
     
     ArrayList<Pose2d> poses=path.asPose2dList();
     double cumulativeDistance=0;
-    System.out.println("----------------------------------------");
     for (int i=1;i<poses.size()-1;i++) {
       Pose2d currentPose=poses.get(i);
       Pose2d nextPose=poses.get(i+1);
