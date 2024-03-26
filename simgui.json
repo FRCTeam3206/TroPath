@@ -5,6 +5,7 @@
       "/SmartDashboard/Beleived Current Pose": "Field2d",
       "/SmartDashboard/FInal Pose": "Field2d",
       "/SmartDashboard/Field": "Field2d",
+      "/SmartDashboard/Final Pose": "Field2d",
       "/SmartDashboard/Next Pose": "Field2d",
       "/SmartDashboard/Reset Gyro": "Command"
     }
