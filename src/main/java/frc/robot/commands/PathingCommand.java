@@ -81,8 +81,10 @@ public class PathingCommand extends Command {
                 new TrapezoidProfile.State(0, 0))
             .velocity;
     Path path = null;
+    long start=System.currentTimeMillis();
     try {
       path = pathfinder.generatePath(robotPose.get(), pose);
+      SmartDashboard.putNumber("Path generation time",System.currentTimeMillis()-start);
     } catch (ImpossiblePathException e) {
       e.printStackTrace();
       return;
@@ -102,11 +104,13 @@ public class PathingCommand extends Command {
     SmartDashboard.putNumber("Move dY", dY);
     double total = Math.abs(dX) + Math.abs(dY);
     TrapezoidProfile.State nextState;
+    start=System.currentTimeMillis();
     if(path.size()<=1){
       nextState=new TrapezoidProfile.State(usedPose.getTranslation().getDistance(pose.getTranslation()), 0);
     }else{
       nextState=getNextState(path);
     }
+    SmartDashboard.putNumber("Physics Time",System.currentTimeMillis()-start);
     velocity =
         translationProfile.calculate(
                 .02, new TrapezoidProfile.State(0, velocity), nextState)
@@ -137,10 +141,6 @@ public class PathingCommand extends Command {
       double maxAllowedVelocity =
           Math.sqrt(stopDist*2*defaultRobotProfile.getMaxAcceleration());
        if (maxAllowedVelocity < defaultRobotProfile.getMaxVelocity()) {
-         System.out.println(lastPose);
-         System.out.println(pose);
-         System.out.println(nextPose);
-         System.out.println("---------------------------------------------");
          SmartDashboard.putNumber("Angle",angle);
          SmartDashboard.putNumber("Distance Away",cumulativeDistance);
          SmartDashboard.putNumber("Stop Dist",stopDist);
