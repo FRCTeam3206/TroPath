@@ -37,8 +37,8 @@ public class RobotContainer implements Logged {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the button bindings
-    PathingCommand.setRobotProfile(new RobotProfile(2, 2, 2, 2, .9, .9));
-    System.out.println(PathingCommand.getRobotProfile());
+    PathingCommand.setDefaultRobotProfile(new RobotProfile(2, 2, 2, 2, .9, .9));
+    System.out.println(PathingCommand.getDefaultRobotProfile());
     PathingCommand.setRobot(() -> m_robotDrive.getPose(), m_robotDrive::driveSpeed);
     configureButtonBindings();
 

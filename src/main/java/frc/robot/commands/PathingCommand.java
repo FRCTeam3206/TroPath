@@ -22,7 +22,7 @@ import me.nabdev.pathfinding.structures.Vertex;
 import me.nabdev.pathfinding.utilities.FieldLoader.Field;
 
 public class PathingCommand extends Command {
-  private static RobotProfile robotProfile;
+  private static RobotProfile defaultRobotProfile;
   private Supplier<Pose2d> robotPose;
   private static Consumer<Transform2d> drive;
   private static Pathfinder pathfinder;
@@ -36,12 +36,12 @@ public class PathingCommand extends Command {
     this.pose = pose;
     translationProfile =
         new TrapezoidProfile(
-            new Constraints(robotProfile.getMaxVelocity(), robotProfile.getMaxAcceleration()));
+            new Constraints(defaultRobotProfile.getMaxVelocity(), defaultRobotProfile.getMaxAcceleration()));
     rotationProfile =
         new TrapezoidProfile(
             new Constraints(
-                robotProfile.getMaxRotationalVelocity(),
-                robotProfile.getMaxRotationalAcceleration()));
+                defaultRobotProfile.getMaxRotationalVelocity(),
+                defaultRobotProfile.getMaxRotationalAcceleration()));
     SmartDashboard.putData("Next Pose",nextPose);
     SmartDashboard.putData("FInal Pose",finalPose);
     this.robotPose=robotPose;
@@ -52,8 +52,8 @@ public class PathingCommand extends Command {
     PathingCommand.drive = drive;
   }
 
-  public static void setRobotProfile(RobotProfile robotProfile) {
-    PathingCommand.robotProfile = robotProfile;
+  public static void setDefaultRobotProfile(RobotProfile robotProfile) {
+    PathingCommand.defaultRobotProfile = robotProfile;
     maxStopDist =
         robotProfile.getMaxVelocity()*robotProfile.getMaxVelocity()/2/robotProfile.getMaxAcceleration();
     pathfinder =
@@ -64,8 +64,8 @@ public class PathingCommand extends Command {
             .build();
   }
 
-  public static RobotProfile getRobotProfile() {
-    return robotProfile;
+  public static RobotProfile getDefaultRobotProfile() {
+    return defaultRobotProfile;
   }
 
   boolean done = false;
@@ -126,7 +126,7 @@ public class PathingCommand extends Command {
     for (Pose2d pose : poses.subList(1, poses.size()-1)) {
       Pose2d nextPose=poses.get(i+1);
       double nextDistance=nextPose.getTranslation().getDistance(pose.getTranslation());
-      if(cumulativeDistance>robotProfile.getMaxVelocity()*robotProfile.getMaxVelocity()/robotProfile.getMaxAcceleration()/2){
+      if(cumulativeDistance>defaultRobotProfile.getMaxVelocity()*defaultRobotProfile.getMaxVelocity()/defaultRobotProfile.getMaxAcceleration()/2){
         cumulativeDistance+=nextDistance;
         continue;//Don't do extra math, just find the distance of the path
       }
@@ -135,8 +135,8 @@ public class PathingCommand extends Command {
       if(angle<1E-4)continue;
       double stopDist = nextDistance/angle;
       double maxAllowedVelocity =
-          Math.sqrt(stopDist*2*robotProfile.getMaxAcceleration());
-       if (maxAllowedVelocity < robotProfile.getMaxVelocity()) {
+          Math.sqrt(stopDist*2*defaultRobotProfile.getMaxAcceleration());
+       if (maxAllowedVelocity < defaultRobotProfile.getMaxVelocity()) {
          System.out.println(lastPose);
          System.out.println(pose);
          System.out.println(nextPose);
