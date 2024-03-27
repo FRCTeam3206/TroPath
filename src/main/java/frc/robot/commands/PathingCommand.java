@@ -21,7 +21,8 @@ import me.nabdev.pathfinding.utilities.FieldLoader.Field;
 
 public class PathingCommand extends Command {
   private static RobotProfile defaultRobotProfile;
-  private Supplier<Pose2d> robotPose;
+  private RobotProfile robotProfile;
+  private static Supplier<Pose2d> robotPose;
   private static Consumer<Transform2d> drive;
   private static Pathfinder pathfinder;
   private double velocity, rotationalVelocity = 0;
@@ -30,8 +31,21 @@ public class PathingCommand extends Command {
   private static double maxStopDist;
   private Field2d nextPose=new Field2d();
   private Field2d finalPose=new Field2d();
-  public PathingCommand(Pose2d pose, Supplier<Pose2d> robotPose) {
+  public PathingCommand(Pose2d pose,RobotProfile profile) {
+    this(pose);
+    this.robotProfile=profile;
+    translationProfile =
+        new TrapezoidProfile(
+            new Constraints(profile.getMaxVelocity(), profile.getMaxAcceleration()));
+    rotationProfile =
+        new TrapezoidProfile(
+            new Constraints(
+                profile.getMaxRotationalVelocity(),
+                profile.getMaxRotationalAcceleration()));
+  }
+  public PathingCommand(Pose2d pose) {
     this.goalPose = pose;
+    this.robotProfile=defaultRobotProfile;
     translationProfile =
         new TrapezoidProfile(
             new Constraints(defaultRobotProfile.getMaxVelocity(), defaultRobotProfile.getMaxAcceleration()));
@@ -42,12 +56,12 @@ public class PathingCommand extends Command {
                 defaultRobotProfile.getMaxRotationalAcceleration()));
     SmartDashboard.putData("Next Pose",nextPose);
     SmartDashboard.putData("Final Pose",finalPose);
-    this.robotPose=robotPose;
     System.out.println(angle(new Pose2d(0, 0, new Rotation2d()),new Pose2d(1, 0, new Rotation2d()),new Pose2d(2, 1, new Rotation2d())));
   }
 
   public static void setRobot(Supplier<Pose2d> robotPose, Consumer<Transform2d> drive) {
     PathingCommand.drive = drive;
+    PathingCommand.robotPose=robotPose;
   }
 
   public static void setDefaultRobotProfile(RobotProfile robotProfile) {
