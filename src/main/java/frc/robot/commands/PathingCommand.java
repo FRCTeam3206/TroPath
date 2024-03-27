@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.robotprofile.RobotProfile;
-
 import java.util.ArrayList;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -29,45 +28,54 @@ public class PathingCommand extends Command {
   private TrapezoidProfile translationProfile, rotationProfile;
   private Pose2d goalPose;
   private static double maxStopDist;
-  private Field2d nextPose=new Field2d();
-  private Field2d finalPose=new Field2d();
-  public PathingCommand(Pose2d pose,RobotProfile profile) {
+  private Field2d nextPose = new Field2d();
+  private Field2d finalPose = new Field2d();
+
+  public PathingCommand(Pose2d pose, RobotProfile profile) {
     this(pose);
-    this.robotProfile=profile;
+    this.robotProfile = profile;
     translationProfile =
         new TrapezoidProfile(
             new Constraints(profile.getMaxVelocity(), profile.getMaxAcceleration()));
     rotationProfile =
         new TrapezoidProfile(
             new Constraints(
-                profile.getMaxRotationalVelocity(),
-                profile.getMaxRotationalAcceleration()));
+                profile.getMaxRotationalVelocity(), profile.getMaxRotationalAcceleration()));
   }
+
   public PathingCommand(Pose2d pose) {
     this.goalPose = pose;
-    this.robotProfile=defaultRobotProfile;
+    this.robotProfile = defaultRobotProfile;
     translationProfile =
         new TrapezoidProfile(
-            new Constraints(defaultRobotProfile.getMaxVelocity(), defaultRobotProfile.getMaxAcceleration()));
+            new Constraints(
+                defaultRobotProfile.getMaxVelocity(), defaultRobotProfile.getMaxAcceleration()));
     rotationProfile =
         new TrapezoidProfile(
             new Constraints(
                 defaultRobotProfile.getMaxRotationalVelocity(),
                 defaultRobotProfile.getMaxRotationalAcceleration()));
-    SmartDashboard.putData("Next Pose",nextPose);
-    SmartDashboard.putData("Final Pose",finalPose);
-    System.out.println(angle(new Pose2d(0, 0, new Rotation2d()),new Pose2d(1, 0, new Rotation2d()),new Pose2d(2, 1, new Rotation2d())));
+    SmartDashboard.putData("Next Pose", nextPose);
+    SmartDashboard.putData("Final Pose", finalPose);
+    System.out.println(
+        angle(
+            new Pose2d(0, 0, new Rotation2d()),
+            new Pose2d(1, 0, new Rotation2d()),
+            new Pose2d(2, 1, new Rotation2d())));
   }
 
   public static void setRobot(Supplier<Pose2d> robotPose, Consumer<Transform2d> drive) {
     PathingCommand.drive = drive;
-    PathingCommand.robotPose=robotPose;
+    PathingCommand.robotPose = robotPose;
   }
 
   public static void setDefaultRobotProfile(RobotProfile robotProfile) {
     PathingCommand.defaultRobotProfile = robotProfile;
     maxStopDist =
-        robotProfile.getMaxVelocity()*robotProfile.getMaxVelocity()/2/robotProfile.getMaxAcceleration();
+        robotProfile.getMaxVelocity()
+            * robotProfile.getMaxVelocity()
+            / 2
+            / robotProfile.getMaxAcceleration();
     pathfinder =
         new PathfinderBuilder(Field.CHARGED_UP_2023)
             .setRobotLength(robotProfile.getLength())
@@ -93,41 +101,43 @@ public class PathingCommand extends Command {
                 new TrapezoidProfile.State(0, 0))
             .velocity;
     Path path = null;
-    long start=System.currentTimeMillis();
+    long start = System.currentTimeMillis();
     try {
       path = pathfinder.generatePath(robotPose.get(), goalPose);
-      SmartDashboard.putNumber("Path generation time",System.currentTimeMillis()-start);
+      SmartDashboard.putNumber("Path generation time", System.currentTimeMillis() - start);
     } catch (ImpossiblePathException e) {
       e.printStackTrace();
       return;
     }
     Pose2d nextTargetPose;
     Pose2d usedPose;
-    if(path.size()<=1){
-      nextTargetPose=goalPose;
-      usedPose=robotPose.get();
-    }else{
-      usedPose=path.get(0).asPose2d();
-      nextTargetPose=path.get(1).asPose2d();
+    if (path.size() <= 1) {
+      nextTargetPose = goalPose;
+      usedPose = robotPose.get();
+    } else {
+      usedPose = path.get(0).asPose2d();
+      nextTargetPose = path.get(1).asPose2d();
     }
     nextPose.setRobotPose(nextTargetPose);
-    double dX=nextTargetPose.getX()-robotPose.get().getX(),dY=nextTargetPose.getY()-robotPose.get().getY();
+    double dX = nextTargetPose.getX() - robotPose.get().getX(),
+        dY = nextTargetPose.getY() - robotPose.get().getY();
     SmartDashboard.putNumber("Move dX", dX);
     SmartDashboard.putNumber("Move dY", dY);
     double total = Math.abs(dX) + Math.abs(dY);
     TrapezoidProfile.State nextState;
-    start=System.currentTimeMillis();
-    if(path.size()<=1){
-      nextState=new TrapezoidProfile.State(usedPose.getTranslation().getDistance(goalPose.getTranslation()), 0);
-    }else{
-      nextState=getNextState(path);
+    start = System.currentTimeMillis();
+    if (path.size() <= 1) {
+      nextState =
+          new TrapezoidProfile.State(
+              usedPose.getTranslation().getDistance(goalPose.getTranslation()), 0);
+    } else {
+      nextState = getNextState(path);
     }
-    SmartDashboard.putNumber("Physics Time",System.currentTimeMillis()-start);
+    SmartDashboard.putNumber("Physics Time", System.currentTimeMillis() - start);
     velocity =
-        translationProfile.calculate(
-                .02, new TrapezoidProfile.State(0, velocity), nextState)
+        translationProfile.calculate(.02, new TrapezoidProfile.State(0, velocity), nextState)
             .velocity;
-    SmartDashboard.putNumber("Velocity",velocity);
+    SmartDashboard.putNumber("Velocity", velocity);
     double xSpeed = dX / total * velocity;
     double ySpeed = dY / total * velocity;
 
@@ -135,48 +145,58 @@ public class PathingCommand extends Command {
   }
 
   private TrapezoidProfile.State getNextState(Path path) {
-    Pose2d lastPose=path.get(0).asPose2d();
-    
-    ArrayList<Pose2d> poses=path.asPose2dList();
-    double cumulativeDistance=0;
-    for (int i=1;i<poses.size()-1;i++) {
-      Pose2d currentPose=poses.get(i);
-      Pose2d nextPose=poses.get(i+1);
-      double nextDistance=nextPose.getTranslation().getDistance(currentPose.getTranslation());
-      if(cumulativeDistance>defaultRobotProfile.getMaxVelocity()*defaultRobotProfile.getMaxVelocity()/defaultRobotProfile.getMaxAcceleration()/2){
-        cumulativeDistance+=nextDistance;
-        continue;//Don't do extra math, just find the distance of the path
+    Pose2d lastPose = path.get(0).asPose2d();
+
+    ArrayList<Pose2d> poses = path.asPose2dList();
+    double cumulativeDistance = 0;
+    for (int i = 1; i < poses.size() - 1; i++) {
+      Pose2d currentPose = poses.get(i);
+      Pose2d nextPose = poses.get(i + 1);
+      double nextDistance = nextPose.getTranslation().getDistance(currentPose.getTranslation());
+      if (cumulativeDistance
+          > defaultRobotProfile.getMaxVelocity()
+              * defaultRobotProfile.getMaxVelocity()
+              / defaultRobotProfile.getMaxAcceleration()
+              / 2) {
+        cumulativeDistance += nextDistance;
+        continue; // Don't do extra math, just find the distance of the path
       }
-      double angle=angle(lastPose, currentPose, nextPose);
-      
-      if(angle<1E-4)continue;
-      double stopDist = nextDistance/angle;
+      double angle = angle(lastPose, currentPose, nextPose);
+
+      if (angle < 1E-4) continue;
+      double stopDist = nextDistance / angle;
       double maxAllowedVelocity =
-          Math.sqrt(stopDist*2*defaultRobotProfile.getMaxAcceleration());
-       if (maxAllowedVelocity < defaultRobotProfile.getMaxVelocity()) {
-         SmartDashboard.putNumber("Angle",angle);
-         SmartDashboard.putNumber("Distance Away",cumulativeDistance);
-         SmartDashboard.putNumber("Stop Dist",stopDist);
-         return new TrapezoidProfile.State(cumulativeDistance, maxAllowedVelocity);
-       }
+          Math.sqrt(stopDist * 2 * defaultRobotProfile.getMaxAcceleration());
+      if (maxAllowedVelocity < defaultRobotProfile.getMaxVelocity()) {
+        SmartDashboard.putNumber("Angle", angle);
+        SmartDashboard.putNumber("Distance Away", cumulativeDistance);
+        SmartDashboard.putNumber("Stop Dist", stopDist);
+        return new TrapezoidProfile.State(cumulativeDistance, maxAllowedVelocity);
+      }
       // System.out.println(nextDistance);
       // System.out.println(currentPose);
       // System.out.println(nextPose);
-      cumulativeDistance+=nextDistance;
-      lastPose=currentPose;
+      cumulativeDistance += nextDistance;
+      lastPose = currentPose;
     }
-    SmartDashboard.putNumber("Angle",0);
-    SmartDashboard.putNumber("Distance Away",cumulativeDistance);
+    SmartDashboard.putNumber("Angle", 0);
+    SmartDashboard.putNumber("Distance Away", cumulativeDistance);
     return new TrapezoidProfile.State(
-        cumulativeDistance+poses.get(poses.size()-1).getTranslation().getDistance(poses.get(poses.size()-2).getTranslation()),
+        cumulativeDistance
+            + poses
+                .get(poses.size() - 1)
+                .getTranslation()
+                .getDistance(poses.get(poses.size() - 2).getTranslation()),
         0);
   }
-  private double angle(Pose2d pose1, Pose2d pose2, Pose2d pose3){
-    double d1=pose1.getTranslation().getDistance(pose2.getTranslation());
-    double d2=pose2.getTranslation().getDistance(pose3.getTranslation());
-    double d3=pose3.getTranslation().getDistance(pose1.getTranslation());
-    return Math.PI-Math.acos((d1*d1+d2*d2-d3*d3)/(2*d1*d2));
+
+  private double angle(Pose2d pose1, Pose2d pose2, Pose2d pose3) {
+    double d1 = pose1.getTranslation().getDistance(pose2.getTranslation());
+    double d2 = pose2.getTranslation().getDistance(pose3.getTranslation());
+    double d3 = pose3.getTranslation().getDistance(pose1.getTranslation());
+    return Math.PI - Math.acos((d1 * d1 + d2 * d2 - d3 * d3) / (2 * d1 * d2));
   }
+
   public boolean isFinished() {
     return false;
   }

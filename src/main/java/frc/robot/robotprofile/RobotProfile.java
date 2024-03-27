@@ -7,20 +7,21 @@ public class RobotProfile {
       maxRotationalAcceleration,
       length,
       width;
+  private double safteyMultiplier = .95;
 
   public RobotProfile(
       double maxVelocity,
       double maxAcceleration,
       double maxRotationalVelocity,
       double maxRotationalAcceleration,
-      double trackLength,
-      double wheelBase) {
+      double length,
+      double width) {
     this.maxVelocity = maxVelocity;
     this.maxAcceleration = maxAcceleration;
     this.maxRotationalVelocity = maxRotationalVelocity;
     this.maxRotationalAcceleration = maxRotationalAcceleration;
-    this.length = trackLength;
-    this.width = wheelBase;
+    this.length = length;
+    this.width = width;
   }
 
   public RobotProfile(
@@ -45,7 +46,7 @@ public class RobotProfile {
   }
 
   public double getMaxVelocity() {
-    return maxVelocity;
+    return maxVelocity * safteyMultiplier;
   }
 
   public void setMaxVelocity(double maxVelocity) {
@@ -53,7 +54,7 @@ public class RobotProfile {
   }
 
   public double getMaxAcceleration() {
-    return maxAcceleration;
+    return maxAcceleration * safteyMultiplier;
   }
 
   public void setMaxAcceleration(double maxAcceleration) {
@@ -61,7 +62,7 @@ public class RobotProfile {
   }
 
   public double getMaxRotationalVelocity() {
-    return maxRotationalVelocity;
+    return maxRotationalVelocity * safteyMultiplier;
   }
 
   public void setMaxRotationalVelocity(double maxRotationalVelocity) {
@@ -69,7 +70,7 @@ public class RobotProfile {
   }
 
   public double getMaxRotationalAcceleration() {
-    return maxRotationalAcceleration;
+    return maxRotationalAcceleration * safteyMultiplier;
   }
 
   public void setMaxRotationalAcceleration(double maxRotationalAcceleration) {
@@ -92,6 +93,15 @@ public class RobotProfile {
     this.width = wheelBase;
   }
 
+  public double getSafteyMultiplier() {
+    return safteyMultiplier;
+  }
+
+  public RobotProfile setSafteyMultiplier(double safteyMultiplier) {
+    this.safteyMultiplier = safteyMultiplier;
+    return this;
+  }
+
   @Override
   public String toString() {
     return "RobotProfile [maxVelocity="
@@ -106,6 +116,8 @@ public class RobotProfile {
         + length
         + ", width="
         + width
+        + ", safteyMultiplier="
+        + safteyMultiplier
         + "]";
   }
 }
