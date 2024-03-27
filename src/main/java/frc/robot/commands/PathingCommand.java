@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -16,7 +17,6 @@ import me.nabdev.pathfinding.Pathfinder;
 import me.nabdev.pathfinding.PathfinderBuilder;
 import me.nabdev.pathfinding.structures.ImpossiblePathException;
 import me.nabdev.pathfinding.structures.Path;
-import me.nabdev.pathfinding.utilities.FieldLoader.Field;
 
 public class PathingCommand extends Command {
   private static RobotProfile defaultRobotProfile;
@@ -77,7 +77,8 @@ public class PathingCommand extends Command {
             / 2
             / robotProfile.getMaxAcceleration();
     pathfinder =
-        new PathfinderBuilder(Field.CHARGED_UP_2023)
+        new PathfinderBuilder(
+                Filesystem.getDeployDirectory().getAbsolutePath() + "\\concave_obstacle_field.json")
             .setRobotLength(robotProfile.getLength())
             .setRobotWidth(robotProfile.getWidth())
             .setCornerDist(maxStopDist)
