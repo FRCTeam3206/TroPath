@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -27,7 +28,6 @@ public class PathingCommand extends Command {
   private double velocity, rotationalVelocity = 0;
   private TrapezoidProfile translationProfile, rotationProfile;
   private Pose2d goalPose;
-  private static double maxStopDist;
   private Field2d nextPose = new Field2d();
   private Field2d finalPose = new Field2d();
 
@@ -71,23 +71,23 @@ public class PathingCommand extends Command {
 
   public static void setDefaultRobotProfile(RobotProfile robotProfile) {
     PathingCommand.defaultRobotProfile = robotProfile;
-    maxStopDist =
-        robotProfile.getMaxVelocity()
-            * robotProfile.getMaxVelocity()
-            / 2
-            / robotProfile.getMaxAcceleration();
     pathfinder =
         new PathfinderBuilder(Field.CHARGED_UP_2023)
             .setRobotLength(robotProfile.getLength())
             .setRobotWidth(robotProfile.getWidth())
-            .setCornerDist(maxStopDist)
             .build();
   }
 
   public static RobotProfile getDefaultRobotProfile() {
     return defaultRobotProfile;
   }
-
+  public static void setCustomField(String name){
+    pathfinder =
+        new PathfinderBuilder(Filesystem.getDeployDirectory()+"\\"+name)
+            .setRobotLength(defaultRobotProfile.getLength())
+            .setRobotWidth(defaultRobotProfile.getWidth())
+            .build();
+  }
   boolean done = false;
 
   public void execute() {
@@ -154,9 +154,9 @@ public class PathingCommand extends Command {
       Pose2d nextPose = poses.get(i + 1);
       double nextDistance = nextPose.getTranslation().getDistance(currentPose.getTranslation());
       if (cumulativeDistance
-          > defaultRobotProfile.getMaxVelocity()
-              * defaultRobotProfile.getMaxVelocity()
-              / defaultRobotProfile.getMaxAcceleration()
+          > robotProfile.getMaxVelocity()
+              * robotProfile.getMaxVelocity()
+              / robotProfile.getMaxAcceleration()
               / 2) {
         cumulativeDistance += nextDistance;
         continue; // Don't do extra math, just find the distance of the path
@@ -166,8 +166,8 @@ public class PathingCommand extends Command {
       if (angle < 1E-4) continue;
       double stopDist = nextDistance / angle;
       double maxAllowedVelocity =
-          Math.sqrt(stopDist * 2 * defaultRobotProfile.getMaxAcceleration());
-      if (maxAllowedVelocity < defaultRobotProfile.getMaxVelocity()) {
+          Math.sqrt(stopDist * 2 * robotProfile.getMaxAcceleration());
+      if (maxAllowedVelocity < robotProfile.getMaxVelocity()) {
         SmartDashboard.putNumber("Angle", angle);
         SmartDashboard.putNumber("Distance Away", cumulativeDistance);
         SmartDashboard.putNumber("Stop Dist", stopDist);
