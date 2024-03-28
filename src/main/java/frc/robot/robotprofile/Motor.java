@@ -34,10 +34,7 @@ public class Motor {
   }
 
   public Motor gear(double gearRatio) {
-    freeSpeed /= gearRatio;
-    maxStallTorque *= gearRatio;
-    realStallTorque *= gearRatio;
-    return this;
+    return new Motor(maxStallTorque*gearRatio,realStallTorque*gearRatio,freeSpeed/gearRatio);
   }
 
   public static final double SDS_L1 = 8.14,
