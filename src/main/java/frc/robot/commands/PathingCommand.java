@@ -28,8 +28,8 @@ public class PathingCommand extends Command {
   private double velocity, rotationalVelocity = 0;
   private TrapezoidProfile translationProfile, rotationProfile;
   private Pose2d goalPose;
-  private Field2d nextPose = new Field2d();
-  private Field2d finalPose = new Field2d();
+  private Field2d nextPoseFieldDisplay = new Field2d();
+  private Field2d finalPoseFieldDisplay = new Field2d();
   private boolean continnuous=false;
   private double translationTolerance,rotationTolerance=0;
 
@@ -37,8 +37,8 @@ public class PathingCommand extends Command {
     this.goalPose = pose;
     this.robotProfile = defaultRobotProfile;
     setRobotProfile(defaultRobotProfile);
-    SmartDashboard.putData("Next Pose", nextPose);
-    SmartDashboard.putData("Final Pose", finalPose);
+    SmartDashboard.putData("Next Pose", nextPoseFieldDisplay);
+    SmartDashboard.putData("Final Pose", finalPoseFieldDisplay);
   }
   public PathingCommand(double x,double y,double rot){
     this(new Pose2d(x,y,new Rotation2d(rot)));
@@ -83,7 +83,7 @@ public class PathingCommand extends Command {
   boolean done = false;
 
   public void execute() {
-    finalPose.setRobotPose(goalPose);
+    finalPoseFieldDisplay.setRobotPose(goalPose);
     double deltaRotation;
     deltaRotation = robotPose.get().getRotation().minus(goalPose.getRotation()).getRadians();
     rotationalVelocity =
@@ -110,7 +110,7 @@ public class PathingCommand extends Command {
       usedPose = path.get(0).asPose2d();
       nextTargetPose = path.get(1).asPose2d();
     }
-    nextPose.setRobotPose(nextTargetPose);
+    nextPoseFieldDisplay.setRobotPose(new Pose2d(nextTargetPose.getTranslation(),goalPose.getRotation()));
     double dX = nextTargetPose.getX() - robotPose.get().getX(),
         dY = nextTargetPose.getY() - robotPose.get().getY();
     SmartDashboard.putNumber("Move dX", dX);
