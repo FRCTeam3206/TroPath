@@ -139,8 +139,8 @@ public class DriveSubsystem extends SubsystemBase implements Logged {
     simOdometryPose = pose;
   }
 
-  SlewRateLimiter xLimiter = new SlewRateLimiter(4.8);
-  SlewRateLimiter yLimiter = new SlewRateLimiter(4.8);
+  SlewRateLimiter xLimiter = new SlewRateLimiter(9);
+  SlewRateLimiter yLimiter = new SlewRateLimiter(9);
 
   private void updateOdometry() {
     m_poseEstimator.update(
