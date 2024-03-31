@@ -176,7 +176,7 @@ public final class Constants {
     public static final double kFieldWidth = 4;
 
     public static final AprilTag[] kAprilTags = {
-      new AprilTag(4, new Pose3d(1.5, 4.75, .75, new Rotation3d(0, 0, 0)))
+      new AprilTag(4, new Pose3d(1.5, 4.5, .75, new Rotation3d(0, 0, 0)))
     };
 
     public static final AprilTagFieldLayout kAprilTagFieldLayout =
