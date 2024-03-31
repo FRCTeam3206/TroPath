@@ -32,9 +32,19 @@ public class PathingCommand extends Command {
   private Field2d finalPose = new Field2d();
   private boolean continnuous=false;
   private double translationTolerance,rotationTolerance=0;
-  public PathingCommand(Pose2d pose, RobotProfile profile) {
-    this(pose);
-    this.robotProfile = profile;
+
+  public PathingCommand(Pose2d pose) {
+    this.goalPose = pose;
+    this.robotProfile = defaultRobotProfile;
+    setRobotProfile(defaultRobotProfile);
+    SmartDashboard.putData("Next Pose", nextPose);
+    SmartDashboard.putData("Final Pose", finalPose);
+  }
+  public PathingCommand(double x,double y,double rot){
+    this(new Pose2d(x,y,new Rotation2d(rot)));
+  }
+  public PathingCommand setRobotProfile(RobotProfile profile){
+    this.robotProfile=profile;
     translationProfile =
         new TrapezoidProfile(
             new Constraints(profile.getMaxVelocity(), profile.getMaxAcceleration()));
@@ -42,30 +52,7 @@ public class PathingCommand extends Command {
         new TrapezoidProfile(
             new Constraints(
                 profile.getMaxRotationalVelocity(), profile.getMaxRotationalAcceleration()));
-  }
-
-  public PathingCommand(Pose2d pose) {
-    this.goalPose = pose;
-    this.robotProfile = defaultRobotProfile;
-    translationProfile =
-        new TrapezoidProfile(
-            new Constraints(
-                defaultRobotProfile.getMaxVelocity(), defaultRobotProfile.getMaxAcceleration()));
-    rotationProfile =
-        new TrapezoidProfile(
-            new Constraints(
-                defaultRobotProfile.getMaxRotationalVelocity(),
-                defaultRobotProfile.getMaxRotationalAcceleration()));
-    SmartDashboard.putData("Next Pose", nextPose);
-    SmartDashboard.putData("Final Pose", finalPose);
-    System.out.println(
-        angle(
-            new Pose2d(0, 0, new Rotation2d()),
-            new Pose2d(1, 0, new Rotation2d()),
-            new Pose2d(2, 1, new Rotation2d())));
-  }
-  public PathingCommand(double x,double y,double rot){
-    this(new Pose2d(x,y,new Rotation2d(rot)));
+    return this;
   }
   public static void setRobot(Supplier<Pose2d> robotPose, Consumer<Transform2d> drive) {
     PathingCommand.drive = drive;
