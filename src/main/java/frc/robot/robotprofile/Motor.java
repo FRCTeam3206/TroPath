@@ -51,9 +51,40 @@ public class Motor {
       REV_EHIGH_2 = 4.29,
       REV_EHIGH_3 = 4.00,
       REV_EHIGH_4 = 3.75,
-      REV_EHIGH_5 = 3.56;
-  public static Motor NEO = new Motor(3.28, .701, 5880);
-  public static Motor FALCON = new Motor(4.69, .70003, 6380);
-  public static Motor VORTEX = new Motor(3.6, .621, 6784);
-  public static Motor KRAKENX60 = new Motor(7.09, .746, 6000);
+      REV_EHIGH_5 = 3.56,
+      WCP_X1_LOW=7.85,
+      WCP_X1_MED=7.13,
+      WCP_X1_HIGH=6.54,
+      WCP_X2_LOW=6.56,
+      WCP_X2_MED=5.96,
+      WCP_X2_HIGH=5.46,
+      WCP_X3_LOW=5.14,
+      WCP_X3_MED=4.75,
+      WCP_X3_HIGH=4.41,
+      WCP_XS1_12=6.00,
+      WCP_XS1_13=5.54,
+      WCP_XS1_14=5.14,
+      WCP_XS2_14=4.71,
+      WCP_XS2_15=4.40,
+      WCP_XS2_16=4.13;
+
+  public static Motor CIM() {
+    return new Motor(2.4, .686, 5333);
+  }
+
+  public static Motor NEO() {
+    return new Motor(3.28, .701, 5880);
+  }
+
+  public static Motor FALCON() {
+    return new Motor(4.69, .70003, 6380);
+  }
+
+  public static Motor VORTEX() {
+    return new Motor(3.6, .621, 6784);
+  }
+
+  public static Motor KRAKENX60() {
+    return new Motor(7.09, .746, 6000);
+  }
 }

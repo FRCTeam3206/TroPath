@@ -81,13 +81,15 @@ public class PathingCommand extends Command {
   public static RobotProfile getDefaultRobotProfile() {
     return defaultRobotProfile;
   }
-  public static void setCustomField(String name){
+
+  public static void setCustomField(String name) {
     pathfinder =
-        new PathfinderBuilder(Filesystem.getDeployDirectory()+"\\"+name)
+        new PathfinderBuilder(Filesystem.getDeployDirectory() + "\\" + name)
             .setRobotLength(defaultRobotProfile.getLength())
             .setRobotWidth(defaultRobotProfile.getWidth())
             .build();
   }
+
   boolean done = false;
 
   public void execute() {
@@ -165,8 +167,7 @@ public class PathingCommand extends Command {
 
       if (angle < 1E-4) continue;
       double stopDist = nextDistance / angle;
-      double maxAllowedVelocity =
-          Math.sqrt(stopDist * 2 * robotProfile.getMaxAcceleration());
+      double maxAllowedVelocity = Math.sqrt(stopDist * 2 * robotProfile.getMaxAcceleration());
       if (maxAllowedVelocity < robotProfile.getMaxVelocity()) {
         SmartDashboard.putNumber("Angle", angle);
         SmartDashboard.putNumber("Distance Away", cumulativeDistance);
