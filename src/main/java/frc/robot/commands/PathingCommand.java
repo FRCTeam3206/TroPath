@@ -192,13 +192,11 @@ public class PathingCommand extends Command {
     this.continnuous=continnuous;
     return this;
   }
-  public PathingCommand setTranslationTolerance(double translationTolerance){
+  public PathingCommand setTolerances(double translationTolerance,double rotationTolerance){
     this.translationTolerance=translationTolerance;
-    return this;
-  }
-  public PathingCommand setRotationTolerance(double rotationTolerance){
     this.rotationTolerance=rotationTolerance;
     return this;
+
   }
   public boolean isFinished() {
     //If continnuous true, always returns false
