@@ -182,4 +182,9 @@ public final class Constants {
     public static final AprilTagFieldLayout kAprilTagFieldLayout =
         new AprilTagFieldLayout(List.of(kAprilTags), kFieldLength, kFieldWidth);
   }
+  public static final class SimConstants{
+    //Essentially no limiting
+    public static final double translationAcceleration=999;
+    public static final double rotationAcceleration=999;
+  }
 }

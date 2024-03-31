@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.RelativeTo;
+import frc.robot.Constants.SimConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.Robot;
 import frc.robot.sensors.AprilTagCamera;
@@ -103,8 +104,10 @@ public class DriveSubsystem extends SubsystemBase implements Logged {
   public void periodic() {
     // Update the odometry in the periodic block
     updateOdometry();
-    poseCamera1.addVisionMeasurementToEstimator();
-    poseCamera2.addVisionMeasurementToEstimator();
+    if(Robot.isReal()){
+      poseCamera1.addVisionMeasurementToEstimator();
+      poseCamera2.addVisionMeasurementToEstimator();
+    }
     // this.log("Pose_X", getPose().getX());
     // this.log("Pose_Y", getPose().getY());
     // this.log("Heading", getPose().getRotation().getDegrees());
@@ -139,9 +142,9 @@ public class DriveSubsystem extends SubsystemBase implements Logged {
     simOdometryPose = pose;
   }
 
-  SlewRateLimiter xLimiter = new SlewRateLimiter(9);
-  SlewRateLimiter yLimiter = new SlewRateLimiter(9);
-
+  SlewRateLimiter xLimiter = new SlewRateLimiter(SimConstants.translationAcceleration);
+  SlewRateLimiter yLimiter = new SlewRateLimiter(SimConstants.translationAcceleration);
+  SlewRateLimiter tLimiter = new SlewRateLimiter(SimConstants.rotationAcceleration);
   private void updateOdometry() {
     m_poseEstimator.update(
         m_gyro.getRotation2d(),
@@ -168,7 +171,7 @@ public class DriveSubsystem extends SubsystemBase implements Logged {
               new Twist2d(
                   xLimiter.calculate(speeds.vxMetersPerSecond) * timeDelta,
                   yLimiter.calculate(speeds.vyMetersPerSecond) * timeDelta,
-                  speeds.omegaRadiansPerSecond * timeDelta));
+                  tLimiter.calculate(speeds.omegaRadiansPerSecond) * timeDelta));
     }
   }
 
