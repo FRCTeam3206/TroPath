@@ -122,7 +122,6 @@ public class PathingCommand extends Command {
       nextState =
           new TrapezoidProfile.State(
               usedPose.getTranslation().getDistance(goalPose.getTranslation()), 0);
-      done=translationProfile.timeLeftUntil(nextState.position)<.02&&rotationProfile.timeLeftUntil(0)<.02;
     } else {
       nextState = getNextState(path);
     }
@@ -130,6 +129,7 @@ public class PathingCommand extends Command {
     velocity =
         translationProfile.calculate(.02, new TrapezoidProfile.State(0, velocity), nextState)
             .velocity;
+    if(path.size()<=1)done=translationProfile.timeLeftUntil(nextState.position)<.02&&rotationProfile.timeLeftUntil(0)<.02;
     SmartDashboard.putNumber("Velocity", velocity);
     double xSpeed = dX / total * velocity;
     double ySpeed = dY / total * velocity;
