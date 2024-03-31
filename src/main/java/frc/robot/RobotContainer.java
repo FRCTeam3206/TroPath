@@ -78,7 +78,7 @@ public class RobotContainer implements Logged {
 
     m_driverController
         .button(1)
-        .whileTrue(new PathingCommand(1.9,4.5,Math.PI).setContinnuous(false).setTolerances(.05, Math.PI/32));
+        .whileTrue(new PathingCommand(1.9,4.5,Math.PI).setContinnuous(true));
   }
 
   /**
@@ -89,8 +89,10 @@ public class RobotContainer implements Logged {
   public Command getAutonomousCommand() {
     return new SequentialCommandGroup(
       new PathingCommand(new Pose2d(6.3,4.6, new Rotation2d())),
+      new RunCommand(()->m_robotDrive.drive(.25, 0, 0, RelativeTo.kRobotRelative, false),m_robotDrive).withTimeout(.5),
       new PathingCommand(new Pose2d(1.9,4.5, new Rotation2d(Math.PI))),
       new PathingCommand(new Pose2d(6.3,3.3, new Rotation2d())),
+      new RunCommand(()->m_robotDrive.drive(.25, 0, 0, RelativeTo.kRobotRelative, false),m_robotDrive).withTimeout(.5),
       new PathingCommand(new Pose2d(1.9,3.3, new Rotation2d(Math.PI)))
     );
   }
