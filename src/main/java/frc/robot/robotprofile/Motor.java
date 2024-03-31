@@ -52,8 +52,8 @@ public class Motor {
       REV_EHIGH_3 = 4.00,
       REV_EHIGH_4 = 3.75,
       REV_EHIGH_5 = 3.56;
-  public static Motor NEO = new Motor(3.28, .701, 5880);
-  public static Motor FALCON = new Motor(4.69, .70003, 6380);
-  public static Motor VORTEX = new Motor(3.6, .621, 6784);
-  public static Motor KRAKENX60 = new Motor(7.09, .746, 6000);
+  public static Motor NEO(){return new Motor(3.28, .701, 5880);}
+  public static Motor FALCON (){return new Motor(4.69, .70003, 6380);}
+  public static Motor VORTEX (){return new Motor(3.6, .621, 6784);}
+  public static Motor KRAKENX60 (){return new Motor(7.09, .746, 6000);}
 }
