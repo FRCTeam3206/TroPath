@@ -78,7 +78,7 @@ public class RobotContainer implements Logged {
 
     m_driverController
         .button(1)
-        .whileTrue(new PathingCommand(new Pose2d(2.3, 7, new Rotation2d(Math.PI / 2))).setContinnuous(false).setTranslationTolerance(.05).setRotationTolerance(.1));
+        .whileTrue(new PathingCommand(1.9,4.5,Math.PI).setContinnuous(true).setTranslationTolerance(.05).setRotationTolerance(.1));
   }
 
   /**

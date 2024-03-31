@@ -174,7 +174,7 @@ public class PathingCommand extends Command {
       double maxAllowedVelocity = Math.sqrt(stopDist * 2 * robotProfile.getMaxAcceleration());
       if (maxAllowedVelocity < robotProfile.getMaxVelocity()) {
         SmartDashboard.putNumber("Angle", angle);
-        SmartDashboard.putNumber("Distance Away", cumulativeDistance);
+        SmartDashboard.putNumber("Distance Target Away", cumulativeDistance);
         SmartDashboard.putNumber("Stop Dist", stopDist);
         return new TrapezoidProfile.State(cumulativeDistance, maxAllowedVelocity);
       }
@@ -185,7 +185,7 @@ public class PathingCommand extends Command {
       lastPose = currentPose;
     }
     SmartDashboard.putNumber("Angle", 0);
-    SmartDashboard.putNumber("Distance Away", cumulativeDistance);
+    SmartDashboard.putNumber("Distance Target Away", cumulativeDistance);
     return new TrapezoidProfile.State(
         cumulativeDistance
             + poses
