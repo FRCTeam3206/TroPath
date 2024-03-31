@@ -30,7 +30,8 @@ public class PathingCommand extends Command {
   private Pose2d goalPose;
   private Field2d nextPose = new Field2d();
   private Field2d finalPose = new Field2d();
-
+  private boolean continnuous=false;
+  private double translationTolerance,rotationTolerance=0;
   public PathingCommand(Pose2d pose, RobotProfile profile) {
     this(pose);
     this.robotProfile = profile;
@@ -63,7 +64,9 @@ public class PathingCommand extends Command {
             new Pose2d(1, 0, new Rotation2d()),
             new Pose2d(2, 1, new Rotation2d())));
   }
-
+  public PathingCommand(double x,double y,double rot){
+    this(new Pose2d(x,y,new Rotation2d(rot)));
+  }
   public static void setRobot(Supplier<Pose2d> robotPose, Consumer<Transform2d> drive) {
     PathingCommand.drive = drive;
     PathingCommand.robotPose = robotPose;
@@ -132,6 +135,7 @@ public class PathingCommand extends Command {
       nextState =
           new TrapezoidProfile.State(
               usedPose.getTranslation().getDistance(goalPose.getTranslation()), 0);
+      done=translationProfile.timeLeftUntil(nextState.position)<.02&&rotationProfile.timeLeftUntil(0)<.02;
     } else {
       nextState = getNextState(path);
     }
@@ -197,8 +201,21 @@ public class PathingCommand extends Command {
     double d3 = pose3.getTranslation().getDistance(pose1.getTranslation());
     return Math.PI - Math.acos((d1 * d1 + d2 * d2 - d3 * d3) / (2 * d1 * d2));
   }
-
+  public PathingCommand setContinnuous(boolean continnuous){
+    this.continnuous=continnuous;
+    return this;
+  }
+  public PathingCommand setTranslationTolerance(double translationTolerance){
+    this.translationTolerance=translationTolerance;
+    return this;
+  }
+  public PathingCommand setRotationTolerance(double rotationTolerance){
+    this.rotationTolerance=rotationTolerance;
+    return this;
+  }
   public boolean isFinished() {
-    return false;
+    //If continnuous true, always returns false
+    //Otherwise returns true if done(the auto stop) is true or the tolerances are met
+    return !continnuous&&(done||(robotPose.get().getTranslation().getDistance(goalPose.getTranslation())<translationTolerance&&Math.abs(robotPose.get().getRotation().minus(goalPose.getRotation()).getRadians())<rotationTolerance));
   }
 }

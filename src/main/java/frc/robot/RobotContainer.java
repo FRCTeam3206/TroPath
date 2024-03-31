@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.OIConstants;
@@ -77,7 +78,7 @@ public class RobotContainer implements Logged {
 
     m_driverController
         .button(1)
-        .whileTrue(new PathingCommand(new Pose2d(2.3, 7, new Rotation2d(Math.PI / 2))));
+        .whileTrue(new PathingCommand(new Pose2d(2.3, 7, new Rotation2d(Math.PI / 2))).setContinnuous(false).setTranslationTolerance(.05).setRotationTolerance(.1));
   }
 
   /**
@@ -86,6 +87,11 @@ public class RobotContainer implements Logged {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return new RunCommand(null, null);
+    return new SequentialCommandGroup(
+      new PathingCommand(new Pose2d(6.3,4.6, new Rotation2d())),
+      new PathingCommand(new Pose2d(1.9,4.5, new Rotation2d(Math.PI))),
+      new PathingCommand(new Pose2d(6.3,3.3, new Rotation2d())),
+      new PathingCommand(new Pose2d(1.9,3.3, new Rotation2d(Math.PI)))
+    );
   }
 }
