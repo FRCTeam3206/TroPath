@@ -30,8 +30,8 @@ public class PathingCommand extends Command {
   private Pose2d goalPose;
   private Field2d nextPoseFieldDisplay = new Field2d();
   private Field2d finalPoseFieldDisplay = new Field2d();
-  private boolean continnuous=false;
-  private double translationTolerance,rotationTolerance=0;
+  private boolean continnuous = false;
+  private double translationTolerance, rotationTolerance = 0;
 
   public PathingCommand(Pose2d pose) {
     this.goalPose = pose;
@@ -40,11 +40,13 @@ public class PathingCommand extends Command {
     SmartDashboard.putData("Next Pose", nextPoseFieldDisplay);
     SmartDashboard.putData("Final Pose", finalPoseFieldDisplay);
   }
-  public PathingCommand(double x,double y,double rot){
-    this(new Pose2d(x,y,new Rotation2d(rot)));
+
+  public PathingCommand(double x, double y, double rot) {
+    this(new Pose2d(x, y, new Rotation2d(rot)));
   }
-  public PathingCommand setRobotProfile(RobotProfile profile){
-    this.robotProfile=profile;
+
+  public PathingCommand setRobotProfile(RobotProfile profile) {
+    this.robotProfile = profile;
     translationProfile =
         new TrapezoidProfile(
             new Constraints(profile.getMaxVelocity(), profile.getMaxAcceleration()));
@@ -54,6 +56,7 @@ public class PathingCommand extends Command {
                 profile.getMaxRotationalVelocity(), profile.getMaxRotationalAcceleration()));
     return this;
   }
+
   public static void setRobot(Supplier<Pose2d> robotPose, Consumer<Transform2d> drive) {
     PathingCommand.drive = drive;
     PathingCommand.robotPose = robotPose;
@@ -110,7 +113,8 @@ public class PathingCommand extends Command {
       usedPose = path.get(0).asPose2d();
       nextTargetPose = path.get(1).asPose2d();
     }
-    nextPoseFieldDisplay.setRobotPose(new Pose2d(nextTargetPose.getTranslation(),goalPose.getRotation()));
+    nextPoseFieldDisplay.setRobotPose(
+        new Pose2d(nextTargetPose.getTranslation(), goalPose.getRotation()));
     double dX = nextTargetPose.getX() - robotPose.get().getX(),
         dY = nextTargetPose.getY() - robotPose.get().getY();
     SmartDashboard.putNumber("Move dX", dX);
@@ -129,7 +133,10 @@ public class PathingCommand extends Command {
     velocity =
         translationProfile.calculate(.02, new TrapezoidProfile.State(0, velocity), nextState)
             .velocity;
-    if(path.size()<=1)done=translationProfile.timeLeftUntil(nextState.position)<.02&&rotationProfile.timeLeftUntil(0)<.02;
+    if (path.size() <= 1)
+      done =
+          translationProfile.timeLeftUntil(nextState.position) < .02
+              && rotationProfile.timeLeftUntil(0) < .02;
     SmartDashboard.putNumber("Velocity", velocity);
     double xSpeed = dX / total * velocity;
     double ySpeed = dY / total * velocity;
@@ -188,19 +195,27 @@ public class PathingCommand extends Command {
     double d3 = pose3.getTranslation().getDistance(pose1.getTranslation());
     return Math.PI - Math.acos((d1 * d1 + d2 * d2 - d3 * d3) / (2 * d1 * d2));
   }
-  public PathingCommand setContinnuous(boolean continnuous){
-    this.continnuous=continnuous;
-    return this;
-  }
-  public PathingCommand setTolerances(double translationTolerance,double rotationTolerance){
-    this.translationTolerance=translationTolerance;
-    this.rotationTolerance=rotationTolerance;
-    return this;
 
+  public PathingCommand setContinnuous(boolean continnuous) {
+    this.continnuous = continnuous;
+    return this;
   }
+
+  public PathingCommand setTolerances(double translationTolerance, double rotationTolerance) {
+    this.translationTolerance = translationTolerance;
+    this.rotationTolerance = rotationTolerance;
+    return this;
+  }
+
   public boolean isFinished() {
-    //If continnuous true, always returns false
-    //Otherwise returns true if done(the auto stop) is true or the tolerances are met
-    return !continnuous&&(done||(robotPose.get().getTranslation().getDistance(goalPose.getTranslation())<translationTolerance&&Math.abs(robotPose.get().getRotation().minus(goalPose.getRotation()).getRadians())<rotationTolerance));
+    // If continnuous true, always returns false
+    // Otherwise returns true if done(the auto stop) is true or the tolerances are met
+    return !continnuous
+        && (done
+            || (robotPose.get().getTranslation().getDistance(goalPose.getTranslation())
+                    < translationTolerance
+                && Math.abs(
+                        robotPose.get().getRotation().minus(goalPose.getRotation()).getRadians())
+                    < rotationTolerance));
   }
 }

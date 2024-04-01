@@ -104,7 +104,7 @@ public class DriveSubsystem extends SubsystemBase implements Logged {
   public void periodic() {
     // Update the odometry in the periodic block
     updateOdometry();
-    if(Robot.isReal()){
+    if (Robot.isReal()) {
       poseCamera1.addVisionMeasurementToEstimator();
       poseCamera2.addVisionMeasurementToEstimator();
     }
@@ -145,6 +145,7 @@ public class DriveSubsystem extends SubsystemBase implements Logged {
   SlewRateLimiter xLimiter = new SlewRateLimiter(SimConstants.translationAcceleration);
   SlewRateLimiter yLimiter = new SlewRateLimiter(SimConstants.translationAcceleration);
   SlewRateLimiter tLimiter = new SlewRateLimiter(SimConstants.rotationAcceleration);
+
   private void updateOdometry() {
     m_poseEstimator.update(
         m_gyro.getRotation2d(),
