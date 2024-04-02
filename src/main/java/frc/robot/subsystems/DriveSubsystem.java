@@ -278,11 +278,11 @@ public class DriveSubsystem extends SubsystemBase implements Logged {
     this.log("Desired Swerve States", swerveModuleStates);
   }
 
-  public void driveSpeed(Transform2d speeds) {
+  public void driveSpeed(ChassisSpeeds speeds) {
     drive(
-        speeds.getX() / DriveConstants.kMaxSpeedMetersPerSecond,
-        speeds.getY() / DriveConstants.kMaxSpeedMetersPerSecond,
-        speeds.getRotation().getRadians() / DriveConstants.kMaxAngularSpeed,
+        speeds.vxMetersPerSecond / DriveConstants.kMaxSpeedMetersPerSecond,
+        speeds.vyMetersPerSecond / DriveConstants.kMaxSpeedMetersPerSecond,
+        speeds.omegaRadiansPerSecond / DriveConstants.kMaxAngularSpeed,
         RelativeTo.kFieldRelative,
         false);
   }
