@@ -25,7 +25,6 @@ public class PathingCommand extends Command {
   private static RobotProfile defaultRobotProfile;
   private RobotProfile robotProfile;
   private static Supplier<Pose2d> robotPose;
-  private static Supplier<ChassisSpeeds> velocitySupplier;
   private static Consumer<ChassisSpeeds> drive;
   private static Pathfinder pathfinder;
   private double velocity, rotationalVelocity = 0;
@@ -63,11 +62,10 @@ public class PathingCommand extends Command {
   }
 
   public static void setRobot(
-      Supplier<Pose2d> robotPose, Supplier<ChassisSpeeds> velocitySupplier,Consumer<ChassisSpeeds> drive, Subsystem subsystem) {
+      Supplier<Pose2d> robotPose,Consumer<ChassisSpeeds> drive, Subsystem subsystem) {
     PathingCommand.drive = drive;
     PathingCommand.robotPose = robotPose;
     PathingCommand.subsystem = subsystem;
-    PathingCommand.velocitySupplier=velocitySupplier;
   }
 
   public static void setDefaultRobotProfile(RobotProfile robotProfile) {
@@ -105,10 +103,7 @@ public class PathingCommand extends Command {
     finalPoseFieldDisplay.setRobotPose(goalPose);
     double deltaRotation;
     deltaRotation = robotPose.get().getRotation().minus(goalPose.getRotation()).getRadians();
-    ChassisSpeeds chassisSpeeds=velocitySupplier.get();
-    velocity=Math.sqrt(chassisSpeeds.vxMetersPerSecond*chassisSpeeds.vxMetersPerSecond+chassisSpeeds.vyMetersPerSecond+chassisSpeeds.vyMetersPerSecond);
-    rotationalVelocity=chassisSpeeds.omegaRadiansPerSecond;
-    rotationalVelocity =
+        rotationalVelocity =
         rotationProfile.calculate(
                 .02,
                 new TrapezoidProfile.State(deltaRotation, rotationalVelocity),
