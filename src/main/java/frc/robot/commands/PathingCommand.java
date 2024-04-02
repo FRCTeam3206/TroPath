@@ -25,6 +25,7 @@ public class PathingCommand extends Command {
   private static RobotProfile defaultRobotProfile;
   private RobotProfile robotProfile;
   private static Supplier<Pose2d> robotPose;
+  private static Supplier<ChassisSpeeds> velocitySupplier;
   private static Consumer<ChassisSpeeds> drive;
   private static Pathfinder pathfinder;
   private double velocity, rotationalVelocity = 0;
@@ -62,10 +63,11 @@ public class PathingCommand extends Command {
   }
 
   public static void setRobot(
-      Supplier<Pose2d> robotPose, Consumer<ChassisSpeeds> drive, Subsystem subsystem) {
+      Supplier<Pose2d> robotPose, Supplier<ChassisSpeeds> velocitySupplier,Consumer<ChassisSpeeds> drive, Subsystem subsystem) {
     PathingCommand.drive = drive;
     PathingCommand.robotPose = robotPose;
     PathingCommand.subsystem = subsystem;
+    PathingCommand.velocitySupplier=velocitySupplier;
   }
 
   public static void setDefaultRobotProfile(RobotProfile robotProfile) {
@@ -103,6 +105,9 @@ public class PathingCommand extends Command {
     finalPoseFieldDisplay.setRobotPose(goalPose);
     double deltaRotation;
     deltaRotation = robotPose.get().getRotation().minus(goalPose.getRotation()).getRadians();
+    ChassisSpeeds chassisSpeeds=velocitySupplier.get();
+    velocity=Math.sqrt(chassisSpeeds.vxMetersPerSecond*chassisSpeeds.vxMetersPerSecond+chassisSpeeds.vyMetersPerSecond+chassisSpeeds.vyMetersPerSecond);
+    rotationalVelocity=chassisSpeeds.omegaRadiansPerSecond;
     rotationalVelocity =
         rotationProfile.calculate(
                 .02,
@@ -221,9 +226,9 @@ public class PathingCommand extends Command {
     // If continnuous true, always returns false
     // Otherwise returns true if done(the auto stop) is true or the tolerances are met
     return !continnuous
-        && (robotPose.get().getTranslation().getDistance(goalPose.getTranslation())
+        && (robotPose.get().getTranslation().getDistance(goalPose.getTranslation())+velocity*velocity/2/robotProfile.getMaxAcceleration()
                 < translationTolerance
-            && Math.abs(robotPose.get().getRotation().minus(goalPose.getRotation()).getRadians())
+            && Math.abs(robotPose.get().getRotation().minus(goalPose.getRotation()).getRadians())+rotationalVelocity*rotationalVelocity/2/robotProfile.getMaxRotationalAcceleration()
                 < rotationTolerance);
   }
 }
