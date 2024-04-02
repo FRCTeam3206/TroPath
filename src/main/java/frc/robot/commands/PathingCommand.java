@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.robotprofile.RobotProfile;
 import java.util.ArrayList;
 import java.util.function.Consumer;
@@ -32,10 +33,11 @@ public class PathingCommand extends Command {
   private Field2d finalPoseFieldDisplay = new Field2d();
   private boolean continnuous = false;
   private double translationTolerance, rotationTolerance = 0;
-
+  private static Subsystem subsystem;
   public PathingCommand(Pose2d pose) {
     this.goalPose = pose;
     this.robotProfile = defaultRobotProfile;
+    this.addRequirements(subsystem);
     setRobotProfile(defaultRobotProfile);
     SmartDashboard.putData("Next Pose", nextPoseFieldDisplay);
     SmartDashboard.putData("Final Pose", finalPoseFieldDisplay);
@@ -57,9 +59,10 @@ public class PathingCommand extends Command {
     return this;
   }
 
-  public static void setRobot(Supplier<Pose2d> robotPose, Consumer<Transform2d> drive) {
+  public static void setRobot(Supplier<Pose2d> robotPose, Consumer<Transform2d> drive,Subsystem subsystem) {
     PathingCommand.drive = drive;
     PathingCommand.robotPose = robotPose;
+    PathingCommand.subsystem=subsystem;
   }
 
   public static void setDefaultRobotProfile(RobotProfile robotProfile) {
@@ -135,8 +138,8 @@ public class PathingCommand extends Command {
             .velocity;
     if (path.size() <= 1)
       done =
-          translationProfile.timeLeftUntil(nextState.position) < .02
-              && rotationProfile.timeLeftUntil(0) < .02;
+          translationProfile.timeLeftUntil(nextState.position) < .2
+              && rotationProfile.timeLeftUntil(0) < .2;
     SmartDashboard.putNumber("Velocity", velocity);
     double xSpeed = dX / total * velocity;
     double ySpeed = dY / total * velocity;

@@ -35,14 +35,13 @@ public class RobotContainer implements Logged {
   // The driver's controller
   CommandXboxController m_driverController =
       new CommandXboxController(OIConstants.kDriverControllerPort);
-
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the button bindings
     PathingCommand.setDefaultRobotProfile(
-        new RobotProfile(50, 3 / 39.37, .9, .9, Motor.NEO().gear(Motor.REV_HIGH)));
+        new RobotProfile(50, 3 / 39.37, .9, .9, Motor.NEO().gear(Motor.REV_HIGH)).setSafteyMultiplier(.8));
     System.out.println(PathingCommand.getDefaultRobotProfile());
-    PathingCommand.setRobot(() -> m_robotDrive.getPose(), m_robotDrive::driveSpeed);
+    PathingCommand.setRobot(() -> m_robotDrive.getPose(), m_robotDrive::driveSpeed,m_robotDrive);
     configureButtonBindings();
 
     // Configure default commands
@@ -78,7 +77,7 @@ public class RobotContainer implements Logged {
 
     m_driverController
         .button(1)
-        .whileTrue(new PathingCommand(1.9, 4.5, Math.PI).setContinnuous(true));
+        .onTrue(new PathingCommand(2.3, 4.5, Math.PI).setContinnuous(true).until(()->m_driverController.b().getAsBoolean()));
   }
 
   /**
