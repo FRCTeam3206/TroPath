@@ -1,7 +1,6 @@
 package frc.robot.sensors;
 
 import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -70,9 +69,10 @@ public class AprilTagCamera {
     // if (numTags > 1) {
     //   estStandardDeviations = VisionConstants.kMultiTagStandardDeviations;
     // } else if (numTags == 1 && avgDist > 4) {
-    //   estStandardDeviations = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+    //   estStandardDeviations = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE,
+    // Double.MAX_VALUE);
     // } else {
-      estStandardDeviations = estStandardDeviations.times(1 + (avgDist * avgDist / 30));
+    estStandardDeviations = estStandardDeviations.times(1 + (avgDist * avgDist / 30));
     // }
 
     return estStandardDeviations;

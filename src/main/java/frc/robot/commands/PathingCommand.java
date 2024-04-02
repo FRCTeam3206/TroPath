@@ -32,8 +32,9 @@ public class PathingCommand extends Command {
   private Field2d nextPoseFieldDisplay = new Field2d();
   private Field2d finalPoseFieldDisplay = new Field2d();
   private boolean continnuous = false;
-  private double translationTolerance=.05,rotationTolerance=Math.PI/32;
+  private double translationTolerance = .05, rotationTolerance = Math.PI / 32;
   private static Subsystem subsystem;
+
   public PathingCommand(Pose2d pose) {
     this.goalPose = pose;
     this.robotProfile = defaultRobotProfile;
@@ -59,10 +60,11 @@ public class PathingCommand extends Command {
     return this;
   }
 
-  public static void setRobot(Supplier<Pose2d> robotPose, Consumer<Transform2d> drive,Subsystem subsystem) {
+  public static void setRobot(
+      Supplier<Pose2d> robotPose, Consumer<Transform2d> drive, Subsystem subsystem) {
     PathingCommand.drive = drive;
     PathingCommand.robotPose = robotPose;
-    PathingCommand.subsystem=subsystem;
+    PathingCommand.subsystem = subsystem;
   }
 
   public static void setDefaultRobotProfile(RobotProfile robotProfile) {
@@ -85,6 +87,7 @@ public class PathingCommand extends Command {
             .setRobotWidth(defaultRobotProfile.getWidth())
             .build();
   }
+
   public static void setCustomField(Field field) {
     pathfinder =
         new PathfinderBuilder(field)
@@ -92,6 +95,7 @@ public class PathingCommand extends Command {
             .setRobotWidth(defaultRobotProfile.getWidth())
             .build();
   }
+
   boolean done = false;
 
   public void execute() {
@@ -217,9 +221,8 @@ public class PathingCommand extends Command {
     // Otherwise returns true if done(the auto stop) is true or the tolerances are met
     return !continnuous
         && (robotPose.get().getTranslation().getDistance(goalPose.getTranslation())
-                    < translationTolerance
-                && Math.abs(
-                        robotPose.get().getRotation().minus(goalPose.getRotation()).getRadians())
-                    < rotationTolerance);
+                < translationTolerance
+            && Math.abs(robotPose.get().getRotation().minus(goalPose.getRotation()).getRadians())
+                < rotationTolerance);
   }
 }
