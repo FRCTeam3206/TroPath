@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.robotprofile.RobotProfile;
 import java.util.ArrayList;
 import java.util.function.Consumer;
@@ -28,11 +29,26 @@ public class PathingCommand extends Command {
   private double velocity, rotationalVelocity = 0;
   private TrapezoidProfile translationProfile, rotationProfile;
   private Pose2d goalPose;
-  private Field2d nextPose = new Field2d();
-  private Field2d finalPose = new Field2d();
+  private Field2d nextPoseFieldDisplay = new Field2d();
+  private Field2d finalPoseFieldDisplay = new Field2d();
+  private boolean continnuous = false;
+  private double translationTolerance = .05, rotationTolerance = Math.PI / 32;
+  private static Subsystem subsystem;
 
-  public PathingCommand(Pose2d pose, RobotProfile profile) {
-    this(pose);
+  public PathingCommand(Pose2d pose) {
+    this.goalPose = pose;
+    this.robotProfile = defaultRobotProfile;
+    this.addRequirements(subsystem);
+    setRobotProfile(defaultRobotProfile);
+    SmartDashboard.putData("Next Pose", nextPoseFieldDisplay);
+    SmartDashboard.putData("Final Pose", finalPoseFieldDisplay);
+  }
+
+  public PathingCommand(double x, double y, double rot) {
+    this(new Pose2d(x, y, new Rotation2d(rot)));
+  }
+
+  public PathingCommand setRobotProfile(RobotProfile profile) {
     this.robotProfile = profile;
     translationProfile =
         new TrapezoidProfile(
@@ -41,32 +57,14 @@ public class PathingCommand extends Command {
         new TrapezoidProfile(
             new Constraints(
                 profile.getMaxRotationalVelocity(), profile.getMaxRotationalAcceleration()));
+    return this;
   }
 
-  public PathingCommand(Pose2d pose) {
-    this.goalPose = pose;
-    this.robotProfile = defaultRobotProfile;
-    translationProfile =
-        new TrapezoidProfile(
-            new Constraints(
-                defaultRobotProfile.getMaxVelocity(), defaultRobotProfile.getMaxAcceleration()));
-    rotationProfile =
-        new TrapezoidProfile(
-            new Constraints(
-                defaultRobotProfile.getMaxRotationalVelocity(),
-                defaultRobotProfile.getMaxRotationalAcceleration()));
-    SmartDashboard.putData("Next Pose", nextPose);
-    SmartDashboard.putData("Final Pose", finalPose);
-    System.out.println(
-        angle(
-            new Pose2d(0, 0, new Rotation2d()),
-            new Pose2d(1, 0, new Rotation2d()),
-            new Pose2d(2, 1, new Rotation2d())));
-  }
-
-  public static void setRobot(Supplier<Pose2d> robotPose, Consumer<Transform2d> drive) {
+  public static void setRobot(
+      Supplier<Pose2d> robotPose, Consumer<Transform2d> drive, Subsystem subsystem) {
     PathingCommand.drive = drive;
     PathingCommand.robotPose = robotPose;
+    PathingCommand.subsystem = subsystem;
   }
 
   public static void setDefaultRobotProfile(RobotProfile robotProfile) {
@@ -90,10 +88,18 @@ public class PathingCommand extends Command {
             .build();
   }
 
+  public static void setCustomField(Field field) {
+    pathfinder =
+        new PathfinderBuilder(field)
+            .setRobotLength(defaultRobotProfile.getLength())
+            .setRobotWidth(defaultRobotProfile.getWidth())
+            .build();
+  }
+
   boolean done = false;
 
   public void execute() {
-    finalPose.setRobotPose(goalPose);
+    finalPoseFieldDisplay.setRobotPose(goalPose);
     double deltaRotation;
     deltaRotation = robotPose.get().getRotation().minus(goalPose.getRotation()).getRadians();
     rotationalVelocity =
@@ -120,7 +126,8 @@ public class PathingCommand extends Command {
       usedPose = path.get(0).asPose2d();
       nextTargetPose = path.get(1).asPose2d();
     }
-    nextPose.setRobotPose(nextTargetPose);
+    nextPoseFieldDisplay.setRobotPose(
+        new Pose2d(nextTargetPose.getTranslation(), goalPose.getRotation()));
     double dX = nextTargetPose.getX() - robotPose.get().getX(),
         dY = nextTargetPose.getY() - robotPose.get().getY();
     SmartDashboard.putNumber("Move dX", dX);
@@ -170,7 +177,7 @@ public class PathingCommand extends Command {
       double maxAllowedVelocity = Math.sqrt(stopDist * 2 * robotProfile.getMaxAcceleration());
       if (maxAllowedVelocity < robotProfile.getMaxVelocity()) {
         SmartDashboard.putNumber("Angle", angle);
-        SmartDashboard.putNumber("Distance Away", cumulativeDistance);
+        SmartDashboard.putNumber("Distance Target Away", cumulativeDistance);
         SmartDashboard.putNumber("Stop Dist", stopDist);
         return new TrapezoidProfile.State(cumulativeDistance, maxAllowedVelocity);
       }
@@ -181,7 +188,7 @@ public class PathingCommand extends Command {
       lastPose = currentPose;
     }
     SmartDashboard.putNumber("Angle", 0);
-    SmartDashboard.putNumber("Distance Away", cumulativeDistance);
+    SmartDashboard.putNumber("Distance Target Away", cumulativeDistance);
     return new TrapezoidProfile.State(
         cumulativeDistance
             + poses
@@ -198,7 +205,24 @@ public class PathingCommand extends Command {
     return Math.PI - Math.acos((d1 * d1 + d2 * d2 - d3 * d3) / (2 * d1 * d2));
   }
 
+  public PathingCommand setContinnuous(boolean continnuous) {
+    this.continnuous = continnuous;
+    return this;
+  }
+
+  public PathingCommand setTolerances(double translationTolerance, double rotationTolerance) {
+    this.translationTolerance = translationTolerance;
+    this.rotationTolerance = rotationTolerance;
+    return this;
+  }
+
   public boolean isFinished() {
-    return false;
+    // If continnuous true, always returns false
+    // Otherwise returns true if done(the auto stop) is true or the tolerances are met
+    return !continnuous
+        && (robotPose.get().getTranslation().getDistance(goalPose.getTranslation())
+                < translationTolerance
+            && Math.abs(robotPose.get().getRotation().minus(goalPose.getRotation()).getRadians())
+                < rotationTolerance);
   }
 }

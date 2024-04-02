@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.OIConstants;
@@ -39,9 +40,10 @@ public class RobotContainer implements Logged {
   public RobotContainer() {
     // Configure the button bindings
     PathingCommand.setDefaultRobotProfile(
-        new RobotProfile(50, 3 / 39.37, .9, .9, Motor.NEO().gear(Motor.REV_HIGH)));
+        new RobotProfile(50, 3 / 39.37, .9, .9, Motor.NEO().gear(Motor.REV_HIGH))
+            .setSafteyMultiplier(.8));
     System.out.println(PathingCommand.getDefaultRobotProfile());
-    PathingCommand.setRobot(() -> m_robotDrive.getPose(), m_robotDrive::driveSpeed);
+    PathingCommand.setRobot(() -> m_robotDrive.getPose(), m_robotDrive::driveSpeed, m_robotDrive);
     configureButtonBindings();
 
     // Configure default commands
@@ -77,7 +79,7 @@ public class RobotContainer implements Logged {
 
     m_driverController
         .button(1)
-        .whileTrue(new PathingCommand(new Pose2d(2.3, 7, new Rotation2d(Math.PI / 2))));
+        .whileTrue(new PathingCommand(2.3, 4.5, Math.PI).setContinnuous(true));
   }
 
   /**
@@ -86,6 +88,16 @@ public class RobotContainer implements Logged {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return new RunCommand(null, null);
+    return new SequentialCommandGroup(
+        new PathingCommand(new Pose2d(6.3, 4.6, new Rotation2d())),
+        new RunCommand(
+                () -> m_robotDrive.drive(.25, 0, 0, RelativeTo.kRobotRelative, false), m_robotDrive)
+            .withTimeout(.5),
+        new PathingCommand(new Pose2d(1.9, 4.5, new Rotation2d(Math.PI))),
+        new PathingCommand(new Pose2d(6.3, 3.3, new Rotation2d())),
+        new RunCommand(
+                () -> m_robotDrive.drive(.25, 0, 0, RelativeTo.kRobotRelative, false), m_robotDrive)
+            .withTimeout(.5),
+        new PathingCommand(new Pose2d(1.9, 3.3, new Rotation2d(Math.PI))));
   }
 }

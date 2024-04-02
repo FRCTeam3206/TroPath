@@ -175,11 +175,35 @@ public final class Constants {
     public static final double kFieldLength = 4;
     public static final double kFieldWidth = 4;
 
+    public static final AprilTag[] kOldAprilTags = {
+      new AprilTag(4, new Pose3d(1.5, 4.5, .75, new Rotation3d(0, 0, 0)))
+    };
+
     public static final AprilTag[] kAprilTags = {
-      new AprilTag(4, new Pose3d(1.5, 4.75, .75, new Rotation3d(0, 0, 0)))
+      new AprilTag(7, new Pose3d(1.25, 4.5, Units.inchesToMeters(27.25), new Rotation3d(0, 0, 0))),
+      new AprilTag(
+          8,
+          new Pose3d(
+              1.25,
+              4.5 - Units.inchesToMeters(22.125),
+              Units.inchesToMeters(27.25),
+              new Rotation3d(0, 0, 0))),
+      new AprilTag(
+          4,
+          new Pose3d(
+              1.25 + Units.feetToMeters(27),
+              4.5,
+              Units.inchesToMeters(27),
+              new Rotation3d(0, 0, Math.PI)))
     };
 
     public static final AprilTagFieldLayout kAprilTagFieldLayout =
         new AprilTagFieldLayout(List.of(kAprilTags), kFieldLength, kFieldWidth);
+  }
+
+  public static final class SimConstants {
+    // Essentially no limiting
+    public static final double translationAcceleration = 999;
+    public static final double rotationAcceleration = 999;
   }
 }
