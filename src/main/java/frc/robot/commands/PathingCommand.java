@@ -32,7 +32,7 @@ public class PathingCommand extends Command {
   private Field2d nextPoseFieldDisplay = new Field2d();
   private Field2d finalPoseFieldDisplay = new Field2d();
   private boolean continnuous = false;
-  private double translationTolerance, rotationTolerance = 0;
+  private double translationTolerance=.05,rotationTolerance=Math.PI/32;
   private static Subsystem subsystem;
   public PathingCommand(Pose2d pose) {
     this.goalPose = pose;
@@ -85,7 +85,13 @@ public class PathingCommand extends Command {
             .setRobotWidth(defaultRobotProfile.getWidth())
             .build();
   }
-
+  public static void setCustomField(Field field) {
+    pathfinder =
+        new PathfinderBuilder(field)
+            .setRobotLength(defaultRobotProfile.getLength())
+            .setRobotWidth(defaultRobotProfile.getWidth())
+            .build();
+  }
   boolean done = false;
 
   public void execute() {
@@ -136,10 +142,6 @@ public class PathingCommand extends Command {
     velocity =
         translationProfile.calculate(.02, new TrapezoidProfile.State(0, velocity), nextState)
             .velocity;
-    if (path.size() <= 1)
-      done =
-          translationProfile.timeLeftUntil(nextState.position) < .2
-              && rotationProfile.timeLeftUntil(0) < .2;
     SmartDashboard.putNumber("Velocity", velocity);
     double xSpeed = dX / total * velocity;
     double ySpeed = dY / total * velocity;
@@ -214,11 +216,10 @@ public class PathingCommand extends Command {
     // If continnuous true, always returns false
     // Otherwise returns true if done(the auto stop) is true or the tolerances are met
     return !continnuous
-        && (done
-            || (robotPose.get().getTranslation().getDistance(goalPose.getTranslation())
+        && (robotPose.get().getTranslation().getDistance(goalPose.getTranslation())
                     < translationTolerance
                 && Math.abs(
                         robotPose.get().getRotation().minus(goalPose.getRotation()).getRadians())
-                    < rotationTolerance));
+                    < rotationTolerance);
   }
 }
