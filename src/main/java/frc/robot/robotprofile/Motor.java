@@ -1,28 +1,19 @@
 package frc.robot.robotprofile;
 
 public class Motor {
-  private double maxStallTorque, realStallTorque, freeSpeed;
+  private double stallTorque, freeSpeed;
 
   public Motor(double maxStallTorque, double realStallTorque, double freeSpeed) {
-    this.maxStallTorque = maxStallTorque;
-    this.realStallTorque = realStallTorque;
+    this.stallTorque = realStallTorque;
     this.freeSpeed = freeSpeed;
   }
 
-  public double getMaxStallTorque() {
-    return maxStallTorque;
+  public double getStallTorque() {
+    return stallTorque;
   }
 
-  public void setMaxStallTorque(double maxStallTorque) {
-    this.maxStallTorque = maxStallTorque;
-  }
-
-  public double getRealStallTorque() {
-    return realStallTorque;
-  }
-
-  public void setRealStallTorque(double realStallTorque) {
-    this.realStallTorque = realStallTorque;
+  public void setStallTorque(double realStallTorque) {
+    this.stallTorque = realStallTorque;
   }
 
   public double getFreeSpeed() {
@@ -35,8 +26,7 @@ public class Motor {
 
   public Motor gear(double gearRatio) {
     freeSpeed /= gearRatio;
-    maxStallTorque *= gearRatio;
-    realStallTorque *= gearRatio;
+    stallTorque *= gearRatio;
     return this;
   }
 
