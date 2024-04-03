@@ -3,6 +3,7 @@ package frc.robot.commands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -24,7 +25,7 @@ public class PathingCommand extends Command {
   private static RobotProfile defaultRobotProfile;
   private RobotProfile robotProfile;
   private static Supplier<Pose2d> robotPose;
-  private static Consumer<Transform2d> drive;
+  private static Consumer<ChassisSpeeds> drive;
   private static Pathfinder pathfinder;
   private double velocity, rotationalVelocity = 0;
   private TrapezoidProfile translationProfile, rotationProfile;
@@ -61,7 +62,7 @@ public class PathingCommand extends Command {
   }
 
   public static void setRobot(
-      Supplier<Pose2d> robotPose, Consumer<Transform2d> drive, Subsystem subsystem) {
+      Supplier<Pose2d> robotPose,Consumer<ChassisSpeeds> drive, Subsystem subsystem) {
     PathingCommand.drive = drive;
     PathingCommand.robotPose = robotPose;
     PathingCommand.subsystem = subsystem;
@@ -102,7 +103,7 @@ public class PathingCommand extends Command {
     finalPoseFieldDisplay.setRobotPose(goalPose);
     double deltaRotation;
     deltaRotation = robotPose.get().getRotation().minus(goalPose.getRotation()).getRadians();
-    rotationalVelocity =
+        rotationalVelocity =
         rotationProfile.calculate(
                 .02,
                 new TrapezoidProfile.State(deltaRotation, rotationalVelocity),
@@ -150,7 +151,7 @@ public class PathingCommand extends Command {
     double xSpeed = dX / total * velocity;
     double ySpeed = dY / total * velocity;
 
-    drive.accept(new Transform2d(xSpeed, ySpeed, new Rotation2d(rotationalVelocity)));
+    drive.accept(new ChassisSpeeds(xSpeed, ySpeed, rotationalVelocity));
   }
 
   private TrapezoidProfile.State getNextState(Path path) {
@@ -220,9 +221,9 @@ public class PathingCommand extends Command {
     // If continnuous true, always returns false
     // Otherwise returns true if done(the auto stop) is true or the tolerances are met
     return !continnuous
-        && (robotPose.get().getTranslation().getDistance(goalPose.getTranslation())
+        && (robotPose.get().getTranslation().getDistance(goalPose.getTranslation())+velocity*velocity/2/robotProfile.getMaxAcceleration()
                 < translationTolerance
-            && Math.abs(robotPose.get().getRotation().minus(goalPose.getRotation()).getRadians())
+            && Math.abs(robotPose.get().getRotation().minus(goalPose.getRotation()).getRadians())+rotationalVelocity*rotationalVelocity/2/robotProfile.getMaxRotationalAcceleration()
                 < rotationTolerance);
   }
 }

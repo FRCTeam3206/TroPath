@@ -278,11 +278,11 @@ public class DriveSubsystem extends SubsystemBase implements Logged {
     this.log("Desired Swerve States", swerveModuleStates);
   }
 
-  public void driveSpeed(Transform2d speeds) {
+  public void driveSpeed(ChassisSpeeds speeds) {
     drive(
-        speeds.getX() / DriveConstants.kMaxSpeedMetersPerSecond,
-        speeds.getY() / DriveConstants.kMaxSpeedMetersPerSecond,
-        speeds.getRotation().getRadians() / DriveConstants.kMaxAngularSpeed,
+        speeds.vxMetersPerSecond / DriveConstants.kMaxSpeedMetersPerSecond,
+        speeds.vyMetersPerSecond / DriveConstants.kMaxSpeedMetersPerSecond,
+        speeds.omegaRadiansPerSecond / DriveConstants.kMaxAngularSpeed,
         RelativeTo.kFieldRelative,
         false);
   }
@@ -345,6 +345,14 @@ public class DriveSubsystem extends SubsystemBase implements Logged {
     return m_gyro.getRate() * (DriveConstants.kGyroReversed ? -1.0 : 1.0);
   }
 
+  public ChassisSpeeds currentChassisSpeeds(){
+    return DriveConstants.kDriveKinematics.toChassisSpeeds(
+          m_frontLeft.getState(),
+          m_frontRight.getState(),
+          m_rearLeft.getState(),
+          m_rearRight.getState()
+    );
+  }
   @Override
   public void simulationPeriodic() {
     // TODO Auto-generated method stub

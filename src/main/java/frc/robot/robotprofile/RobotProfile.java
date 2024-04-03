@@ -7,7 +7,7 @@ public class RobotProfile {
       maxRotationalAcceleration,
       length,
       width;
-  private double safteyMultiplier = .95;
+  private double safteyMultiplier = .8;
 
   public RobotProfile(
       double maxVelocity,
