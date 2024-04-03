@@ -37,6 +37,10 @@ public class PathingCommand extends Command {
   private static Subsystem subsystem;
 
   public PathingCommand(Pose2d pose) {
+    if(defaultRobotProfile==null)throw new NullPointerException("Default Robot Profile is null, please call PathingCommand.setDefaultRobotProfile before this constructor");
+    if(robotPose==null)throw new NullPointerException("Robot Pose supplier is null. Please call PathingCommand.set Robot before this constructor");
+    if(drive==null)throw new NullPointerException("Drive Speed consumer is null. Please call PathingCommand.set Robot before this constructor");
+    if(subsystem==null)throw new NullPointerException("Drive Subsystem is null. Please call PathingCommand.set Robot before this constructor");
     this.goalPose = pose;
     this.robotProfile = defaultRobotProfile;
     this.addRequirements(subsystem);
