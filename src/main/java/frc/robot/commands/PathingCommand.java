@@ -131,8 +131,6 @@ public class PathingCommand extends Command {
         new Pose2d(nextTargetPose.getTranslation(), goalPose.getRotation()));
     double dX = nextTargetPose.getX() - robotPose.get().getX(),
         dY = nextTargetPose.getY() - robotPose.get().getY();
-    SmartDashboard.putNumber("Move dX", dX);
-    SmartDashboard.putNumber("Move dY", dY);
     double total = Math.abs(dX) + Math.abs(dY);
     TrapezoidProfile.State nextState;
     start = System.currentTimeMillis();
@@ -177,19 +175,11 @@ public class PathingCommand extends Command {
       double stopDist = nextDistance / angle;
       double maxAllowedVelocity = Math.sqrt(stopDist * 2 * robotProfile.getMaxAcceleration());
       if (maxAllowedVelocity < robotProfile.getMaxVelocity()) {
-        SmartDashboard.putNumber("Angle", angle);
-        SmartDashboard.putNumber("Distance Target Away", cumulativeDistance);
-        SmartDashboard.putNumber("Stop Dist", stopDist);
         return new TrapezoidProfile.State(cumulativeDistance, maxAllowedVelocity);
       }
-      // System.out.println(nextDistance);
-      // System.out.println(currentPose);
-      // System.out.println(nextPose);
       cumulativeDistance += nextDistance;
       lastPose = currentPose;
     }
-    SmartDashboard.putNumber("Angle", 0);
-    SmartDashboard.putNumber("Distance Target Away", cumulativeDistance);
     return new TrapezoidProfile.State(
         cumulativeDistance
             + poses
