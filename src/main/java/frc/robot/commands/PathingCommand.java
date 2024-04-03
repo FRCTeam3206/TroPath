@@ -32,7 +32,8 @@ public class PathingCommand extends Command {
   private Field2d nextPoseFieldDisplay = new Field2d();
   private Field2d finalPoseFieldDisplay = new Field2d();
   private boolean continnuous = false;
-  private double translationTolerance = .05, rotationTolerance = Math.PI / 32;
+  private static double defaultTranslationTolerance=.05, defaultRotationTolerance=Math.PI/32;
+  private double translationTolerance = defaultTranslationTolerance, rotationTolerance = defaultTranslationTolerance;
   private static Subsystem subsystem;
 
   public PathingCommand(Pose2d pose) {
@@ -40,6 +41,7 @@ public class PathingCommand extends Command {
     if(robotPose==null)throw new NullPointerException("Robot Pose supplier is null. Please call PathingCommand.set Robot before this constructor");
     if(drive==null)throw new NullPointerException("Drive Speed consumer is null. Please call PathingCommand.set Robot before this constructor");
     if(subsystem==null)throw new NullPointerException("Drive Subsystem is null. Please call PathingCommand.set Robot before this constructor");
+    setTolerances(defaultTranslationTolerance, defaultRotationTolerance);
     this.goalPose = pose;
     this.robotProfile = defaultRobotProfile;
     this.addRequirements(subsystem);
@@ -209,7 +211,10 @@ public class PathingCommand extends Command {
     this.rotationTolerance = rotationTolerance;
     return this;
   }
-
+  public static void setDefaultTolerances(double translationTolerance, double rotationTolerance){
+    PathingCommand.defaultTranslationTolerance=translationTolerance;
+    PathingCommand.defaultRotationTolerance=rotationTolerance;
+  }
   public boolean isFinished() {
     // If continnuous true, always returns false
     // Otherwise returns true if done(the auto stop) is true or the tolerances are met
