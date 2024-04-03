@@ -102,8 +102,6 @@ public class PathingCommand extends Command {
             .build();
   }
 
-  boolean done = false;
-
   public void execute() {
     finalPoseFieldDisplay.setRobotPose(goalPose);
     double deltaRotation;
