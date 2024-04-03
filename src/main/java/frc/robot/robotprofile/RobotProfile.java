@@ -27,11 +27,11 @@ public class RobotProfile {
   public RobotProfile(
       double robotMass,
       double wheelDiameter,
-      double trackLength,
-      double wheelBase,
+      double length,
+      double width,
       Motor driveMotor) {
-    this.length = trackLength;
-    this.width = wheelBase;
+    this.length = length;
+    this.width = width;
 
     maxVelocity = driveMotor.getFreeSpeed() * Math.PI * wheelDiameter / 60;
     maxAcceleration =
@@ -40,7 +40,7 @@ public class RobotProfile {
             / robotMass
             * 4; // We have four swerve modules
 
-    double robotRadius = 2 * Math.max(trackLength, wheelBase) / Math.sqrt(2);
+    double robotRadius = 2 * Math.max(length, width) / Math.sqrt(2);
     maxRotationalVelocity = maxVelocity / robotRadius;
     maxRotationalAcceleration = maxAcceleration / robotRadius;
   }
@@ -81,16 +81,16 @@ public class RobotProfile {
     return length;
   }
 
-  public void setLength(double trackLength) {
-    this.length = trackLength;
+  public void setLength(double length) {
+    this.length = length;
   }
 
   public double getWidth() {
     return width;
   }
 
-  public void setWidth(double wheelBase) {
-    this.width = wheelBase;
+  public void setWidth(double width) {
+    this.width = width;
   }
 
   public double getSafteyMultiplier() {
