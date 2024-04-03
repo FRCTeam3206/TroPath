@@ -25,11 +25,7 @@ public class RobotProfile {
   }
 
   public RobotProfile(
-      double robotMass,
-      double wheelDiameter,
-      double length,
-      double width,
-      Motor driveMotor) {
+      double robotMass, double wheelDiameter, double length, double width, Motor driveMotor) {
     this.length = length;
     this.width = width;
 

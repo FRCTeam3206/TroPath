@@ -32,16 +32,26 @@ public class PathingCommand extends Command {
   private Field2d nextPoseFieldDisplay = new Field2d();
   private Field2d finalPoseFieldDisplay = new Field2d();
   private boolean continnuous = false;
-  private static double defaultTranslationTolerance=.05, defaultRotationTolerance=Math.PI/32;
-  private double translationTolerance = defaultTranslationTolerance, rotationTolerance = defaultTranslationTolerance;
+  private static double defaultTranslationTolerance = .05, defaultRotationTolerance = Math.PI / 32;
+  private double translationTolerance = defaultTranslationTolerance,
+      rotationTolerance = defaultTranslationTolerance;
   private static Subsystem subsystem;
 
-  private static final double dT=.02,eps=1E-4;
+  private static final double dT = .02, eps = 1E-4;
+
   public PathingCommand(Pose2d pose) {
-    if(defaultRobotProfile==null)throw new NullPointerException("Default Robot Profile is null, please call PathingCommand.setDefaultRobotProfile before this constructor");
-    if(robotPose==null)throw new NullPointerException("Robot Pose supplier is null. Please call PathingCommand.set Robot before this constructor");
-    if(drive==null)throw new NullPointerException("Drive Speed consumer is null. Please call PathingCommand.set Robot before this constructor");
-    if(subsystem==null)throw new NullPointerException("Drive Subsystem is null. Please call PathingCommand.set Robot before this constructor");
+    if (defaultRobotProfile == null)
+      throw new NullPointerException(
+          "Default Robot Profile is null, please call PathingCommand.setDefaultRobotProfile before this constructor");
+    if (robotPose == null)
+      throw new NullPointerException(
+          "Robot Pose supplier is null. Please call PathingCommand.set Robot before this constructor");
+    if (drive == null)
+      throw new NullPointerException(
+          "Drive Speed consumer is null. Please call PathingCommand.set Robot before this constructor");
+    if (subsystem == null)
+      throw new NullPointerException(
+          "Drive Subsystem is null. Please call PathingCommand.set Robot before this constructor");
     setTolerances(defaultTranslationTolerance, defaultRotationTolerance);
     this.goalPose = pose;
     this.robotProfile = defaultRobotProfile;
@@ -68,7 +78,7 @@ public class PathingCommand extends Command {
   }
 
   public static void setRobot(
-      Supplier<Pose2d> robotPose,Consumer<ChassisSpeeds> drive, Subsystem subsystem) {
+      Supplier<Pose2d> robotPose, Consumer<ChassisSpeeds> drive, Subsystem subsystem) {
     PathingCommand.drive = drive;
     PathingCommand.robotPose = robotPose;
     PathingCommand.subsystem = subsystem;
@@ -107,7 +117,7 @@ public class PathingCommand extends Command {
     finalPoseFieldDisplay.setRobotPose(goalPose);
     double deltaRotation;
     deltaRotation = robotPose.get().getRotation().minus(goalPose.getRotation()).getRadians();
-        rotationalVelocity =
+    rotationalVelocity =
         rotationProfile.calculate(
                 dT,
                 new TrapezoidProfile.State(deltaRotation, rotationalVelocity),
@@ -210,15 +220,22 @@ public class PathingCommand extends Command {
     this.rotationTolerance = rotationTolerance;
     return this;
   }
-  public static void setDefaultTolerances(double translationTolerance, double rotationTolerance){
-    PathingCommand.defaultTranslationTolerance=translationTolerance;
-    PathingCommand.defaultRotationTolerance=rotationTolerance;
+
+  public static void setDefaultTolerances(double translationTolerance, double rotationTolerance) {
+    PathingCommand.defaultTranslationTolerance = translationTolerance;
+    PathingCommand.defaultRotationTolerance = rotationTolerance;
   }
+
   public boolean isFinished() {
     return !continnuous
-        && (robotPose.get().getTranslation().getDistance(goalPose.getTranslation())+velocity*velocity/2/robotProfile.getMaxAcceleration()
+        && (robotPose.get().getTranslation().getDistance(goalPose.getTranslation())
+                    + velocity * velocity / 2 / robotProfile.getMaxAcceleration()
                 < translationTolerance
-            && Math.abs(robotPose.get().getRotation().minus(goalPose.getRotation()).getRadians())+rotationalVelocity*rotationalVelocity/2/robotProfile.getMaxRotationalAcceleration()
+            && Math.abs(robotPose.get().getRotation().minus(goalPose.getRotation()).getRadians())
+                    + rotationalVelocity
+                        * rotationalVelocity
+                        / 2
+                        / robotProfile.getMaxRotationalAcceleration()
                 < rotationTolerance);
   }
 }
