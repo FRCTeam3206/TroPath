@@ -36,6 +36,7 @@ public class PathingCommand extends Command {
   private double translationTolerance = defaultTranslationTolerance, rotationTolerance = defaultTranslationTolerance;
   private static Subsystem subsystem;
 
+  private static final double dT=.02,eps=1E-4;
   public PathingCommand(Pose2d pose) {
     if(defaultRobotProfile==null)throw new NullPointerException("Default Robot Profile is null, please call PathingCommand.setDefaultRobotProfile before this constructor");
     if(robotPose==null)throw new NullPointerException("Robot Pose supplier is null. Please call PathingCommand.set Robot before this constructor");
@@ -108,7 +109,7 @@ public class PathingCommand extends Command {
     deltaRotation = robotPose.get().getRotation().minus(goalPose.getRotation()).getRadians();
         rotationalVelocity =
         rotationProfile.calculate(
-                .02,
+                dT,
                 new TrapezoidProfile.State(deltaRotation, rotationalVelocity),
                 new TrapezoidProfile.State(0, 0))
             .velocity;
@@ -146,7 +147,7 @@ public class PathingCommand extends Command {
     }
     SmartDashboard.putNumber("Physics Time", System.currentTimeMillis() - start);
     velocity =
-        translationProfile.calculate(.02, new TrapezoidProfile.State(0, velocity), nextState)
+        translationProfile.calculate(dT, new TrapezoidProfile.State(0, velocity), nextState)
             .velocity;
     SmartDashboard.putNumber("Velocity", velocity);
     double xSpeed = dX / total * velocity;
@@ -174,7 +175,7 @@ public class PathingCommand extends Command {
       }
       double angle = angle(lastPose, currentPose, nextPose);
 
-      if (angle < 1E-4) continue;
+      if (angle < eps) continue;
       double stopDist = nextDistance / angle;
       double maxAllowedVelocity = Math.sqrt(stopDist * 2 * robotProfile.getMaxAcceleration());
       if (maxAllowedVelocity < robotProfile.getMaxVelocity()) {
@@ -214,8 +215,6 @@ public class PathingCommand extends Command {
     PathingCommand.defaultRotationTolerance=rotationTolerance;
   }
   public boolean isFinished() {
-    // If continnuous true, always returns false
-    // Otherwise returns true if done(the auto stop) is true or the tolerances are met
     return !continnuous
         && (robotPose.get().getTranslation().getDistance(goalPose.getTranslation())+velocity*velocity/2/robotProfile.getMaxAcceleration()
                 < translationTolerance
