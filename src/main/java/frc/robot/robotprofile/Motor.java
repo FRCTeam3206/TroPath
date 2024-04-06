@@ -10,26 +10,44 @@ public class Motor {
    * you want to make a custom motor, {@link https://www.reca.lc/} should be used to find the
    * values.
    *
-   * @param realStallTorque The real stall torque.
-   * @param freeSpeed The free speed.
+   * @param realStallTorque The real stall torque in newton meters. At 12 volts and 40 amps as found
+   *     in recalc.
+   * @param freeSpeed The free speed in rpm.
    */
   public Motor(double realStallTorque, double freeSpeed) {
     this.stallTorque = realStallTorque;
     this.freeSpeed = freeSpeed;
   }
 
+  /**
+   * @return The real stall torque in newton meters.
+   */
   public double getStallTorque() {
     return stallTorque;
   }
 
+  /**
+   * Set the stall torque to something different than what had previously been configured.
+   *
+   * @param realStallTorque The real stall torque in newton meters to set. At 12 volts and 40 amps
+   *     as found in recalc at {@link https://www.reca.lc/}.
+   */
   public void setStallTorque(double realStallTorque) {
     this.stallTorque = realStallTorque;
   }
 
+  /**
+   * @return The free speed in rpm.
+   */
   public double getFreeSpeed() {
     return freeSpeed;
   }
 
+  /**
+   * Set the free speed to something different than what had previously been configured.
+   *
+   * @param freeSpeed The free speed in rpm.
+   */
   public void setFreeSpeed(double freeSpeed) {
     this.freeSpeed = freeSpeed;
   }
@@ -78,22 +96,42 @@ public class Motor {
         WCP_XS2_16 = 4.13;
   }
 
+  /**
+   * @return A new motor with the correct settings for a CIM. Make sure to use {@link #gear(double)}
+   *     to set it to the gear you are using.
+   */
   public static Motor CIM() {
     return new Motor(.686, 5333);
   }
 
+  /**
+   * @return A new motor with the correct settings for a NEO. Make sure to use {@link #gear(double)}
+   *     to set it to the gear you are using.
+   */
   public static Motor NEO() {
     return new Motor(.701, 5880);
   }
 
+  /**
+   * @return A new motor with the correct settings for a Falcon. Make sure to use {@link
+   *     #gear(double)} to set it to the gear you are using.
+   */
   public static Motor FALCON() {
     return new Motor(.70003, 6380);
   }
 
+  /**
+   * @return A new motor with the correct settings for a Vortex. Make sure to use {@link
+   *     #gear(double)} to set it to the gear you are using.
+   */
   public static Motor VORTEX() {
     return new Motor(.621, 6784);
   }
 
+  /**
+   * @return A new motor with the correct settings for a Kraken. Make sure to use {@link
+   *     #gear(double)} to set it to the gear you are using.
+   */
   public static Motor KRAKENX60() {
     return new Motor(.746, 6000);
   }
