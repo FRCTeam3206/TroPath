@@ -10,11 +10,10 @@ public class Motor {
    * you want to make a custom motor, {@link https://www.reca.lc/} should be used to find the
    * values.
    *
-   * @param maxStallTorque The maximum stall torque.
    * @param realStallTorque The real stall torque.
    * @param freeSpeed The free speed.
    */
-  public Motor(double maxStallTorque, double realStallTorque, double freeSpeed) {
+  public Motor(double realStallTorque, double freeSpeed) {
     this.stallTorque = realStallTorque;
     this.freeSpeed = freeSpeed;
   }
@@ -80,22 +79,22 @@ public class Motor {
   }
 
   public static Motor CIM() {
-    return new Motor(2.4, .686, 5333);
+    return new Motor(.686, 5333);
   }
 
   public static Motor NEO() {
-    return new Motor(3.28, .701, 5880);
+    return new Motor(.701, 5880);
   }
 
   public static Motor FALCON() {
-    return new Motor(4.69, .70003, 6380);
+    return new Motor(.70003, 6380);
   }
 
   public static Motor VORTEX() {
-    return new Motor(3.6, .621, 6784);
+    return new Motor(.621, 6784);
   }
 
   public static Motor KRAKENX60() {
-    return new Motor(7.09, .746, 6000);
+    return new Motor(.746, 6000);
   }
 }
