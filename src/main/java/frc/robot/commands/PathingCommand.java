@@ -22,51 +22,20 @@ import me.nabdev.pathfinding.utilities.FieldLoader.Field;
 
 /** A command to go to the given position. */
 public class PathingCommand extends Command {
-  /**
-   * Statically configured robot profile that will be used by default when a new PathingCommand is
-   * created.
-   */
   private static RobotProfile defaultRobotProfile;
-
-  /** The robot profile for this instance of the PathingCommand. */
   private RobotProfile robotProfile;
-
-  /** Supplies the robot's current position. */
   private static Supplier<Pose2d> robotPose;
-
-  /** Consumer to drive the robot given ChassisSpeeds. */
   private static Consumer<ChassisSpeeds> drive;
-
-  /** The Pathfinder that is used for generating the paths. */
   private static Pathfinder pathfinder;
-
   private double velocity, rotationalVelocity = 0;
   private TrapezoidProfile translationProfile, rotationProfile;
-
-  /** The goal position to end at. */
   private Supplier<Pose2d> goalPoseSupplier;
-
-  /**
-   * A field that shows the next goal pose to be reached in the process of getting to the final one.
-   */
   private Field2d nextPoseFieldDisplay = new Field2d();
-
-  /** A field that shows the final goal pose. */
   private Field2d finalPoseFieldDisplay = new Field2d();
-
-  /** The default amount this can be off by when considered to be complete. */
   private static double defaultTranslationTolerance = .05, defaultRotationTolerance = Math.PI / 32;
-
-  /**
-   * The amount this can be off by for this instance of PathingCommand when considered to be
-   * complete.
-   */
   private double translationTolerance = defaultTranslationTolerance,
       rotationTolerance = defaultTranslationTolerance;
-
-  /** The drive subsystem. */
   private static Subsystem subsystem;
-
   private static final double dT = .02, eps = 1E-4;
 
   /**
