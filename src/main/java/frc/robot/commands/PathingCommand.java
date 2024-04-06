@@ -212,7 +212,8 @@ public class PathingCommand extends Command {
   public void execute() {
     finalPoseFieldDisplay.setRobotPose(goalPoseSupplier.get());
     double deltaRotation;
-    deltaRotation = robotPose.get().getRotation().minus(goalPoseSupplier.get().getRotation()).getRadians();
+    deltaRotation =
+        robotPose.get().getRotation().minus(goalPoseSupplier.get().getRotation()).getRadians();
     rotationalVelocity =
         rotationProfile.calculate(
                 dT,
@@ -344,13 +345,18 @@ public class PathingCommand extends Command {
 
   public boolean isFinished() {
     return (robotPose.get().getTranslation().getDistance(goalPoseSupplier.get().getTranslation())
-                    + velocity * velocity / 2 / robotProfile.getMaxAcceleration()
-                < translationTolerance
-            && Math.abs(robotPose.get().getRotation().minus(goalPoseSupplier.get().getRotation()).getRadians())
-                    + rotationalVelocity
-                        * rotationalVelocity
-                        / 2
-                        / robotProfile.getMaxRotationalAcceleration()
-                < rotationTolerance);
+                + velocity * velocity / 2 / robotProfile.getMaxAcceleration()
+            < translationTolerance
+        && Math.abs(
+                    robotPose
+                        .get()
+                        .getRotation()
+                        .minus(goalPoseSupplier.get().getRotation())
+                        .getRadians())
+                + rotationalVelocity
+                    * rotationalVelocity
+                    / 2
+                    / robotProfile.getMaxRotationalAcceleration()
+            < rotationTolerance);
   }
 }
