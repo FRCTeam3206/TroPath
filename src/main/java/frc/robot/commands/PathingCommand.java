@@ -44,7 +44,7 @@ public class PathingCommand extends Command {
   private TrapezoidProfile translationProfile, rotationProfile;
 
   /** The goal position to end at. */
-  private Pose2d goalPose;
+  private Supplier<Pose2d> goalPoseSupplier;
 
   /**
    * A field that shows the next goal pose to be reached in the process of getting to the final one.
@@ -70,14 +70,14 @@ public class PathingCommand extends Command {
   private static final double dT = .02, eps = 1E-4;
 
   /**
-   * Constructs a PathingCommand to go to the given position.
+   * Constructs a PathingCommand to go to the given position that is supplied.
    *
-   * @param pose The goal position.
+   * @param poseSupplier Supplier of the goal position.
    * @throws NullPointerException If the robot profile, pose supplier, drive speed consumer, or
    *     drive subsystem is null. Please call {@link PathingCommand#setRobot} and {@link
    *     PathingCommand#setDefaultRobotProfile} before constructing a PathingCommand.
    */
-  public PathingCommand(Pose2d pose) {
+  public PathingCommand(Supplier<Pose2d> poseSupplier) {
     if (defaultRobotProfile == null)
       throw new NullPointerException(
           "Default Robot Profile is null, please call PathingCommand.setDefaultRobotProfile before this constructor");
@@ -91,12 +91,24 @@ public class PathingCommand extends Command {
       throw new NullPointerException(
           "Drive Subsystem is null. Please call PathingCommand.setRobot before this constructor");
     setTolerances(defaultTranslationTolerance, defaultRotationTolerance);
-    this.goalPose = pose;
+    this.goalPoseSupplier = poseSupplier;
     this.robotProfile = defaultRobotProfile;
     this.addRequirements(subsystem);
     setRobotProfile(defaultRobotProfile);
     SmartDashboard.putData("Next Pose", nextPoseFieldDisplay);
     SmartDashboard.putData("Final Pose", finalPoseFieldDisplay);
+  }
+
+  /**
+   * Constructs a pathing command to go to the given position.
+   *
+   * @param pose The goal position.
+   * @throws NullPointerException If the robot profile, pose supplier, drive speed consumer, or
+   *     drive subsystem is null. Please call {@link PathingCommand#setRobot} and {@link
+   *     PathingCommand#setDefaultRobotProfile} before constructing a PathingCommand.
+   */
+  public PathingCommand(Pose2d pose) {
+    this(() -> pose);
   }
 
   /**
@@ -198,9 +210,9 @@ public class PathingCommand extends Command {
   }
 
   public void execute() {
-    finalPoseFieldDisplay.setRobotPose(goalPose);
+    finalPoseFieldDisplay.setRobotPose(goalPoseSupplier.get());
     double deltaRotation;
-    deltaRotation = robotPose.get().getRotation().minus(goalPose.getRotation()).getRadians();
+    deltaRotation = robotPose.get().getRotation().minus(goalPoseSupplier.get().getRotation()).getRadians();
     rotationalVelocity =
         rotationProfile.calculate(
                 dT,
@@ -210,7 +222,7 @@ public class PathingCommand extends Command {
     Path path = null;
     long start = System.currentTimeMillis();
     try {
-      path = pathfinder.generatePath(robotPose.get(), goalPose);
+      path = pathfinder.generatePath(robotPose.get(), goalPoseSupplier.get());
       SmartDashboard.putNumber("Path generation time", System.currentTimeMillis() - start);
     } catch (ImpossiblePathException e) {
       e.printStackTrace();
@@ -219,14 +231,14 @@ public class PathingCommand extends Command {
     Pose2d nextTargetPose;
     Pose2d usedPose;
     if (path.size() <= 1) {
-      nextTargetPose = goalPose;
+      nextTargetPose = goalPoseSupplier.get();
       usedPose = robotPose.get();
     } else {
       usedPose = path.get(0).asPose2d();
       nextTargetPose = path.get(1).asPose2d();
     }
     nextPoseFieldDisplay.setRobotPose(
-        new Pose2d(nextTargetPose.getTranslation(), goalPose.getRotation()));
+        new Pose2d(nextTargetPose.getTranslation(), goalPoseSupplier.get().getRotation()));
     double dX = nextTargetPose.getX() - robotPose.get().getX(),
         dY = nextTargetPose.getY() - robotPose.get().getY();
     double total = Math.abs(dX) + Math.abs(dY);
@@ -235,7 +247,7 @@ public class PathingCommand extends Command {
     if (path.size() <= 1) {
       nextState =
           new TrapezoidProfile.State(
-              usedPose.getTranslation().getDistance(goalPose.getTranslation()), 0);
+              usedPose.getTranslation().getDistance(goalPoseSupplier.get().getTranslation()), 0);
     } else {
       nextState = getNextState(path);
     }
@@ -331,10 +343,10 @@ public class PathingCommand extends Command {
   }
 
   public boolean isFinished() {
-    return (robotPose.get().getTranslation().getDistance(goalPose.getTranslation())
+    return (robotPose.get().getTranslation().getDistance(goalPoseSupplier.get().getTranslation())
                     + velocity * velocity / 2 / robotProfile.getMaxAcceleration()
                 < translationTolerance
-            && Math.abs(robotPose.get().getRotation().minus(goalPose.getRotation()).getRadians())
+            && Math.abs(robotPose.get().getRotation().minus(goalPoseSupplier.get().getRotation()).getRadians())
                     + rotationalVelocity
                         * rotationalVelocity
                         / 2
