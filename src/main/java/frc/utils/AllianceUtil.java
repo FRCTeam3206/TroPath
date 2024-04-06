@@ -29,8 +29,7 @@ public class AllianceUtil {
     AllianceUtil.robotPose = robotPose;
   }
 
-  public static void setCustomField(
-      double fieldLength, double fieldHeight, boolean mirroredField) {
+  public static void setCustomField(double fieldLength, double fieldHeight, boolean mirroredField) {
     AllianceUtil.fieldLength = fieldLength;
     AllianceUtil.fieldHeight = fieldHeight;
     AllianceUtil.mirroredField = mirroredField;
