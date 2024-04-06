@@ -7,6 +7,10 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import java.util.function.Supplier;
 
+/**
+ * Handles the mirroring based on the alliance, which is used in PathingCommand.
+ * Please call {@code AllianceUtil.setAlliance()} in disabled periodic of Robot.java.
+ */
 public class AllianceUtil {
   private static AllianceColor alliance = AllianceColor.UNKNOWN;
   private static Supplier<Pose2d> robotPose;
@@ -20,21 +24,35 @@ public class AllianceUtil {
     UNKNOWN;
   }
 
-  public enum FieldDesignType {
-    ROTATED,
-    MIRRORED;
-  }
-
+  /**
+   * Set the supplier of the robot's current position. This is taken care of in PathingCommand.
+   * @param robotPose Supplies the robot's current position.
+   */
   public static void setRobot(Supplier<Pose2d> robotPose) {
     AllianceUtil.robotPose = robotPose;
   }
 
-  public static void setCustomField(double fieldLength, double fieldHeight, boolean mirroredField) {
+  /**
+   * Set custom field dimensions if you're not using a standard FRC field.
+   * @param fieldLength The length of the custom field in meters.
+   * @param fieldHeight The height of the custom field in meters.
+   */
+  public static void setCustomFieldDimensions(double fieldLength, double fieldHeight) {
     AllianceUtil.fieldLength = fieldLength;
     AllianceUtil.fieldHeight = fieldHeight;
+  }
+
+  /**
+   * Set whether the field design is mirrored or rotated. Defaults to mirrored.
+   * @param mirroredField True for mirrored fields, false for rotated fields.
+   */
+  public static void setCustomFieldDesignType(boolean mirroredField) {
     AllianceUtil.mirroredField = mirroredField;
   }
 
+  /**
+   * Sets the current alliance based on driver station data. This should be called in disabled periodic of Robot.java.
+   */
   public static void setAlliance() {
     if (DriverStation.getAlliance().isEmpty()) {
       alliance = AllianceColor.UNKNOWN;
@@ -70,10 +88,17 @@ public class AllianceUtil {
     }
   }
 
+  /**
+   * @return The current alliance.
+   */
   public static AllianceColor getAlliance() {
     return alliance;
   }
 
+  /**
+   * @param bluePose The blue pose to reference in order to give the correct pose.
+   * @return The correct pose for the alliance.
+   */
   public static Pose2d getPoseForAlliance(Pose2d bluePose) {
     Pose2d redPose = mapBluePoseToRed(bluePose);
     if (alliance.equals(AllianceColor.BLUE)) {
