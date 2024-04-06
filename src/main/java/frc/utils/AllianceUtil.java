@@ -2,19 +2,17 @@ package frc.utils;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import java.util.function.Supplier;
 
 public class AllianceUtil {
   private static AllianceColor alliance = AllianceColor.UNKNOWN;
-  private static boolean configured = false;
   private static Supplier<Pose2d> robotPose;
-  private static double fieldLength;
-  private static double fieldHeight;
-
-  /** Whether the field is mirrored (true) or rotated (false). */
-  private static boolean mirroredField;
+  private static double fieldLength = Units.feetToMeters(54);
+  private static double fieldHeight = Units.feetToMeters(27);
+  private static boolean mirroredField = true;
 
   public enum AllianceColor {
     RED,
@@ -27,19 +25,15 @@ public class AllianceUtil {
     MIRRORED;
   }
 
-  class NotConfiguredException extends NullPointerException {
-    public NotConfiguredException(String s) {
-      super(s);
-    }
+  public static void setRobot(Supplier<Pose2d> robotPose) {
+    AllianceUtil.robotPose = robotPose;
   }
 
-  public static void configure(
-      Supplier<Pose2d> robotPose, double fieldLength, double fieldHeight, boolean mirroredField) {
-    AllianceUtil.robotPose = robotPose;
+  public static void setCustomField(
+      double fieldLength, double fieldHeight, boolean mirroredField) {
     AllianceUtil.fieldLength = fieldLength;
     AllianceUtil.fieldHeight = fieldHeight;
     AllianceUtil.mirroredField = mirroredField;
-    configured = true;
   }
 
   public static void setAlliance() {
@@ -61,9 +55,9 @@ public class AllianceUtil {
    * @return The red pose mapped from the blue pose.
    */
   public static Pose2d mapBluePoseToRed(Pose2d bluePose) {
-    if (!configured)
+    if (robotPose == null)
       throw new NullPointerException(
-          "The field and robot pose have not been configured. Please call AllianceUtil.configure() before this method.");
+          "The robot pose supplier is null. Please call AllianceUtil.setRobot() before this method.");
     if (mirroredField) {
       return new Pose2d(
           fieldLength - bluePose.getX(),
