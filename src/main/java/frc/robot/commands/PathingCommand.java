@@ -61,6 +61,8 @@ public class PathingCommand extends Command {
           "Drive Subsystem is null. Please call PathingCommand.setRobot before this constructor");
     setTolerances(defaultTranslationTolerance, defaultRotationTolerance);
     this.goalPoseSupplier = poseSupplier;
+    // AllianceUtil.setRobot(robotPose);
+    // this.goalPoseSupplier = () -> AllianceUtil.getPoseForAlliance(poseSupplier.get());
     this.robotProfile = defaultRobotProfile;
     this.addRequirements(subsystem);
     setRobotProfile(defaultRobotProfile);
