@@ -115,10 +115,10 @@ public class PathingCommand extends Command {
   /**
    * Configures the robot to be able to be referenced by this command.
    *
-   * @param robotPose Supplier of robot pose. This should usually be a reference to a getPose()
+   * @param robotPose Supplier of robot pose. This should generally be a reference to a getPose()
    *     method.
    * @param drive Consumer to drive the robot. Must take ChassisSpeeds and be field relative. This
-   *     should usually be a reference to a drive() method.
+   *     should generally be a reference to a drive() method.
    * @param subsystem The drive subsystem (so it can be required).
    */
   public static void setRobot(
@@ -154,7 +154,7 @@ public class PathingCommand extends Command {
    * defaults to the 2024 field.
    *
    * @param name The name the custom field json file, which must be located in the deploy folder.
-   *     NOT the full path.
+   *     NOT the full path. For example, {@code "my_field.json"}.
    */
   public static void setCustomField(String name) {
     pathfinder =

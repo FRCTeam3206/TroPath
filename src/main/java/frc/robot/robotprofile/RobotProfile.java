@@ -11,13 +11,14 @@ public class RobotProfile {
 
   /**
    * Constructs a robot profile for the robot's dimensions and given maximums. For calculated
-   * maximums based on your robot, use {@link #RobotProfile(double, double, double, double, Motor)}.
+   * maximums based on your robot's characteristics, use {@link #RobotProfile(double, double,
+   * double, double, Motor)}.
    *
-   * @param maxVelocity The maximum velocity to set. In meters per second.
-   * @param maxAcceleration The maximum acceleration to set. In meters per second squared.
-   * @param maxRotationalVelocity The maximum rotational velocity to set. In radians per second.
-   * @param maxRotationalAcceleration The maximum rotational acceleration to set. In radians per
-   *     second squared.
+   * @param maxVelocity The maximum velocity in meters per second to set.
+   * @param maxAcceleration The maximum acceleration in meters per second squared to set.
+   * @param maxRotationalVelocity The maximum rotational velocity in radians per second to set.
+   * @param maxRotationalAcceleration The maximum rotational acceleration in radians per second
+   *     squared to set.
    * @param length The length of the robot in meters, including bumpers.
    * @param width The width of the robot in meters, including bumpers.
    */
@@ -43,8 +44,8 @@ public class RobotProfile {
    *
    * @param robotMass The mass of the robot in kilograms.
    * @param wheelDiameter The diameter of a wheel on the robot in meters.
-   * @param length The length of the robot in meters.
-   * @param width The width of the robot in meters.
+   * @param length The length of the robot in meters, including bumpers.
+   * @param width The width of the robot in meters, including bumpers.
    * @param driveMotor The {@link Motor} used for driving.
    */
   public RobotProfile(
