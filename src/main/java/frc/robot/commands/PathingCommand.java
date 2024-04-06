@@ -114,9 +114,9 @@ public class PathingCommand extends Command {
   /**
    * Constructs a pathing command to go to the given position.
    *
-   * @param x The goal x position.
-   * @param y The goal y position.
-   * @param rot The goal rotation.
+   * @param x The goal x position in meters.
+   * @param y The goal y position in meters.
+   * @param rot The goal rotation in radians.
    * @throws NullPointerException If the robot profile, pose supplier, drive speed consumer, or
    *     drive subsystem is null. Please call {@link PathingCommand#setRobot} and {@link
    *     PathingCommand#setDefaultRobotProfile} before constructing a PathingCommand.
@@ -181,8 +181,8 @@ public class PathingCommand extends Command {
   }
 
   /**
-   * Sets the field/obstacle layout to a custom one from a json. The layout defaults to the 2024
-   * field.
+   * Sets the field/obstacle layout to a custom one from a json in the deploy folder. The layout
+   * defaults to the 2024 field.
    *
    * @param name The name the custom field json file, which must be located in the deploy folder.
    *     NOT the full path.
