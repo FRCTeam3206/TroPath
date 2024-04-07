@@ -11,7 +11,6 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -345,14 +344,14 @@ public class DriveSubsystem extends SubsystemBase implements Logged {
     return m_gyro.getRate() * (DriveConstants.kGyroReversed ? -1.0 : 1.0);
   }
 
-  public ChassisSpeeds currentChassisSpeeds(){
+  public ChassisSpeeds currentChassisSpeeds() {
     return DriveConstants.kDriveKinematics.toChassisSpeeds(
-          m_frontLeft.getState(),
-          m_frontRight.getState(),
-          m_rearLeft.getState(),
-          m_rearRight.getState()
-    );
+        m_frontLeft.getState(),
+        m_frontRight.getState(),
+        m_rearLeft.getState(),
+        m_rearRight.getState());
   }
+
   @Override
   public void simulationPeriodic() {
     // TODO Auto-generated method stub
