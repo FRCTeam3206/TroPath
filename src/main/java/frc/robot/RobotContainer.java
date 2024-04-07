@@ -20,6 +20,7 @@ import frc.robot.commands.PathingCommand;
 import frc.robot.robotprofile.Motor;
 import frc.robot.robotprofile.RobotProfile;
 import frc.robot.subsystems.DriveSubsystem;
+import me.nabdev.pathfinding.utilities.FieldLoader;
 import monologue.Logged;
 
 /*
@@ -42,6 +43,7 @@ public class RobotContainer implements Logged {
     PathingCommand.setDefaultRobotProfile(
         new RobotProfile(50, 3 / 39.37, .9, .9, Motor.NEO().gear(Motor.Gear.REV_HIGH))
             .setSafteyMultiplier(.8));
+    PathingCommand.setCustomField(FieldLoader.Field.CHARGED_UP_2023);
     System.out.println(PathingCommand.getDefaultRobotProfile());
     PathingCommand.setRobot(() -> m_robotDrive.getPose(), m_robotDrive::driveSpeed, m_robotDrive);
     configureButtonBindings();
