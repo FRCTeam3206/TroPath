@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -42,7 +43,19 @@ public void setField(Field field) {
             .setRobotWidth(robotProfile.getWidth())
             .build();
   }
+  public PathingCommand toPoseSupplier(Supplier<Pose2d> supplier){
+    return new PathingCommand(supplier, robotPose, drive, robotProfile, pathfinder, subsystem).setTolerances(translationTolerance, rotationTolerance);
+  }
+  public PathingCommand toPose(Pose2d pose){
+    return toPoseSupplier(()->pose);
+  }
   public PathingCommand toPoint(double x,double y,double t){
-    return new PathingCommand(()->new Pose2d(x, y, new Rotation2d(t)), robotPose, drive, robotProfile, pathfinder, subsystem).setTolerances(translationTolerance, rotationTolerance);
+    return toPose(new Pose2d(x, y, new Rotation2d(t)));
+  }
+  public PathingCommand toTranslation(Translation2d trans){
+    return toPoseSupplier(()->new Pose2d(trans,robotPose.get().getRotation()));
+  }
+  public PathingCommand toTranslation(double x,double y){
+    return toPoseSupplier(()->new Pose2d(new Translation2d(x, y),robotPose.get().getRotation()));
   }
 }
