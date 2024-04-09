@@ -17,10 +17,12 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.RelativeTo;
 import frc.robot.commands.PathingCommand;
+import frc.robot.commands.PathingCommandGenerator;
 import frc.robot.robotprofile.Motor;
 import frc.robot.robotprofile.RobotProfile;
 import frc.robot.subsystems.DriveSubsystem;
 import me.nabdev.pathfinding.utilities.FieldLoader;
+import me.nabdev.pathfinding.utilities.FieldLoader.Field;
 import monologue.Logged;
 
 /*
@@ -36,16 +38,12 @@ public class RobotContainer implements Logged {
   // The driver's controller
   CommandXboxController m_driverController =
       new CommandXboxController(OIConstants.kDriverControllerPort);
-
+  PathingCommandGenerator path;
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the button bindings
-    PathingCommand.setDefaultRobotProfile(
-        new RobotProfile(50, 3 / 39.37, .9, .9, Motor.NEO().gear(Motor.Gear.REV_HIGH))
-            .setSafteyMultiplier(.8));
-    PathingCommand.setCustomField(FieldLoader.Field.CHARGED_UP_2023);
-    System.out.println(PathingCommand.getDefaultRobotProfile());
-    PathingCommand.setRobot(() -> m_robotDrive.getPose(), m_robotDrive::driveSpeed, m_robotDrive);
+    path=new PathingCommandGenerator(new RobotProfile(50, 3.0/39.37, .9, .9, Motor.NEO().gear(Motor.Gear.REV_HIGH)), m_robotDrive::getPose , m_robotDrive::driveSpeed, m_robotDrive);
+    path.setField(Field.CHARGED_UP_2023);
     configureButtonBindings();
 
     // Configure default commands
@@ -79,7 +77,7 @@ public class RobotContainer implements Logged {
     //         () -> m_robotDrive.setX(),
     //         m_robotDrive));
 
-    m_driverController.button(1).whileTrue(new PathingCommand(2.3, 4.5, Math.PI));
+    m_driverController.button(1).whileTrue(path.toPoint(2.3, 4.5, Math.PI));
   }
 
   /**
@@ -89,15 +87,15 @@ public class RobotContainer implements Logged {
    */
   public Command getAutonomousCommand() {
     return new SequentialCommandGroup(
-        new PathingCommand(new Pose2d(6.3, 4.6, new Rotation2d())),
+        path.toPoint(6.3, 4.6, 0),
         new RunCommand(
                 () -> m_robotDrive.drive(.25, 0, 0, RelativeTo.kRobotRelative, false), m_robotDrive)
             .withTimeout(.5),
-        new PathingCommand(new Pose2d(1.9, 4.5, new Rotation2d(Math.PI))),
-        new PathingCommand(new Pose2d(6.3, 3.3, new Rotation2d())),
+        path.toPoint(1.9, 4.5, Math.PI),
+        path.toPoint(6.3, 3.3, 0),
         new RunCommand(
                 () -> m_robotDrive.drive(.25, 0, 0, RelativeTo.kRobotRelative, false), m_robotDrive)
             .withTimeout(.5),
-        new PathingCommand(new Pose2d(1.9, 3.3, new Rotation2d(Math.PI))));
+        path.toPoint(1.9, 3.3, Math.PI));
   }
 }
