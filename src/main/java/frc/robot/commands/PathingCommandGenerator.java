@@ -58,4 +58,16 @@ public void setField(Field field) {
   public PathingCommand toTranslation(double x,double y){
     return toPoseSupplier(()->new Pose2d(new Translation2d(x, y),robotPose.get().getRotation()));
   }
+  public PathingCommand toDistFromPoint(Translation2d point,double distance,double offset){
+    return toPoseSupplier(()->{
+        Translation2d delta=robotPose.get().getTranslation().minus(point);
+        return new Pose2d(delta.times(distance/delta.getNorm()).plus(point), delta.getAngle().plus(new Rotation2d(Math.PI-offset)));
+    });
+  }
+  public PathingCommand toDistFromPoint(double x,double y,double dist, double offset){
+    return toDistFromPoint(new Translation2d(x, y), dist, offset);
+  }
+  public PathingCommand toDistFromPoint(double x,double y,double dist){
+    return toDistFromPoint(x, y, dist,0);
+  }
 }

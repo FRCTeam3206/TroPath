@@ -79,7 +79,7 @@ public class RobotContainer implements Logged {
     //         m_robotDrive));
 
     m_driverController.button(1).whileTrue(path.toPoint(2.3, 4.5, Math.PI));
-    m_driverController.button(2).whileTrue(path.toTranslation(new Translation2d(8, 4)));
+    m_driverController.button(2).whileTrue(path.toDistFromPoint(new Translation2d(8, 4), 1,Math.PI/2));
   }
 
   /**
