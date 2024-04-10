@@ -42,28 +42,51 @@ public class PathingCommandGenerator {
     return pose;
   }
 
-  public void setAllianceFlipping(boolean flag) {
+  public PathingCommandGenerator setAllianceFlipping(boolean flag) {
     allianceFlip = flag;
+    return this;
   }
 
-  public void setField(String name) {
+  public PathingCommandGenerator setField(String name) {
     pathfinder =
         new PathfinderBuilder(Filesystem.getDeployDirectory() + "\\" + name)
             .setRobotLength(robotProfile.getLength())
             .setRobotWidth(robotProfile.getWidth())
             .build();
+    return this;
   }
 
-  public void setField(Field field) {
+  public PathingCommandGenerator setField(Field field) {
     pathfinder =
         new PathfinderBuilder(field)
             .setRobotLength(robotProfile.getLength())
             .setRobotWidth(robotProfile.getWidth())
             .build();
+    return this;
   }
 
-  public void setPathfinder(Pathfinder pathfinder) {
+  public PathingCommandGenerator setPathfinder(Pathfinder pathfinder) {
     this.pathfinder = pathfinder;
+    return this;
+  }
+
+  /**
+   * <p>Sets the tolerances for this PathingCommandGenerator. These default to 5 cm and pi / 32 radians.</p>
+   * The tolerances are the maximum
+   * allowed error for which the robot is considered to have reached the goal and should be tuned to
+   * your robot. They should be as small as possible without being more precise than the robot can
+   * achieve well. If the tolerance is too small, the robot will spend longer than it should trying
+   * to get perfectly in position (and move the wheels in different directions as it tries to
+   * perfectly adjust). If it is at a good amount, it should stop as soon as it reaches the position
+   * (the wheels moving back and forth should not be noticeable).
+   *
+   * @param translationTolerance The translation tolerance to set. In meters. Defaults to 5 cm.
+   * @param rotationTolerance The rotation tolerance to set. In radians. Defaults to pi/32.
+   */
+  public PathingCommandGenerator setTolerances(double translationTolerance, double rotationTolerance) {
+    this.translationTolerance = translationTolerance;
+    this.rotationTolerance = rotationTolerance;
+    return this;
   }
 
   public PathingCommand toPoseSupplier(Supplier<Pose2d> supplier) {
