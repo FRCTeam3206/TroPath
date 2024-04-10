@@ -31,12 +31,8 @@ public class PathingCommand extends Command {
   private static final double dT = .02, eps = 1E-4;
 
   /**
-   * Constructs a PathingCommand to go to the given position that is supplied.
-   *
-   * @param poseSupplier Supplier of the goal position.
-   * @throws NullPointerException If the robot profile, pose supplier, drive speed consumer, or
-   *     drive subsystem is null. Please call {@link PathingCommand#setRobot} and {@link
-   *     PathingCommand#setDefaultRobotProfile} before constructing a PathingCommand.
+   * Constructs a PathingCommand. This method is called by the {@link PathingCommandGenerator}. Please
+   * use this generator to make a PathingCommand.
    */
   public PathingCommand(
       Supplier<Pose2d> goalSupplier,
@@ -47,24 +43,15 @@ public class PathingCommand extends Command {
       Subsystem subsystem) {
     this.goalPoseSupplier = goalSupplier;
     this.robotPose = currentPoseSupplier;
-    this.pathfinder = pathfinder;
     this.drive = drive;
-    // AllianceUtil.setRobot(robotPose);
-    // this.goalPoseSupplier = () -> AllianceUtil.getPoseForAlliance(poseSupplier.get());
-
-    this.addRequirements(subsystem);
     setRobotProfile(robotProfile);
+    this.pathfinder = pathfinder;
+    this.addRequirements(subsystem);
     SmartDashboard.putData("Next Pose", nextPoseFieldDisplay);
     SmartDashboard.putData("Final Pose", finalPoseFieldDisplay);
   }
 
-  /**
-   * Sets a different {@link RobotProfile} for this command than the configured default. To set the
-   * default robot profile, use {@link PathingCommand#setDefaultRobotProfile}
-   *
-   * @param profile The robot profile to set.
-   */
-  public PathingCommand setRobotProfile(RobotProfile profile) {
+  private PathingCommand setRobotProfile(RobotProfile profile) {
     this.robotProfile = profile;
     translationProfile =
         new TrapezoidProfile(
@@ -175,8 +162,8 @@ public class PathingCommand extends Command {
   }
 
   /**
-   * Sets the tolerances to something different than the default. Should be used if this particular
-   * PathingCommand should have different tolerances than the others. The tolerances are the maximum
+   * <p>Sets the tolerances to something different than those of the PathingCommandGenerator used
+   * to make this PathingCommand.</p>The tolerances are the maximum
    * allowed error for which the robot is considered to have reached the goal and should be tuned to
    * your robot. They should be as small as possible without being more precise than the robot can
    * achieve well. If the tolerance is too small, the robot will spend longer than it should trying
@@ -184,8 +171,8 @@ public class PathingCommand extends Command {
    * perfectly adjust). If it is at a good amount, it should stop as soon as it reaches the position
    * (the wheels moving back and forth should not be noticeable).
    *
-   * @param translationTolerance The translation tolerance to set. In meters. Defaults to 5 cm.
-   * @param rotationTolerance The rotation tolerance to set. In radians. Defaults to pi/32.
+   * @param translationTolerance The translation tolerance to set. In meters.
+   * @param rotationTolerance The rotation tolerance to set. In radians.
    */
   public PathingCommand setTolerances(double translationTolerance, double rotationTolerance) {
     this.translationTolerance = translationTolerance;
