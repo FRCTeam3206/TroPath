@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.robotprofile.RobotProfile;
 import me.nabdev.pathfinding.Pathfinder;
@@ -58,16 +59,29 @@ public void setField(Field field) {
   public PathingCommand toTranslation(double x,double y){
     return toPoseSupplier(()->new Pose2d(new Translation2d(x, y),robotPose.get().getRotation()));
   }
-  public PathingCommand toDistFromPoint(Translation2d point,double distance,double offset){
+  public PathingCommand toDistFromPoint(Translation2d point,double distance,double offset, Rotation2d centerGoal, double maxAngleOff){
+    final Rotation2d maxAngle=centerGoal.plus(new Rotation2d(maxAngleOff));
+    final Rotation2d minAngle=centerGoal.minus(new Rotation2d(maxAngleOff)); 
+    final Translation2d max=new Translation2d(distance, maxAngle);
+    final Translation2d min=new Translation2d(distance, centerGoal.minus(new Rotation2d(maxAngleOff)));
     return toPoseSupplier(()->{
+        SmartDashboard.putNumber("Current Distance from point",robotPose.get().getTranslation().getDistance(point));
         Translation2d delta=robotPose.get().getTranslation().minus(point);
+        Translation2d bestPoint=delta.times(distance/delta.getNorm());
+        Rotation2d angleOff=centerGoal.minus(bestPoint.getAngle());
+        if(Math.abs(angleOff.getRadians())>maxAngleOff){
+            double maxDist=max.getDistance(bestPoint);
+            double minDist=min.getDistance(bestPoint);
+            if(maxDist<minDist){
+                return new Pose2d(max.plus(point), maxAngle.plus(new Rotation2d(Math.PI-offset)));
+            }else{
+                return new Pose2d(min.plus(point), minAngle.plus(new Rotation2d(Math.PI-offset)));
+            }
+        }
         return new Pose2d(delta.times(distance/delta.getNorm()).plus(point), delta.getAngle().plus(new Rotation2d(Math.PI-offset)));
     });
   }
-  public PathingCommand toDistFromPoint(double x,double y,double dist, double offset){
-    return toDistFromPoint(new Translation2d(x, y), dist, offset);
-  }
-  public PathingCommand toDistFromPoint(double x,double y,double dist){
-    return toDistFromPoint(x, y, dist,0);
+  public PathingCommand toDistFromPoint(Translation2d point,double distance,double offset){
+    return toDistFromPoint(point, distance, offset,new Rotation2d(),Math.PI);
   }
 }
