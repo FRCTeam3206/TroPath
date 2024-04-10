@@ -44,6 +44,9 @@ public void setField(Field field) {
             .setRobotWidth(robotProfile.getWidth())
             .build();
   }
+  public void setPathfinder(Pathfinder pathfinder){
+    this.pathfinder=pathfinder;
+  }
   public PathingCommand toPoseSupplier(Supplier<Pose2d> supplier){
     return new PathingCommand(supplier, robotPose, drive, robotProfile, pathfinder, subsystem).setTolerances(translationTolerance, rotationTolerance);
   }
