@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.robotprofile.RobotProfile;
+import frc.utils.AllianceUtil;
 import me.nabdev.pathfinding.Pathfinder;
 import me.nabdev.pathfinding.PathfinderBuilder;
 import me.nabdev.pathfinding.utilities.FieldLoader.Field;
@@ -23,12 +24,21 @@ public class PathingCommandGenerator {
   private Subsystem subsystem;
   private double translationTolerance = .05,
       rotationTolerance = Math.PI/32;
+  private boolean allianceFlip=true;
 public PathingCommandGenerator(RobotProfile robotProfile, Supplier<Pose2d> robotPose, Consumer<ChassisSpeeds> drive, Subsystem subsystem) {
     this.robotProfile = robotProfile;
     this.robotPose = robotPose;
     this.drive = drive;
     this.subsystem = subsystem;
     setField(Field.CRESCENDO_2024);
+}
+private Pose2d getPoseForAlliance(Pose2d pose){
+    if(allianceFlip)
+    return AllianceUtil.getPoseForAlliance(pose);
+    return pose;
+}
+public void setAllianceFlipping(boolean flag){
+    allianceFlip=flag;
 }
 public void setField(String name) {
     pathfinder =
@@ -48,7 +58,7 @@ public void setField(Field field) {
     this.pathfinder=pathfinder;
   }
   public PathingCommand toPoseSupplier(Supplier<Pose2d> supplier){
-    return new PathingCommand(supplier, robotPose, drive, robotProfile, pathfinder, subsystem).setTolerances(translationTolerance, rotationTolerance);
+    return new PathingCommand(()->getPoseForAlliance(supplier.get()), robotPose, drive, robotProfile, pathfinder, subsystem).setTolerances(translationTolerance, rotationTolerance);
   }
   public PathingCommand toPose(Pose2d pose){
     return toPoseSupplier(()->pose);
