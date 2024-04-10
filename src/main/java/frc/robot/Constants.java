@@ -13,6 +13,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -69,6 +70,8 @@ public final class Constants {
     public static final int kRearRightTurningCanId = 14;
 
     public static final boolean kGyroReversed = false;
+
+    public static final DifferentialDriveKinematics diffKinematics=new DifferentialDriveKinematics(Units.inchesToMeters(27.5));
   }
 
   public static final class ModuleConstants {

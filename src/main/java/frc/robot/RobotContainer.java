@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.RelativeTo;
 import frc.robot.commands.PathingCommand;
@@ -45,6 +46,7 @@ public class RobotContainer implements Logged {
     // Configure the button bindings
     path=new PathingCommandGenerator(new RobotProfile(50, 3.0/39.37, .9, .9, Motor.NEO().gear(Motor.Gear.REV_HIGH)), m_robotDrive::getPose , m_robotDrive::driveSpeed, m_robotDrive);
     path.setField(Field.CHARGED_UP_2023);
+    path.setDifferentialDrive(m_robotDrive::driveDifferential, DriveConstants.diffKinematics.trackWidthMeters);
     configureButtonBindings();
 
     // Configure default commands

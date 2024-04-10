@@ -13,9 +13,12 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
+import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.WPIUtilJNI;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -285,7 +288,11 @@ public class DriveSubsystem extends SubsystemBase implements Logged {
         RelativeTo.kFieldRelative,
         false);
   }
-
+  
+  public void driveDifferential(DifferentialDriveWheelSpeeds speeds){
+    ChassisSpeeds swerveSpeeds=DriveConstants.diffKinematics.toChassisSpeeds(speeds);
+    drive(swerveSpeeds.vxMetersPerSecond, 0, swerveSpeeds.omegaRadiansPerSecond, RelativeTo.kRobotRelative, false);
+  }
   /** Sets the wheels into an X formation to prevent movement. */
   public void setX() {
     m_frontLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));

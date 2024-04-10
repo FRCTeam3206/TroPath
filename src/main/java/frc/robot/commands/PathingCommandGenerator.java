@@ -7,6 +7,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
+import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -54,6 +56,19 @@ public void setField(Field field) {
             .setRobotLength(robotProfile.getLength())
             .setRobotWidth(robotProfile.getWidth())
             .build();
+  }
+  public void setDifferentialDrive(Consumer<DifferentialDriveWheelSpeeds> diffDrive,double trackWidth){
+    DifferentialDriveKinematics kinematics=new DifferentialDriveKinematics(trackWidth);
+    drive=(ChassisSpeeds speeds)->{
+      double theta=Math.atan2(speeds.vyMetersPerSecond,speeds.vxMetersPerSecond)-robotPose.get().getRotation().getRadians();
+      double velocity=Math.sqrt(speeds.vxMetersPerSecond*speeds.vxMetersPerSecond+speeds.vyMetersPerSecond*speeds.vyMetersPerSecond);
+      double linearVelocity=velocity*Math.cos(theta);
+      double percentVelocityUsed=linearVelocity/robotProfile.getMaxVelocity();
+      double rotationalVelocity=(velocity)*Math.sin(theta)*2/trackWidth+speeds.omegaRadiansPerSecond*4*(robotProfile.getMaxVelocity()-velocity)/robotProfile.getMaxVelocity();
+      rotationalVelocity+=speeds.omegaRadiansPerSecond*(1-percentVelocityUsed);
+      DifferentialDriveWheelSpeeds output=kinematics.toWheelSpeeds(new ChassisSpeeds(linearVelocity, 0, rotationalVelocity));
+      diffDrive.accept(output);
+    };
   }
   public void setPathfinder(Pathfinder pathfinder){
     this.pathfinder=pathfinder;
