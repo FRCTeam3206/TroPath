@@ -25,8 +25,7 @@ public class PathingCommand extends Command {
   private double velocity, rotationalVelocity = 0;
   private TrapezoidProfile translationProfile, rotationProfile;
   private Supplier<Pose2d> goalPoseSupplier;
-  private double translationTolerance = .05,
-      rotationTolerance = Math.PI/32;
+  private double translationTolerance = .05, rotationTolerance = Math.PI / 32;
   private Field2d nextPoseFieldDisplay = new Field2d();
   private Field2d finalPoseFieldDisplay = new Field2d();
   private static final double dT = .02, eps = 1E-4;
@@ -39,14 +38,20 @@ public class PathingCommand extends Command {
    *     drive subsystem is null. Please call {@link PathingCommand#setRobot} and {@link
    *     PathingCommand#setDefaultRobotProfile} before constructing a PathingCommand.
    */
-  public PathingCommand(Supplier<Pose2d> goalSupplier, Supplier<Pose2d> currentPoseSupplier, Consumer<ChassisSpeeds> drive, RobotProfile robotProfile,Pathfinder pathfinder,Subsystem subsystem) {
+  public PathingCommand(
+      Supplier<Pose2d> goalSupplier,
+      Supplier<Pose2d> currentPoseSupplier,
+      Consumer<ChassisSpeeds> drive,
+      RobotProfile robotProfile,
+      Pathfinder pathfinder,
+      Subsystem subsystem) {
     this.goalPoseSupplier = goalSupplier;
-    this.robotPose=currentPoseSupplier;
-    this.pathfinder=pathfinder;
-    this.drive=drive;
+    this.robotPose = currentPoseSupplier;
+    this.pathfinder = pathfinder;
+    this.drive = drive;
     // AllianceUtil.setRobot(robotPose);
     // this.goalPoseSupplier = () -> AllianceUtil.getPoseForAlliance(poseSupplier.get());
-    
+
     this.addRequirements(subsystem);
     setRobotProfile(robotProfile);
     SmartDashboard.putData("Next Pose", nextPoseFieldDisplay);

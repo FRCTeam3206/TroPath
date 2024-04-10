@@ -5,7 +5,6 @@
 package frc.robot;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.XboxController;
@@ -17,12 +16,10 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.RelativeTo;
-import frc.robot.commands.PathingCommand;
 import frc.robot.commands.PathingCommandGenerator;
 import frc.robot.robotprofile.Motor;
 import frc.robot.robotprofile.RobotProfile;
 import frc.robot.subsystems.DriveSubsystem;
-import me.nabdev.pathfinding.utilities.FieldLoader;
 import me.nabdev.pathfinding.utilities.FieldLoader.Field;
 import monologue.Logged;
 
@@ -40,10 +37,16 @@ public class RobotContainer implements Logged {
   CommandXboxController m_driverController =
       new CommandXboxController(OIConstants.kDriverControllerPort);
   PathingCommandGenerator path;
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the button bindings
-    path=new PathingCommandGenerator(new RobotProfile(50, 3.0/39.37, .9, .9, Motor.NEO().gear(Motor.Gear.REV_HIGH)), m_robotDrive::getPose , m_robotDrive::driveSpeed, m_robotDrive);
+    path =
+        new PathingCommandGenerator(
+            new RobotProfile(50, 3.0 / 39.37, .9, .9, Motor.NEO().gear(Motor.Gear.REV_HIGH)),
+            m_robotDrive::getPose,
+            m_robotDrive::driveSpeed,
+            m_robotDrive);
     path.setField(Field.CHARGED_UP_2023);
     configureButtonBindings();
 
@@ -79,7 +82,11 @@ public class RobotContainer implements Logged {
     //         m_robotDrive));
 
     m_driverController.button(1).whileTrue(path.toPoint(2.3, 4.5, Math.PI));
-    m_driverController.button(2).whileTrue(path.toDistFromPoint(new Translation2d(8, 4), 1,Math.PI/2,new Rotation2d(0),Math.PI/2));
+    m_driverController
+        .button(2)
+        .whileTrue(
+            path.toDistFromPoint(
+                new Translation2d(8, 4), 1, Math.PI / 2, new Rotation2d(0), Math.PI / 2));
   }
 
   /**

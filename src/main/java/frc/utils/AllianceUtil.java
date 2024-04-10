@@ -8,8 +8,8 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import java.util.function.Supplier;
 
 /**
- * Handles the mirroring based on the alliance, which is used in PathingCommand.
- * Please call {@code AllianceUtil.setAlliance()} in disabled periodic of Robot.java.
+ * Handles the mirroring based on the alliance, which is used in PathingCommand. Please call {@code
+ * AllianceUtil.setAlliance()} in disabled periodic of Robot.java.
  */
 public class AllianceUtil {
   private static AllianceColor alliance = AllianceColor.UNKNOWN;
@@ -26,6 +26,7 @@ public class AllianceUtil {
 
   /**
    * Set the supplier of the robot's current position. This is taken care of in PathingCommand.
+   *
    * @param robotPose Supplies the robot's current position.
    */
   public static void setRobot(Supplier<Pose2d> robotPose) {
@@ -34,6 +35,7 @@ public class AllianceUtil {
 
   /**
    * Set custom field dimensions if you're not using a standard FRC field.
+   *
    * @param fieldLength The length of the custom field in meters.
    * @param fieldHeight The height of the custom field in meters.
    */
@@ -44,6 +46,7 @@ public class AllianceUtil {
 
   /**
    * Set whether the field design is mirrored or rotated. Defaults to mirrored.
+   *
    * @param mirroredField True for mirrored fields, false for rotated fields.
    */
   public static void setCustomFieldDesignType(boolean mirroredField) {
@@ -51,7 +54,8 @@ public class AllianceUtil {
   }
 
   /**
-   * Sets the current alliance based on driver station data. This should be called in disabled periodic of Robot.java.
+   * Sets the current alliance based on driver station data. This should be called in disabled
+   * periodic of Robot.java.
    */
   public static void setAlliance() {
     if (DriverStation.getAlliance().isEmpty()) {
