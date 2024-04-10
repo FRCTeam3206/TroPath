@@ -30,6 +30,7 @@ public PathingCommandGenerator(RobotProfile robotProfile, Supplier<Pose2d> robot
     this.robotPose = robotPose;
     this.drive = drive;
     this.subsystem = subsystem;
+    AllianceUtil.setRobot(robotPose);
     setField(Field.CRESCENDO_2024);
 }
 private Pose2d getPoseForAlliance(Pose2d pose){
