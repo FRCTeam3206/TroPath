@@ -167,7 +167,7 @@ public class PathingCommandGenerator {
    * @param supplier The supplier of the goal position.
    * @return A new PathingCommand.
    */
-  public PathingCommand generate(Supplier<Pose2d> supplier) {
+  public PathingCommand generateToPoseSupplierCommand(Supplier<Pose2d> supplier) {
     return new PathingCommand(
         () -> getPoseForAlliance(supplier.get()),
         robotPose,
@@ -185,8 +185,8 @@ public class PathingCommandGenerator {
    * @param pose The goal position.
    * @return A new PathingCommand.
    */
-  public PathingCommand generate(Pose2d pose) {
-    return generate(() -> pose);
+  public PathingCommand generateToPoseCommand(Pose2d pose) {
+    return generateToPoseSupplierCommand(() -> pose);
   }
 
   /**
@@ -197,8 +197,8 @@ public class PathingCommandGenerator {
    * @param t The goal rotation in meters.
    * @return A new PathingCommand.
    */
-  public PathingCommand generate(double x, double y, double t) {
-    return generate(new Pose2d(x, y, new Rotation2d(t)));
+  public PathingCommand generateToPoseCommand(double x, double y, double t) {
+    return generateToPoseCommand(new Pose2d(x, y, new Rotation2d(t)));
   }
 
   /**
@@ -207,8 +207,8 @@ public class PathingCommandGenerator {
    * @param trans The translation.
    * @return A new PathingCommand.
    */
-  public PathingCommand generate(Translation2d trans) {
-    return generate(() -> new Pose2d(trans, robotPose.get().getRotation()));
+  public PathingCommand generateToTranslationCommand(Translation2d trans) {
+    return generateToPoseSupplierCommand(() -> new Pose2d(trans, robotPose.get().getRotation()));
   }
 
   /**
@@ -218,8 +218,8 @@ public class PathingCommandGenerator {
    * @param y The goal y position in meters.
    * @return A new PathingCommand.
    */
-  public PathingCommand generate(double x, double y) {
-    return generate(() -> new Pose2d(new Translation2d(x, y), robotPose.get().getRotation()));
+  public PathingCommand generateToTranslationCommand(double x, double y) {
+    return generateToPoseSupplierCommand(() -> new Pose2d(new Translation2d(x, y), robotPose.get().getRotation()));
   }
 
   /**
@@ -235,7 +235,7 @@ public class PathingCommandGenerator {
    *     centerGoal to be in range.
    * @return A new PathingCommand.
    */
-  public PathingCommand generate(
+  public PathingCommand generateToDistFromPointCommand(
       Translation2d point,
       Supplier<Double> distance,
       double offset,
@@ -243,7 +243,7 @@ public class PathingCommandGenerator {
       double maxAngleOff) {
     final Rotation2d maxAngle = centerGoal.plus(new Rotation2d(maxAngleOff));
     final Rotation2d minAngle = centerGoal.minus(new Rotation2d(maxAngleOff));
-    return generate(
+    return generateToPoseSupplierCommand(
         () -> {
           Translation2d max = new Translation2d(distance.get(), maxAngle);
           Translation2d min =
@@ -281,13 +281,13 @@ public class PathingCommandGenerator {
    *     centerGoal to be in range.
    * @return A new PathingCommand.
    */
-  public PathingCommand generate(
+  public PathingCommand generateToDistFromPointCommand(
       Translation2d point,
       double distance,
       double offset,
       Rotation2d centerGoal,
       double maxAngleOff) {
-    return generate(point, () -> distance, offset, centerGoal, maxAngleOff);
+    return generateToDistFromPointCommand(point, () -> distance, offset, centerGoal, maxAngleOff);
   }
 
   /**
@@ -300,7 +300,7 @@ public class PathingCommandGenerator {
    *     robot facing the target.
    * @return A new PathingCommand.
    */
-  public PathingCommand generate(Translation2d point, double distance, double offset) {
-    return generate(point, distance, offset, new Rotation2d(), Math.PI);
+  public PathingCommand generateToDistFromPointCommand(Translation2d point, double distance, double offset) {
+    return generateToDistFromPointCommand(point, distance, offset, new Rotation2d(), Math.PI);
   }
 }

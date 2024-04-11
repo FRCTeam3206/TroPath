@@ -81,11 +81,11 @@ public class RobotContainer implements Logged {
     //         () -> m_robotDrive.setX(),
     //         m_robotDrive));
 
-    m_driverController.button(1).whileTrue(path.generate(2.3, 4.5, Math.PI));
+    m_driverController.button(1).whileTrue(path.generateToPoseCommand(2.3, 4.5, Math.PI));
     m_driverController
         .button(2)
         .whileTrue(
-            path.generate(new Translation2d(8, 4), 1, Math.PI / 2, new Rotation2d(0), Math.PI / 2));
+            path.generateToDistFromPointCommand(new Translation2d(8, 4), 1, Math.PI / 2, new Rotation2d(0), Math.PI / 2));
   }
 
   /**
@@ -95,15 +95,15 @@ public class RobotContainer implements Logged {
    */
   public Command getAutonomousCommand() {
     return new SequentialCommandGroup(
-        path.generate(6.3, 4.6, 0),
+        path.generateToPoseCommand(6.3, 4.6, 0),
         new RunCommand(
                 () -> m_robotDrive.drive(.25, 0, 0, RelativeTo.kRobotRelative, false), m_robotDrive)
             .withTimeout(.5),
-        path.generate(1.9, 4.5, Math.PI),
-        path.generate(6.3, 3.3, 0),
+        path.generateToPoseCommand(1.9, 4.5, Math.PI),
+        path.generateToPoseCommand(6.3, 3.3, 0),
         new RunCommand(
                 () -> m_robotDrive.drive(.25, 0, 0, RelativeTo.kRobotRelative, false), m_robotDrive)
             .withTimeout(.5),
-        path.generate(1.9, 3.3, Math.PI));
+        path.generateToPoseCommand(1.9, 3.3, Math.PI));
   }
 }
