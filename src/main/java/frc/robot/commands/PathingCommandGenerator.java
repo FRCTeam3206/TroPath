@@ -152,7 +152,8 @@ public class PathingCommandGenerator {
   }
 
   /**
-   * Allows you to modify the builder using its methods.
+   * Allows you to modify the builder using its methods. For example, you could do
+   * {@code generator.getBuilder().setPointSpacing(0.2)}.
    *
    * @return The builder used in this PathingCommandGenerator.
    */
@@ -179,7 +180,7 @@ public class PathingCommandGenerator {
   }
 
   /**
-   * Generates a new PathingCommand to go to the pose.
+   * Generates a new PathingCommand to go to a pose.
    *
    * @param pose The goal position.
    * @return A new PathingCommand.
@@ -189,7 +190,7 @@ public class PathingCommandGenerator {
   }
 
   /**
-   * Generates a new PathingCommand to go to the pose.
+   * Generates a new PathingCommand to go to a pose.
    *
    * @param x The goal x position in meters.
    * @param y The goal y position in meters.
@@ -201,7 +202,7 @@ public class PathingCommandGenerator {
   }
 
   /**
-   * Generates a new PathingCommand to go to the translation, ignoring rotation.
+   * Generates a new PathingCommand to go to a translation, ignoring rotation.
    *
    * @param trans The translation.
    * @return A new PathingCommand.
@@ -211,7 +212,7 @@ public class PathingCommandGenerator {
   }
 
   /**
-   * Generates a new PathingCommand to go to the translation, ignoring rotation.
+   * Generates a new PathingCommand to go to a translation, ignoring rotation.
    *
    * @param x The goal x position in meters.
    * @param y The goal y position in meters.
@@ -222,12 +223,11 @@ public class PathingCommandGenerator {
   }
 
   /**
-   * Generates a new PathingCommand to go to a distance from a reference point within a range of
-   * angles. This allows for going to a flexible shooting position.
+   * Generates a new PathingCommand to go to a specified distance from a reference point within a range of
+   * angles. For example, this can be used to go to a flexible shooting position.
    *
    * @param point The point to reference for the distance it is from it.
-   * @param distance Supplier of the goal distance from the reference point in meters to allow for
-   *     variable-distance shooting.
+   * @param distance Supplier of the goal distance from the reference point in meters.
    * @param offset The offset of the robot's rotation relative to the target. 0 is the front of the
    *     robot facing the target.
    * @param centerGoal The center angle in radians to reference for the range.
@@ -270,7 +270,7 @@ public class PathingCommandGenerator {
 
   /**
    * Generates a new PathingCommand to go to a distance from a reference point within a range of
-   * angles. This allows for going to a flexible shooting position.
+   * angles. For example, this can be used to go to a flexible shooting position.
    *
    * @param point The point to reference for the distance it is from it.
    * @param distance The goal distance from the reference point in meters.
@@ -292,7 +292,7 @@ public class PathingCommandGenerator {
 
   /**
    * Generates a new PathingCommand to go to a distance from a reference point. Does not include
-   * angle limiting. This allows for going to a flexible shooting position.
+   * angle limiting. For example, this can be used to go to a flexible shooting position.
    *
    * @param point The point to reference for the distance it is from it.
    * @param distance The goal distance from the reference point in meters.
