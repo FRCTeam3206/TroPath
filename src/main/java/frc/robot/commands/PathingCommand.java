@@ -163,25 +163,6 @@ public class PathingCommand extends Command {
     return Math.PI - Math.acos((d1 * d1 + d2 * d2 - d3 * d3) / (2 * d1 * d2));
   }
 
-  /**
-   * Sets the tolerances to something different than those of the PathingCommandGenerator used to
-   * make this PathingCommand.The tolerances are the maximum allowed error for which the robot is
-   * considered to have reached the goal and should be tuned to your robot. They should be as small
-   * as possible without being more precise than the robot can achieve well. If the tolerance is too
-   * small, the robot will spend longer than it should trying to get perfectly in position (and move
-   * the wheels in different directions as it tries to perfectly adjust). If it is at a good amount,
-   * it should stop as soon as it reaches the position (the wheels moving back and forth should not
-   * be noticeable).
-   *
-   * @param translationTolerance The translation tolerance to set. In meters.
-   * @param rotationTolerance The rotation tolerance to set. In radians.
-   */
-  public PathingCommand setTolerances(double translationTolerance, double rotationTolerance) {
-    this.translationTolerance = translationTolerance;
-    this.rotationTolerance = rotationTolerance;
-    return this;
-  }
-
   public boolean isFinished() {
     return (robotPose.get().getTranslation().getDistance(goalPoseSupplier.get().getTranslation())
                 + velocity * velocity / 2 / robotProfile.getMaxAcceleration()
