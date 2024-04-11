@@ -226,6 +226,53 @@ public class PathingCommandGenerator {
    * angles. This allows for going to a flexible shooting position.
    *
    * @param point The point to reference for the distance it is from it.
+   * @param distance Supplier of the goal distance from the reference point in meters to allow for
+   *     variable-distance shooting.
+   * @param offset The offset of the robot's rotation relative to the target. 0 is the front of the
+   *     robot facing the target.
+   * @param centerGoal The center angle in radians to reference for the range.
+   * @param maxAngleOff The maximum acceptable angle value in radians to be off by from the
+   *     centerGoal to be in range.
+   * @return A new PathingCommand.
+   */
+  public PathingCommand generate(
+      Translation2d point,
+      Supplier<Double> distance,
+      double offset,
+      Rotation2d centerGoal,
+      double maxAngleOff) {
+    final Rotation2d maxAngle = centerGoal.plus(new Rotation2d(maxAngleOff));
+    final Rotation2d minAngle = centerGoal.minus(new Rotation2d(maxAngleOff));
+    return generate(
+        () -> {
+          Translation2d max = new Translation2d(distance.get(), maxAngle);
+          Translation2d min =
+              new Translation2d(distance.get(), centerGoal.minus(new Rotation2d(maxAngleOff)));
+          SmartDashboard.putNumber(
+              "Current Distance from point", robotPose.get().getTranslation().getDistance(point));
+          Translation2d delta = robotPose.get().getTranslation().minus(point);
+          Translation2d bestPoint = delta.times(distance.get() / delta.getNorm());
+          Rotation2d angleOff = centerGoal.minus(bestPoint.getAngle());
+          if (Math.abs(angleOff.getRadians()) > maxAngleOff) {
+            double maxDist = max.getDistance(bestPoint);
+            double minDist = min.getDistance(bestPoint);
+            if (maxDist < minDist) {
+              return new Pose2d(max.plus(point), maxAngle.plus(new Rotation2d(Math.PI - offset)));
+            } else {
+              return new Pose2d(min.plus(point), minAngle.plus(new Rotation2d(Math.PI - offset)));
+            }
+          }
+          return new Pose2d(
+              delta.times(distance.get() / delta.getNorm()).plus(point),
+              delta.getAngle().plus(new Rotation2d(Math.PI - offset)));
+        });
+  }
+
+  /**
+   * Generates a new PathingCommand to go to a distance from a reference point within a range of
+   * angles. This allows for going to a flexible shooting position.
+   *
+   * @param point The point to reference for the distance it is from it.
    * @param distance The goal distance from the reference point in meters.
    * @param offset The offset of the robot's rotation relative to the target. 0 is the front of the
    *     robot facing the target.
@@ -240,31 +287,7 @@ public class PathingCommandGenerator {
       double offset,
       Rotation2d centerGoal,
       double maxAngleOff) {
-    final Rotation2d maxAngle = centerGoal.plus(new Rotation2d(maxAngleOff));
-    final Rotation2d minAngle = centerGoal.minus(new Rotation2d(maxAngleOff));
-    final Translation2d max = new Translation2d(distance, maxAngle);
-    final Translation2d min =
-        new Translation2d(distance, centerGoal.minus(new Rotation2d(maxAngleOff)));
-    return generate(
-        () -> {
-          SmartDashboard.putNumber(
-              "Current Distance from point", robotPose.get().getTranslation().getDistance(point));
-          Translation2d delta = robotPose.get().getTranslation().minus(point);
-          Translation2d bestPoint = delta.times(distance / delta.getNorm());
-          Rotation2d angleOff = centerGoal.minus(bestPoint.getAngle());
-          if (Math.abs(angleOff.getRadians()) > maxAngleOff) {
-            double maxDist = max.getDistance(bestPoint);
-            double minDist = min.getDistance(bestPoint);
-            if (maxDist < minDist) {
-              return new Pose2d(max.plus(point), maxAngle.plus(new Rotation2d(Math.PI - offset)));
-            } else {
-              return new Pose2d(min.plus(point), minAngle.plus(new Rotation2d(Math.PI - offset)));
-            }
-          }
-          return new Pose2d(
-              delta.times(distance / delta.getNorm()).plus(point),
-              delta.getAngle().plus(new Rotation2d(Math.PI - offset)));
-        });
+    return generate(point, () -> distance, offset, centerGoal, maxAngleOff);
   }
 
   /**
