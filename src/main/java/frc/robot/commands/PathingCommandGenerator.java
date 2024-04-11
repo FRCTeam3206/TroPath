@@ -11,7 +11,6 @@ import frc.robot.robotprofile.RobotProfile;
 import frc.utils.AllianceUtil;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import me.nabdev.pathfinding.Pathfinder;
 import me.nabdev.pathfinding.PathfinderBuilder;
 import me.nabdev.pathfinding.utilities.FieldLoader.Field;
 
@@ -19,22 +18,85 @@ public class PathingCommandGenerator {
   private RobotProfile robotProfile;
   private Supplier<Pose2d> robotPose;
   private Consumer<ChassisSpeeds> drive;
-  private Pathfinder pathfinder;
+  private PathfinderBuilder builder;
   private Subsystem subsystem;
   private double translationTolerance = .05, rotationTolerance = Math.PI / 32;
   private boolean allianceFlip = true;
+
+  private PathingCommandGenerator(
+      RobotProfile robotProfile,
+      Supplier<Pose2d> robotPose,
+      Consumer<ChassisSpeeds> drive,
+      Subsystem subsystem,
+      PathfinderBuilder builder) {
+    this.robotProfile = robotProfile;
+    this.robotPose = robotPose;
+    this.drive = drive;
+    this.subsystem = subsystem;
+    AllianceUtil.setRobot(robotPose);
+    this.builder = builder;
+  }
+
+  public PathingCommandGenerator(
+      RobotProfile robotProfile,
+      Supplier<Pose2d> robotPose,
+      Consumer<ChassisSpeeds> drive,
+      Subsystem subsystem,
+      String fieldJsonName) {
+    this(
+        robotProfile,
+        robotPose,
+        drive,
+        subsystem,
+        new PathfinderBuilder(Filesystem.getDeployDirectory() + "\\" + fieldJsonName));
+  }
+
+  public PathingCommandGenerator(
+      RobotProfile robotProfile,
+      Supplier<Pose2d> robotPose,
+      Consumer<ChassisSpeeds> drive,
+      Subsystem subsystem,
+      Field field) {
+    this(robotProfile, robotPose, drive, subsystem, new PathfinderBuilder(field));
+  }
 
   public PathingCommandGenerator(
       RobotProfile robotProfile,
       Supplier<Pose2d> robotPose,
       Consumer<ChassisSpeeds> drive,
       Subsystem subsystem) {
-    this.robotProfile = robotProfile;
-    this.robotPose = robotPose;
-    this.drive = drive;
-    this.subsystem = subsystem;
-    AllianceUtil.setRobot(robotPose);
-    setField(Field.CRESCENDO_2024);
+    this(robotProfile, robotPose, drive, subsystem, Field.CRESCENDO_2024);
+  }
+
+  /**
+   * Set whether to enable flipping the position based on the alliance.
+   *
+   * @param flippingEnabled Whether to enable alliance flipping.
+   * @return The generator.
+   */
+  public PathingCommandGenerator setAllianceFlipping(boolean flippingEnabled) {
+    allianceFlip = flippingEnabled;
+    return this;
+  }
+
+  /**
+   * Sets the tolerances for this PathingCommandGenerator. These default to 5 cm and pi / 32
+   * radians. The tolerances are the maximum allowed error for which the robot is considered to have
+   * reached the goal and should be tuned to your robot. They should be as small as possible without
+   * being more precise than the robot can achieve well. If the tolerance is too small, the robot
+   * will spend longer than it should trying to get perfectly in position (and move the wheels in
+   * different directions as it tries to perfectly adjust). If it is at a good amount, it should
+   * stop as soon as it reaches the position (the wheels moving back and forth should not be
+   * noticeable).
+   *
+   * @param translationTolerance The translation tolerance to set. In meters. Defaults to 5 cm.
+   * @param rotationTolerance The rotation tolerance to set. In radians. Defaults to pi/32.
+   */
+  public PathingCommandGenerator setTolerances(
+      double translationTolerance, double rotationTolerance) {
+    this.translationTolerance = translationTolerance;
+    this.rotationTolerance = rotationTolerance;
+    return this;
   }
 
   private Pose2d getPoseForAlliance(Pose2d pose) {
@@ -42,81 +104,35 @@ public class PathingCommandGenerator {
     return pose;
   }
 
-  public PathingCommandGenerator setAllianceFlipping(boolean flag) {
-    allianceFlip = flag;
-    return this;
-  }
-
-  public PathingCommandGenerator setField(String name) {
-    pathfinder =
-        new PathfinderBuilder(Filesystem.getDeployDirectory() + "\\" + name)
-            .setRobotLength(robotProfile.getLength())
-            .setRobotWidth(robotProfile.getWidth())
-            .build();
-    return this;
-  }
-
-  public PathingCommandGenerator setField(Field field) {
-    pathfinder =
-        new PathfinderBuilder(field)
-            .setRobotLength(robotProfile.getLength())
-            .setRobotWidth(robotProfile.getWidth())
-            .build();
-    return this;
-  }
-
-  public PathingCommandGenerator setPathfinder(Pathfinder pathfinder) {
-    this.pathfinder = pathfinder;
-    return this;
-  }
-
-  /**
-   * <p>Sets the tolerances for this PathingCommandGenerator. These default to 5 cm and pi / 32 radians.</p>
-   * The tolerances are the maximum
-   * allowed error for which the robot is considered to have reached the goal and should be tuned to
-   * your robot. They should be as small as possible without being more precise than the robot can
-   * achieve well. If the tolerance is too small, the robot will spend longer than it should trying
-   * to get perfectly in position (and move the wheels in different directions as it tries to
-   * perfectly adjust). If it is at a good amount, it should stop as soon as it reaches the position
-   * (the wheels moving back and forth should not be noticeable).
-   *
-   * @param translationTolerance The translation tolerance to set. In meters. Defaults to 5 cm.
-   * @param rotationTolerance The rotation tolerance to set. In radians. Defaults to pi/32.
-   */
-  public PathingCommandGenerator setTolerances(double translationTolerance, double rotationTolerance) {
-    this.translationTolerance = translationTolerance;
-    this.rotationTolerance = rotationTolerance;
-    return this;
-  }
-
-  public PathingCommand toPoseSupplier(Supplier<Pose2d> supplier) {
+  public PathingCommand generate(Supplier<Pose2d> supplier) {
     return new PathingCommand(
-            () -> getPoseForAlliance(supplier.get()),
-            robotPose,
-            drive,
-            robotProfile,
-            pathfinder,
-            subsystem)
-        .setTolerances(translationTolerance, rotationTolerance);
+        () -> getPoseForAlliance(supplier.get()),
+        robotPose,
+        drive,
+        robotProfile,
+        builder.build(),
+        subsystem,
+        translationTolerance,
+        rotationTolerance);
   }
 
-  public PathingCommand toPose(Pose2d pose) {
-    return toPoseSupplier(() -> pose);
+  public PathingCommand generate(Pose2d pose) {
+    return generate(() -> pose);
   }
 
-  public PathingCommand toPoint(double x, double y, double t) {
-    return toPose(new Pose2d(x, y, new Rotation2d(t)));
+  public PathingCommand generate(double x, double y, double t) {
+    return generate(new Pose2d(x, y, new Rotation2d(t)));
   }
 
-  public PathingCommand toTranslation(Translation2d trans) {
-    return toPoseSupplier(() -> new Pose2d(trans, robotPose.get().getRotation()));
+  public PathingCommand generate(Translation2d trans) {
+    return generate(() -> new Pose2d(trans, robotPose.get().getRotation()));
   }
 
-  public PathingCommand toTranslation(double x, double y) {
-    return toPoseSupplier(() -> new Pose2d(new Translation2d(x, y), robotPose.get().getRotation()));
+  public PathingCommand generate(double x, double y) {
+    return generate(() -> new Pose2d(new Translation2d(x, y), robotPose.get().getRotation()));
   }
 
-  public PathingCommand toDistFromPoint(
+  public PathingCommand generate(
       Translation2d point,
       double distance,
       double offset,
@@ -127,7 +143,7 @@ public class PathingCommandGenerator {
     final Translation2d max = new Translation2d(distance, maxAngle);
     final Translation2d min =
         new Translation2d(distance, centerGoal.minus(new Rotation2d(maxAngleOff)));
-    return toPoseSupplier(
+    return generate(
         () -> {
           SmartDashboard.putNumber(
               "Current Distance from point", robotPose.get().getTranslation().getDistance(point));
@@ -149,7 +165,7 @@ public class PathingCommandGenerator {
         });
   }
 
-  public PathingCommand toDistFromPoint(Translation2d point, double distance, double offset) {
-    return toDistFromPoint(point, distance, offset, new Rotation2d(), Math.PI);
+  public PathingCommand generate(Translation2d point, double distance, double offset) {
+    return generate(point, distance, offset, new Rotation2d(), Math.PI);
   }
 }

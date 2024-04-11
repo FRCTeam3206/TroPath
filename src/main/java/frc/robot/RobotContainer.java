@@ -46,8 +46,8 @@ public class RobotContainer implements Logged {
             new RobotProfile(50, 3.0 / 39.37, .9, .9, Motor.NEO().gear(Motor.Gear.REV_HIGH)),
             m_robotDrive::getPose,
             m_robotDrive::driveSpeed,
-            m_robotDrive);
-    path.setField(Field.CHARGED_UP_2023);
+            m_robotDrive,
+            Field.CHARGED_UP_2023);
     configureButtonBindings();
 
     // Configure default commands
@@ -81,12 +81,11 @@ public class RobotContainer implements Logged {
     //         () -> m_robotDrive.setX(),
     //         m_robotDrive));
 
-    m_driverController.button(1).whileTrue(path.toPoint(2.3, 4.5, Math.PI));
+    m_driverController.button(1).whileTrue(path.generate(2.3, 4.5, Math.PI));
     m_driverController
         .button(2)
         .whileTrue(
-            path.toDistFromPoint(
-                new Translation2d(8, 4), 1, Math.PI / 2, new Rotation2d(0), Math.PI / 2));
+            path.generate(new Translation2d(8, 4), 1, Math.PI / 2, new Rotation2d(0), Math.PI / 2));
   }
 
   /**
@@ -96,15 +95,15 @@ public class RobotContainer implements Logged {
    */
   public Command getAutonomousCommand() {
     return new SequentialCommandGroup(
-        path.toPoint(6.3, 4.6, 0),
+        path.generate(6.3, 4.6, 0),
         new RunCommand(
                 () -> m_robotDrive.drive(.25, 0, 0, RelativeTo.kRobotRelative, false), m_robotDrive)
             .withTimeout(.5),
-        path.toPoint(1.9, 4.5, Math.PI),
-        path.toPoint(6.3, 3.3, 0),
+        path.generate(1.9, 4.5, Math.PI),
+        path.generate(6.3, 3.3, 0),
         new RunCommand(
                 () -> m_robotDrive.drive(.25, 0, 0, RelativeTo.kRobotRelative, false), m_robotDrive)
             .withTimeout(.5),
-        path.toPoint(1.9, 3.3, Math.PI));
+        path.generate(1.9, 3.3, Math.PI));
   }
 }

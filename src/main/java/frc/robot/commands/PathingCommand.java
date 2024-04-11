@@ -31,8 +31,8 @@ public class PathingCommand extends Command {
   private static final double dT = .02, eps = 1E-4;
 
   /**
-   * Constructs a PathingCommand. This method is called by the {@link PathingCommandGenerator}. Please
-   * use this generator to make a PathingCommand.
+   * Constructs a PathingCommand. This method is called by the {@link PathingCommandGenerator}.
+   * Please use this generator to make a PathingCommand.
    */
   public PathingCommand(
       Supplier<Pose2d> goalSupplier,
@@ -40,7 +40,9 @@ public class PathingCommand extends Command {
       Consumer<ChassisSpeeds> drive,
       RobotProfile robotProfile,
       Pathfinder pathfinder,
-      Subsystem subsystem) {
+      Subsystem subsystem,
+      double translationTolerance,
+      double rotationTolerance) {
     this.goalPoseSupplier = goalSupplier;
     this.robotPose = currentPoseSupplier;
     this.drive = drive;
@@ -162,14 +164,14 @@ public class PathingCommand extends Command {
   }
 
   /**
-   * <p>Sets the tolerances to something different than those of the PathingCommandGenerator used
-   * to make this PathingCommand.</p>The tolerances are the maximum
-   * allowed error for which the robot is considered to have reached the goal and should be tuned to
-   * your robot. They should be as small as possible without being more precise than the robot can
-   * achieve well. If the tolerance is too small, the robot will spend longer than it should trying
-   * to get perfectly in position (and move the wheels in different directions as it tries to
-   * perfectly adjust). If it is at a good amount, it should stop as soon as it reaches the position
-   * (the wheels moving back and forth should not be noticeable).
+   * Sets the tolerances to something different than those of the PathingCommandGenerator used to
+   * make this PathingCommand.The tolerances are the maximum allowed error for which the robot is
+   * considered to have reached the goal and should be tuned to your robot. They should be as small
+   * as possible without being more precise than the robot can achieve well. If the tolerance is too
+   * small, the robot will spend longer than it should trying to get perfectly in position (and move
+   * the wheels in different directions as it tries to perfectly adjust). If it is at a good amount,
+   * it should stop as soon as it reaches the position (the wheels moving back and forth should not
+   * be noticeable).
    *
    * @param translationTolerance The translation tolerance to set. In meters.
    * @param rotationTolerance The rotation tolerance to set. In radians.
