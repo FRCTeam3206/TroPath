@@ -21,7 +21,7 @@ import me.nabdev.pathfinding.utilities.FieldLoader.Field;
 public class PathingCommandGenerator {
   private final RobotProfile robotProfile;
   private final Supplier<Pose2d> robotPose;
-  private final Consumer<ChassisSpeeds> drive;
+  private Consumer<ChassisSpeeds> drive;
   private PathfinderBuilder builder;
   private final Subsystem subsystem;
   private double translationTolerance = .05, rotationTolerance = Math.PI / 32;
@@ -174,6 +174,23 @@ public class PathingCommandGenerator {
    */
   public PathfinderBuilder getBuilder() {
     return builder;
+  }
+
+  /**
+   * Makes a new PathingCommandGenerator with the same settings. Please note that the builders are
+   * still linked, so if you change this one's builder, the builder of the one it was created from
+   * will be changed too.
+   *
+   * @param givenTranslationTolerance The translational tolerance for the new
+   *     PathingCommandGenerator.
+   * @param givenRotationTolerance The rotational tolerance for the new PathingCommandGenerator.
+   * @return A new PathingCommandGenerator with different tolerances.
+   */
+  public PathingCommandGenerator withModifiedTolerances(
+      double givenTranslationTolerance, double givenRotationTolerance) {
+    return new PathingCommandGenerator(robotProfile, robotPose, drive, subsystem, builder)
+        .setTolerances(givenRotationTolerance, givenRotationTolerance)
+        .setAllianceFlipping(allianceFlip);
   }
 
   /**
