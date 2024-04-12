@@ -19,11 +19,11 @@ import me.nabdev.pathfinding.utilities.FieldLoader.Field;
  * to different goals.
  */
 public class PathingCommandGenerator {
-  private RobotProfile robotProfile;
-  private Supplier<Pose2d> robotPose;
-  private Consumer<ChassisSpeeds> drive;
+  private final RobotProfile robotProfile;
+  private final Supplier<Pose2d> robotPose;
+  private final Consumer<ChassisSpeeds> drive;
   private PathfinderBuilder builder;
-  private Subsystem subsystem;
+  private final Subsystem subsystem;
   private double translationTolerance = .05, rotationTolerance = Math.PI / 32;
   private boolean allianceFlip = true;
 
@@ -99,8 +99,23 @@ public class PathingCommandGenerator {
     this(robotProfile, robotPose, drive, subsystem, new PathfinderBuilder(field));
   }
 
-  // Referenced by the other constructors.
-  private PathingCommandGenerator(
+  /**
+   * Please only use this constructor if you understand well how the code works and know why you
+   * don't want to use one of the other constructors. Constructs a PathingCommandGenerator to
+   * generate {@code PathingCommand}s with the given settings. This constructor allows you to pass
+   * in a custom Pathfinder builder instead of one being created with a field layout as the default,
+   * with a custom json, or with a Field value. The builder can later be modified using {@link
+   * #getBuilder}).
+   *
+   * @param robotProfile The {@link RobotProfile} to be used by this command generator.
+   * @param robotPose Supplier of the robot's current position as a {@link Pose2d}. For example, a
+   *     reference to a {@code getPose()} method.
+   * @param drive Consumer to drive the robot. Must take {@link ChassisSpeeds} and be field
+   *     relative. For example, a reference to a {@code drive()} method.
+   * @param subsystem The drive subsystem (so it can be required).
+   * @param builder The PathfinderBuilder to be used by this command generator.
+   */
+  public PathingCommandGenerator(
       RobotProfile robotProfile,
       Supplier<Pose2d> robotPose,
       Consumer<ChassisSpeeds> drive,
@@ -152,8 +167,8 @@ public class PathingCommandGenerator {
   }
 
   /**
-   * Allows you to modify the builder using its methods. For example, you could do
-   * {@code generator.getBuilder().setPointSpacing(0.2)}.
+   * Allows you to modify the builder using its methods. For example, you could do {@code
+   * generator.getBuilder().setPointSpacing(0.2)}.
    *
    * @return The builder used in this PathingCommandGenerator.
    */
@@ -219,12 +234,13 @@ public class PathingCommandGenerator {
    * @return A new PathingCommand.
    */
   public PathingCommand generateToTranslationCommand(double x, double y) {
-    return generateToPoseSupplierCommand(() -> new Pose2d(new Translation2d(x, y), robotPose.get().getRotation()));
+    return generateToPoseSupplierCommand(
+        () -> new Pose2d(new Translation2d(x, y), robotPose.get().getRotation()));
   }
 
   /**
-   * Generates a new PathingCommand to go to a specified distance from a reference point within a range of
-   * angles. For example, this can be used to go to a flexible shooting position.
+   * Generates a new PathingCommand to go to a specified distance from a reference point within a
+   * range of angles. For example, this can be used to go to a flexible shooting position.
    *
    * @param point The point to reference for the distance it is from it.
    * @param distance Supplier of the goal distance from the reference point in meters.
@@ -300,7 +316,8 @@ public class PathingCommandGenerator {
    *     robot facing the target.
    * @return A new PathingCommand.
    */
-  public PathingCommand generateToDistFromPointCommand(Translation2d point, double distance, double offset) {
+  public PathingCommand generateToDistFromPointCommand(
+      Translation2d point, double distance, double offset) {
     return generateToDistFromPointCommand(point, distance, offset, new Rotation2d(), Math.PI);
   }
 }

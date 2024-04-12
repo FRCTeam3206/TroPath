@@ -85,7 +85,8 @@ public class RobotContainer implements Logged {
     m_driverController
         .button(2)
         .whileTrue(
-            path.generateToDistFromPointCommand(new Translation2d(8, 4), 1, Math.PI / 2, new Rotation2d(0), Math.PI / 2));
+            path.generateToDistFromPointCommand(
+                new Translation2d(8, 4), 1, Math.PI / 2, new Rotation2d(0), Math.PI / 2));
   }
 
   /**
