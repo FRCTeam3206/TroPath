@@ -8,6 +8,8 @@ import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.robotprofile.RobotProfile;
 import frc.utils.AllianceUtil;
@@ -30,7 +32,7 @@ public class PathingCommandGenerator {
   private Subsystem subsystem;
   private double translationTolerance = .05, rotationTolerance = Math.PI / 32;
   private boolean allianceFlip = true;
-
+  private boolean isDifferential = false;
   /**
    * Constructs a PathingCommandGenerator to generate {@code PathingCommand}s with the given
    * settings. Defaults to using the layout for the 2024 field. To use a custom field, add String or
@@ -117,7 +119,9 @@ public class PathingCommandGenerator {
     AllianceUtil.setRobot(robotPose);
     this.builder = builder;
   }
+  private Consumer<ChassisSpeeds> differentialRotationConsumer;
   public void setDifferentialDrive(Consumer<DifferentialDriveWheelSpeeds> diffDrive,double trackWidth){
+    isDifferential=true;
     DifferentialDriveKinematics kinematics=new DifferentialDriveKinematics(trackWidth);
     drive=(ChassisSpeeds speeds)->{
       double theta=Math.atan2(speeds.vyMetersPerSecond,speeds.vxMetersPerSecond)-robotPose.get().getRotation().getRadians();
@@ -126,6 +130,9 @@ public class PathingCommandGenerator {
       double rotationalVelocity=(velocity)*Math.sin(theta)*2/trackWidth;
       DifferentialDriveWheelSpeeds output=kinematics.toWheelSpeeds(new ChassisSpeeds(linearVelocity, 0, rotationalVelocity));
       diffDrive.accept(output);
+    };
+    differentialRotationConsumer=(ChassisSpeeds speeds)->{
+      diffDrive.accept(kinematics.toWheelSpeeds(new ChassisSpeeds(0, 0, speeds.omegaRadiansPerSecond)));
     };
   }
   /**
@@ -181,8 +188,8 @@ public class PathingCommandGenerator {
    * @param supplier The supplier of the goal position.
    * @return A new PathingCommand.
    */
-  public PathingCommand generateToPoseSupplierCommand(Supplier<Pose2d> supplier) {
-    return new PathingCommand(
+  public Command generateToPoseSupplierCommand(Supplier<Pose2d> supplier) {
+    Command holonomicCommand=new PathingCommand(
         () -> getPoseForAlliance(supplier.get()),
         robotPose,
         drive,
@@ -191,6 +198,18 @@ public class PathingCommandGenerator {
         subsystem,
         translationTolerance,
         rotationTolerance);
+    if(isDifferential){
+      return new ActiveConditionalCommand(new PathingCommand(
+        () -> getPoseForAlliance(supplier.get()),
+        robotPose,
+        differentialRotationConsumer,
+        robotProfile,
+        builder.build(),
+        subsystem,
+        translationTolerance,
+        rotationTolerance), holonomicCommand, ()->{System.out.println(robotPose.get().getTranslation().getDistance(getPoseForAlliance(supplier.get()).getTranslation()));return robotPose.get().getTranslation().getDistance(supplier.get().getTranslation())<translationTolerance;});
+    }
+    return holonomicCommand;
   }
   
   /**
@@ -199,7 +218,7 @@ public class PathingCommandGenerator {
    * @param pose The goal position.
    * @return A new PathingCommand.
    */
-  public PathingCommand generateToPoseCommand(Pose2d pose) {
+  public Command generateToPoseCommand(Pose2d pose) {
     return generateToPoseSupplierCommand(() -> pose);
   }
 
@@ -211,7 +230,7 @@ public class PathingCommandGenerator {
    * @param t The goal rotation in meters.
    * @return A new PathingCommand.
    */
-  public PathingCommand generateToPoseCommand(double x, double y, double t) {
+  public Command generateToPoseCommand(double x, double y, double t) {
     return generateToPoseCommand(new Pose2d(x, y, new Rotation2d(t)));
   }
 
@@ -221,7 +240,7 @@ public class PathingCommandGenerator {
    * @param trans The translation.
    * @return A new PathingCommand.
    */
-  public PathingCommand generateToTranslationCommand(Translation2d trans) {
+  public Command generateToTranslationCommand(Translation2d trans) {
     return generateToPoseSupplierCommand(() -> new Pose2d(trans, robotPose.get().getRotation()));
   }
 
@@ -232,7 +251,7 @@ public class PathingCommandGenerator {
    * @param y The goal y position in meters.
    * @return A new PathingCommand.
    */
-  public PathingCommand generateToTranslationCommand(double x, double y) {
+  public Command generateToTranslationCommand(double x, double y) {
     return generateToPoseSupplierCommand(() -> new Pose2d(new Translation2d(x, y), robotPose.get().getRotation()));
   }
 
@@ -249,7 +268,7 @@ public class PathingCommandGenerator {
    *     centerGoal to be in range.
    * @return A new PathingCommand.
    */
-  public PathingCommand generateToDistFromPointCommand(
+  public Command generateToDistFromPointCommand(
       Translation2d point,
       Supplier<Double> distance,
       double offset,
@@ -295,7 +314,7 @@ public class PathingCommandGenerator {
    *     centerGoal to be in range.
    * @return A new PathingCommand.
    */
-  public PathingCommand generateToDistFromPointCommand(
+  public Command generateToDistFromPointCommand(
       Translation2d point,
       double distance,
       double offset,
@@ -314,7 +333,7 @@ public class PathingCommandGenerator {
    *     robot facing the target.
    * @return A new PathingCommand.
    */
-  public PathingCommand generateToDistFromPointCommand(Translation2d point, double distance, double offset) {
+  public Command generateToDistFromPointCommand(Translation2d point, double distance, double offset) {
     return generateToDistFromPointCommand(point, distance, offset, new Rotation2d(), Math.PI);
   }
 }
