@@ -63,9 +63,7 @@ public void setField(Field field) {
       double theta=Math.atan2(speeds.vyMetersPerSecond,speeds.vxMetersPerSecond)-robotPose.get().getRotation().getRadians();
       double velocity=Math.sqrt(speeds.vxMetersPerSecond*speeds.vxMetersPerSecond+speeds.vyMetersPerSecond*speeds.vyMetersPerSecond);
       double linearVelocity=velocity*Math.cos(theta);
-      double percentVelocityUsed=linearVelocity/robotProfile.getMaxVelocity();
       double rotationalVelocity=(velocity)*Math.sin(theta)*2/trackWidth;
-      rotationalVelocity+=speeds.omegaRadiansPerSecond*(1-percentVelocityUsed);
       DifferentialDriveWheelSpeeds output=kinematics.toWheelSpeeds(new ChassisSpeeds(linearVelocity, 0, rotationalVelocity));
       diffDrive.accept(output);
     };
