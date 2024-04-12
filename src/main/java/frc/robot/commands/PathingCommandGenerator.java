@@ -199,7 +199,15 @@ public class PathingCommandGenerator {
         translationTolerance,
         rotationTolerance);
     if(isDifferential){
-      return new ActiveConditionalCommand(new PathingCommand(
+      return new PathingCommand(
+        () -> getPoseForAlliance(supplier.get()),
+        robotPose,
+        drive,
+        robotProfile,
+        builder.build(),
+        subsystem,
+        translationTolerance,
+        rotationTolerance).until(()->robotPose.get().getTranslation().getDistance(supplier.get().getTranslation())<translationTolerance).andThen(new PathingCommand(
         () -> getPoseForAlliance(supplier.get()),
         robotPose,
         differentialRotationConsumer,
@@ -207,7 +215,7 @@ public class PathingCommandGenerator {
         builder.build(),
         subsystem,
         translationTolerance,
-        rotationTolerance), holonomicCommand, ()->{System.out.println(robotPose.get().getTranslation().getDistance(getPoseForAlliance(supplier.get()).getTranslation()));return robotPose.get().getTranslation().getDistance(supplier.get().getTranslation())<translationTolerance;});
+        rotationTolerance));
     }
     return holonomicCommand;
   }
