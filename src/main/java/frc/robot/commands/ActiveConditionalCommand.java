@@ -32,6 +32,6 @@ public class ActiveConditionalCommand extends Command{
     }
     @Override
     public boolean isFinished(){
-        return onTrue.isFinished()&&onFalse.isFinished();
+        return (onTrue.isFinished()&&condition.get())||(onFalse.isFinished()&&!condition.get());
     }
 }

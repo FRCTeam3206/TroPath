@@ -332,7 +332,7 @@ public class PathingCommandGenerator {
         subsystem,
         translationTolerance,
         rotationTolerance), new PathingCommand(
-        finalSupplier,
+        ()->new Pose2d(robotPose.get().getTranslation(),finalSupplier.get().getRotation()),
         robotPose,
         differentialRotationConsumer,
         robotProfile,
