@@ -35,6 +35,7 @@ public class RobotProfile {
     this.maxRotationalAcceleration = maxRotationalAcceleration;
     this.length = length;
     this.width = width;
+    this.safteyMultiplier=1;
   }
 
   /**
@@ -168,19 +169,19 @@ public class RobotProfile {
   @Override
   public String toString() {
     return "RobotProfile [maxVelocity="
-        + maxVelocity
+        + getMaxVelocity()
         + ", maxAcceleration="
-        + maxAcceleration
+        + getMaxAcceleration()
         + ", maxRotationalVelocity="
-        + maxRotationalVelocity
+        + getMaxRotationalVelocity()
         + ", maxRotationalAcceleration="
-        + maxRotationalAcceleration
+        + getMaxRotationalAcceleration()
         + ", length="
-        + length
+        + getLength()
         + ", width="
-        + width
+        + getWidth()
         + ", safteyMultiplier="
-        + safteyMultiplier
+        + getSafteyMultiplier()
         + "]";
   }
 }
