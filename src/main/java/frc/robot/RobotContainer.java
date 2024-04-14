@@ -43,7 +43,8 @@ public class RobotContainer implements Logged {
     // Configure the button bindings
     path =
         new PathingCommandGenerator(
-            new RobotProfile(50, 3.0 / 39.37, .9, .9, Motor.NEO().gear(Motor.Gear.REV_HIGH)),
+            new RobotProfile(3,3,2,2,.9,.9
+            ),
             m_robotDrive::getPose,
             m_robotDrive::driveSpeed,
             m_robotDrive,
@@ -81,7 +82,7 @@ public class RobotContainer implements Logged {
     //         () -> m_robotDrive.setX(),
     //         m_robotDrive));
 
-    m_driverController.button(1).whileTrue(path.generateToPoseCommand(2.3, 4.5, Math.PI));
+    m_driverController.button(1).whileTrue(path.generateToPoseCommand(5.45, 3.15, Math.PI));
     m_driverController
         .button(2)
         .whileTrue(
