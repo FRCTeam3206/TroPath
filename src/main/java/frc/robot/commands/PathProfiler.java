@@ -39,7 +39,7 @@ public class PathProfiler {
             if(Double.isInfinite(maxAllowedVelocity)||Double.isNaN(maxAllowedVelocity)){
                 maxAllowedVelocity=maxVelocity;
             }
-            System.out.println(maxAllowedVelocity);
+            System.out.println(maxAllowedVelocity+" "+angle(profiledPath.get(i-1)));
             //System.out.println(maxAllowedVelocity);
             profiledPath.get(i-1).setVelocity(Math.min(maxAllowedVelocity,maxVelocity));
         }
