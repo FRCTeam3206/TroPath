@@ -32,7 +32,7 @@ public class PathingCommandGenerator {
   private boolean allianceFlip = true;
   private boolean isDifferential = false;
   /**
-   * Constructs a PathingCommandGenerator to generate {@code PathingCommand}s with the given
+   * Constructs a PathingCommandGenerator to generate {@code PathingCommand}s on a holonomic chassis with the given
    * settings. Defaults to using the layout for the 2024 field. To use a custom field, add String or
    * Field as a last parameter in the constructor.
    *
@@ -52,7 +52,7 @@ public class PathingCommandGenerator {
   }
 
   /**
-   * Constructs a PathingCommandGenerator to generate {@code PathingCommand}s with the given
+   * Constructs a PathingCommandGenerator to generate {@code PathingCommand}s on a holonomic chassis with the given
    * settings. Creates a custom field from the given json name. To use the default field, leave out
    * the String from the constructor. To use a custom field from the Field enum, replace the String
    * value with a field value.
@@ -81,7 +81,7 @@ public class PathingCommandGenerator {
   }
 
   /**
-   * Constructs a PathingCommandGenerator to generate {@code PathingCommand}s with the given
+   * Constructs a PathingCommandGenerator to generate {@code PathingCommand}s on a holonomic chassis with the given
    * settings. Creates a custom field from the given json name. To use the default field, leave out
    * the String from the constructor. To use a custom field from the Field enum, replace the String
    * value with a field value.
@@ -106,7 +106,7 @@ public class PathingCommandGenerator {
   /**
    * Please only use this constructor if you understand well how the code works and know why you
    * don't want to use one of the other constructors. Constructs a PathingCommandGenerator to
-   * generate {@code PathingCommand}s with the given settings. This constructor allows you to pass
+   * generate {@code PathingCommand}s on a holonomic chassis with the given settings. This constructor allows you to pass
    * in a custom Pathfinder builder instead of one being created with a field layout as the default,
    * with a custom json, or with a Field value. The builder can later be modified using {@link
    * #getBuilder}).
@@ -128,6 +128,108 @@ public class PathingCommandGenerator {
     this.robotProfile = robotProfile;
     this.robotPose = robotPose;
     this.drive = drive;
+    this.subsystem = subsystem;
+    AllianceUtil.setRobot(robotPose);
+    this.builder = builder;
+  }
+  /**
+   * Constructs a PathingCommandGenerator to generate {@code PathingCommand}s on a differential chassis with the given
+   * settings. Defaults to using the layout for the 2024 field. To use a custom field, add String or
+   * Field as a last parameter in the constructor.
+   *
+   * @param robotProfile The {@link RobotProfile} to be used by this command generator.
+   * @param robotPose Supplier of the robot's current position as a {@link Pose2d}. For example, a
+   *     reference to a {@code getPose()} method.
+   * @param drive Consumer to drive the robot. Must take {@link DifferentialDriveWheelSpeeds} in meters per second
+   * @param trackWidth The wheel to wheel distance on the drivetrain, in meters
+   * @param subsystem The drive subsystem (so it can be required).
+   */
+  public PathingCommandGenerator(
+      RobotProfile robotProfile,
+      Supplier<Pose2d> robotPose,
+      Consumer<DifferentialDriveWheelSpeeds> drive,
+      double trackWidth,
+      Subsystem subsystem) {
+    this(robotProfile, robotPose, drive, trackWidth, subsystem, Field.CRESCENDO_2024);
+  }
+  /**
+   * Constructs a PathingCommandGenerator to generate {@code PathingCommand}s on a differential chassis with the given
+   * settings. Creates a custom field from the given json name. To use the default field, leave out
+   * the String from the constructor. To use a custom field from the Field enum, replace the String
+   * value with a field value.
+   *
+   * @param robotProfile The {@link RobotProfile} to be used by this command generator.
+   * @param robotPose Supplier of the robot's current position as a {@link Pose2d}. For example, a
+   *     reference to a {@code getPose()} method.
+   * @param drive Consumer to drive the robot. Must take {@link DifferentialDriveWheelSpeeds} in meters per second
+   * @param trackWidth The wheel to wheel distance on the drivetrain, in meters
+   * @param subsystem The drive subsystem (so it can be required).
+   * @param fieldJsonName The name the custom field json file, which must be located in the deploy
+   *     folder. NOT the full path. For example, {@code "my_field.json"}.
+   */
+  public PathingCommandGenerator(
+      RobotProfile robotProfile,
+      Supplier<Pose2d> robotPose,
+      Consumer<DifferentialDriveWheelSpeeds> drive,
+      double trackWidth,
+      Subsystem subsystem,
+      String fieldJsonName) {
+    this(
+        robotProfile,
+        robotPose,
+        drive,
+        trackWidth,
+        subsystem,
+        new PathfinderBuilder(Filesystem.getDeployDirectory() + "\\" + fieldJsonName));
+  }
+  /**
+   * Constructs a PathingCommandGenerator to generate {@code PathingCommand}s on a differential chassis with the given
+   * settings. Creates a custom field from the given json name. To use the default field, leave out
+   * the String from the constructor. To use a custom field from the Field enum, replace the String
+   * value with a field value.
+   *
+   * @param robotProfile The {@link RobotProfile} to be used by this command generator.
+   * @param robotPose Supplier of the robot's current position as a {@link Pose2d}. For example, a
+   *     reference to a {@code getPose()} method.
+   * @param drive Consumer to drive the robot. Must take {@link DifferentialDriveWheelSpeeds} in meters per second
+   * @param trackWidth The wheel to wheel distance on the drivetrain, in meters
+   * @param subsystem The drive subsystem (so it can be required).
+   * @param field The value of the desired field from the {@link Field} enum.
+   */
+  public PathingCommandGenerator(
+      RobotProfile robotProfile,
+      Supplier<Pose2d> robotPose,
+      Consumer<DifferentialDriveWheelSpeeds> drive,
+      double trackWidth,
+      Subsystem subsystem,
+      Field field) {
+    this(robotProfile, robotPose, drive,trackWidth, subsystem, new PathfinderBuilder(field));
+  }
+  /**
+   * Only use this if you know what you are doing. Constructs a PathingCommandGenerator to
+   * generate {@code PathingCommand}s on a differential chassis with the given settings. This constructor allows you to pass
+   * in a custom Pathfinder builder instead of one being created with a field layout as the default,
+   * with a custom json, or with a Field value. The builder can later be modified using {@link
+   * #getBuilder}).
+   *
+   * @param robotProfile The {@link RobotProfile} to be used by this command generator.
+   * @param robotPose Supplier of the robot's current position as a {@link Pose2d}. For example, a
+   *     reference to a {@code getPose()} method.
+   * @param drive Consumer to drive the robot. Must take {@link DifferentialDriveWheelSpeeds} in meters per second
+   * @param trackWidth The wheel to wheel distance on the drivetrain, in meters
+   * @param subsystem The drive subsystem (so it can be required).
+   * @param builder The PathfinderBuilder to be used by this command generator.
+   */
+  public PathingCommandGenerator(
+      RobotProfile robotProfile,
+      Supplier<Pose2d> robotPose,
+      Consumer<DifferentialDriveWheelSpeeds> drive,
+      double trackWidth,
+      Subsystem subsystem,
+      PathfinderBuilder builder) {
+    this.robotProfile = robotProfile;
+    this.robotPose = robotPose;
+    setDifferentialDrive(drive, trackWidth);
     this.subsystem = subsystem;
     AllianceUtil.setRobot(robotPose);
     this.builder = builder;
@@ -219,8 +321,28 @@ public class PathingCommandGenerator {
    * @return A new PathingCommand.
    */
   public Command generateToPoseSupplierCommand(Supplier<Pose2d> supplier) {
-    Command holonomicCommand=new PathingCommand(
-        () -> getPoseForAlliance(supplier.get()),
+    Supplier<Pose2d> finalSupplier=() -> getPoseForAlliance(supplier.get());
+    if(isDifferential){
+      return new ActiveConditionalCommand(new PathingCommand(
+        finalSupplier,
+        robotPose,
+        drive,
+        robotProfile,
+        builder.build(),
+        subsystem,
+        translationTolerance,
+        rotationTolerance), new PathingCommand(
+        finalSupplier,
+        robotPose,
+        differentialRotationConsumer,
+        robotProfile,
+        builder.build(),
+        subsystem,
+        translationTolerance,
+        rotationTolerance), ()->robotPose.get().getTranslation().getDistance(finalSupplier.get().getTranslation())>translationTolerance);
+    }
+    return new PathingCommand(
+        finalSupplier,
         robotPose,
         drive,
         robotProfile,
@@ -228,26 +350,6 @@ public class PathingCommandGenerator {
         subsystem,
         translationTolerance,
         rotationTolerance);
-    if(isDifferential){
-      return new PathingCommand(
-        () -> getPoseForAlliance(supplier.get()),
-        robotPose,
-        drive,
-        robotProfile,
-        builder.build(),
-        subsystem,
-        translationTolerance,
-        rotationTolerance).until(()->robotPose.get().getTranslation().getDistance(supplier.get().getTranslation())<translationTolerance).andThen(new PathingCommand(
-        () -> getPoseForAlliance(supplier.get()),
-        robotPose,
-        differentialRotationConsumer,
-        robotProfile,
-        builder.build(),
-        subsystem,
-        translationTolerance,
-        rotationTolerance));
-    }
-    return holonomicCommand;
   }
   
   /**

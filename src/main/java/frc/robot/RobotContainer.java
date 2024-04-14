@@ -46,10 +46,10 @@ public class RobotContainer implements Logged {
         new PathingCommandGenerator(
             new RobotProfile(50, 3.0 / 39.37, .9, .9, Motor.NEO().gear(Motor.Gear.REV_HIGH)),
             m_robotDrive::getPose,
-            m_robotDrive::driveSpeed,
+            m_robotDrive::driveDifferential,
+            DriveConstants.diffKinematics.trackWidthMeters,
             m_robotDrive,
             Field.CHARGED_UP_2023);
-    path.setDifferentialDrive(m_robotDrive::driveDifferential, DriveConstants.diffKinematics.trackWidthMeters);
     configureButtonBindings();
 
     // Configure default commands
