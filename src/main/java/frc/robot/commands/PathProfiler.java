@@ -24,77 +24,40 @@ public class PathProfiler {
         
     };
     public double getNextRobotSpeed(double inVelocity,Pose2d currentRobotPose, ArrayList<Pose2d> path){
-        //path.add(0, currentRobotPose);
         ArrayList<ProfiledPathPoint> profiledPath=new ArrayList<>();
         profiledPath.add(new ProfiledPathPoint(0).setLocation(path.get(0)).setVelocity(maxVelocity));
         int i=1;
-        //System.out.println("--------------------");
         for(;i<path.size();i++){
-            //System.out.println(i);
             profiledPath.add(new ProfiledPathPoint(i).setLocation(path.get(i)).setLast(profiledPath.get(i-1)));
             profiledPath.get(i-1).setNext(profiledPath.get(i));
             if(i==1)continue;
-            //System.out.println(profiledPath.get(i-1).locationString());
             double stopDist = poseDist(profiledPath.get(i-1), profiledPath.get(i)) / angle(profiledPath.get(i-1));
             double maxAllowedVelocity = Math.sqrt(stopDist * 2 * maxAcceleration);
             if(Double.isInfinite(maxAllowedVelocity)||Double.isNaN(maxAllowedVelocity)){
                 maxAllowedVelocity=maxVelocity;
             }
-            //System.out.println(maxAllowedVelocity+" "+angle(profiledPath.get(i-1)));
-            //System.out.println(maxAllowedVelocity);
             profiledPath.get(i-1).setVelocity(Math.min(maxAllowedVelocity,maxVelocity));
         }
         int maxIndex=i-1;
         profiledPath.get(maxIndex).setVelocity(0);
         Collections.sort(profiledPath, pathPointComparator);
         ProfiledPathPoint currentPoint=profiledPath.get(0);
-        for(ProfiledPathPoint pt:profiledPath){
-            //System.out.println(pt);
-        }
-        int iterations=0;
-        ArrayList<ProfiledPathPoint> fullPath=new ArrayList<>();
-        for(ProfiledPathPoint pt:profiledPath){
-           fullPath.add(pt);
-            
-        }
-        //System.out.println("---------------------");
         while(currentPoint.getIndex()!=0){
             if(currentPoint.getIndex()!=maxIndex&&profiledPath.contains(currentPoint.getNext())){//We can check above
                 ProfiledPathPoint nextPoint=currentPoint.getNext() ;
                 nextPoint.setVelocity(Math.min(nextPoint.getVelocity(),Math.sqrt(currentPoint.getVelocity()*currentPoint.getVelocity()+2*maxAcceleration*poseDist(nextPoint, currentPoint))));
-                //System.out.println("Index "+currentPoint.getIndex()+" acted upon index "+nextPoint.getIndex());
-                //if(nextPoint.getIndex()==0)return nextPoint.getVelocity();
                 profiledPath.remove(nextPoint);
                 profiledPath.add(binarySearch(profiledPath, nextPoint), nextPoint);
             }
             if(profiledPath.contains(currentPoint.getLast())){
                 ProfiledPathPoint lastPoint=currentPoint.getLast() ;
                 lastPoint.setVelocity(Math.min(lastPoint.getVelocity(),Math.sqrt(currentPoint.getVelocity()*currentPoint.getVelocity()+2*maxAcceleration*poseDist(lastPoint, currentPoint))));
-                //System.out.println("Index "+currentPoint.getIndex()+" acted upon index "+lastPoint.getIndex());
-                //if(lastPoint.getIndex()==0)return lastPoint.getVelocity();
                 profiledPath.remove(lastPoint);
-                //System.out.println(binarySearch(profiledPath, lastPoint));
                 profiledPath.add(binarySearch(profiledPath, lastPoint), lastPoint);
             }
             profiledPath.remove(currentPoint);
             currentPoint=profiledPath.get(0);
-            //System.out.println(currentPoint);
-            //System.out.println(iterations++);
-            //System.out.println(profiledPath.size());
         }
-        Collections.sort(fullPath,new Comparator<ProfiledPathPoint>() {
-
-            @Override
-            public int compare(ProfiledPathPoint o1, ProfiledPathPoint o2) {
-                return o1.index>o2.index?1:-1;
-            }
-            
-        });
-        for(ProfiledPathPoint pt:fullPath){
-            //System.out.println(pt);
-        }
-        //System.out.println(currentPoint.getVelocity());
-        //System.out.println("**********************");
         return Math.min(currentPoint.getVelocity(),inVelocity+maxAcceleration*.02);
     }
     //Code for binary search courtesy of chat-gpt
