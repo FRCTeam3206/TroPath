@@ -110,11 +110,12 @@ public class PathingCommand extends Command {
     } else {
       nextState = getNextState(path);
     }
-    SmartDashboard.putNumber("Physics Time", System.currentTimeMillis() - start);
+    
     velocity =
         translationProfile.calculate(dT, new TrapezoidProfile.State(0, velocity), nextState)
             .velocity;*/
     velocity=pathProfiler.getNextRobotSpeed(velocity,robotPose.get(), path.asPose2dList());
+    SmartDashboard.putNumber("Physics Time", System.currentTimeMillis() - start);
     SmartDashboard.putNumber("Velocity", velocity);
     double xSpeed = dX / total * velocity;
     double ySpeed = dY / total * velocity;
