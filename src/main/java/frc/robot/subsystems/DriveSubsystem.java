@@ -286,11 +286,17 @@ public class DriveSubsystem extends SubsystemBase implements Logged {
         RelativeTo.kFieldRelative,
         false);
   }
-  
-  public void driveDifferential(DifferentialDriveWheelSpeeds speeds){
-    ChassisSpeeds swerveSpeeds=DriveConstants.diffKinematics.toChassisSpeeds(speeds);
-    drive(swerveSpeeds.vxMetersPerSecond, 0, swerveSpeeds.omegaRadiansPerSecond, RelativeTo.kRobotRelative, false);
+
+  public void driveDifferential(DifferentialDriveWheelSpeeds speeds) {
+    ChassisSpeeds swerveSpeeds = DriveConstants.diffKinematics.toChassisSpeeds(speeds);
+    drive(
+        swerveSpeeds.vxMetersPerSecond,
+        0,
+        swerveSpeeds.omegaRadiansPerSecond,
+        RelativeTo.kRobotRelative,
+        false);
   }
+
   /** Sets the wheels into an X formation to prevent movement. */
   public void setX() {
     m_frontLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));

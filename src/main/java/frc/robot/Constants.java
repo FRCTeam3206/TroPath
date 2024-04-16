@@ -71,7 +71,8 @@ public final class Constants {
 
     public static final boolean kGyroReversed = false;
 
-    public static final DifferentialDriveKinematics diffKinematics=new DifferentialDriveKinematics(Units.inchesToMeters(27.5));
+    public static final DifferentialDriveKinematics diffKinematics =
+        new DifferentialDriveKinematics(Units.inchesToMeters(27.5));
   }
 
   public static final class ModuleConstants {
