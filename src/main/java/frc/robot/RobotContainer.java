@@ -17,7 +17,6 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.RelativeTo;
 import frc.robot.commands.PathingCommandGenerator;
-import frc.robot.robotprofile.Motor;
 import frc.robot.robotprofile.RobotProfile;
 import frc.robot.subsystems.DriveSubsystem;
 import me.nabdev.pathfinding.utilities.FieldLoader.Field;
@@ -43,8 +42,7 @@ public class RobotContainer implements Logged {
     // Configure the button bindings
     path =
         new PathingCommandGenerator(
-            new RobotProfile(3,3,2,2,.9,.9
-            ),
+            new RobotProfile(3, 3, 2, 2, .9, .9),
             m_robotDrive::getPose,
             m_robotDrive::driveSpeed,
             m_robotDrive,

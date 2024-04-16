@@ -30,6 +30,7 @@ public class PathingCommand extends Command {
   private Field2d finalPoseFieldDisplay = new Field2d();
   private static final double dT = .02, eps = 1E-4;
   private PathProfiler pathProfiler;
+
   /**
    * Constructs a PathingCommand. This method is called by the {@link PathingCommandGenerator}.
    * Please use this generator to make a PathingCommand.
@@ -62,8 +63,8 @@ public class PathingCommand extends Command {
         new TrapezoidProfile(
             new Constraints(
                 profile.getMaxRotationalVelocity(), profile.getMaxRotationalAcceleration()));
-    System.out.println("Pathing Command Max Velocity "+profile.getMaxVelocity());
-    pathProfiler=new PathProfiler(profile.getMaxVelocity(), profile.getMaxAcceleration());
+    System.out.println("Pathing Command Max Velocity " + profile.getMaxVelocity());
+    pathProfiler = new PathProfiler(profile.getMaxVelocity(), profile.getMaxAcceleration());
     return this;
   }
 
@@ -110,11 +111,11 @@ public class PathingCommand extends Command {
     } else {
       nextState = getNextState(path);
     }
-    
+
     velocity =
         translationProfile.calculate(dT, new TrapezoidProfile.State(0, velocity), nextState)
             .velocity;*/
-    velocity=pathProfiler.getNextRobotSpeed(velocity,robotPose.get(), path.asPose2dList());
+    velocity = pathProfiler.getNextRobotSpeed(velocity, robotPose.get(), path.asPose2dList());
     SmartDashboard.putNumber("Physics Time", System.currentTimeMillis() - start);
     SmartDashboard.putNumber("Velocity", velocity);
     double xSpeed = dX / total * velocity;
