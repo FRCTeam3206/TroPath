@@ -15,7 +15,7 @@ public class PathProfiler {
         this.maxAcceleration = maxAcceleration;
         System.out.println("Max velocity "+maxVelocity);
     }
-    Comparator<ProfiledPathPoint> pathPointComparator=new Comparator<ProfiledPathPoint>() {
+    Comparator<ProfiledPathPoint> pathPointVelocityComparator=new Comparator<ProfiledPathPoint>() {
 
         @Override
         public int compare(ProfiledPathPoint o1, ProfiledPathPoint o2) {
@@ -40,7 +40,7 @@ public class PathProfiler {
         }
         int maxIndex=i-1;
         profiledPath.get(maxIndex).setVelocity(0);
-        Collections.sort(profiledPath, pathPointComparator);
+        Collections.sort(profiledPath, pathPointVelocityComparator);
         ProfiledPathPoint currentPoint=profiledPath.get(0);
         while(currentPoint.getIndex()!=0){
             if(currentPoint.getIndex()!=maxIndex&&profiledPath.contains(currentPoint.getNext())){//We can check above
@@ -52,6 +52,10 @@ public class PathProfiler {
             if(profiledPath.contains(currentPoint.getLast())){
                 ProfiledPathPoint lastPoint=currentPoint.getLast() ;
                 lastPoint.setVelocity(Math.min(lastPoint.getVelocity(),Math.sqrt(currentPoint.getVelocity()*currentPoint.getVelocity()+2*maxAcceleration*poseDist(lastPoint, currentPoint))));
+                if(lastPoint.getIndex()==0){//Optimized stopping
+                    currentPoint=lastPoint;
+                    break;
+                }
                 profiledPath.remove(lastPoint);
                 profiledPath.add(binarySearch(profiledPath, lastPoint), lastPoint);
             }
