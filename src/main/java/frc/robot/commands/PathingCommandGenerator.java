@@ -26,7 +26,7 @@ public class PathingCommandGenerator {
   private final Subsystem subsystem;
   private double translationTolerance = .05, rotationTolerance = Math.PI / 32;
   private boolean allianceFlip = true;
-
+  private boolean linearPhysics=false;
   /**
    * Constructs a PathingCommandGenerator to generate {@code PathingCommand}s with the given
    * settings. Defaults to using the layout for the 2024 field. To use a custom field, add String or
@@ -190,9 +190,21 @@ public class PathingCommandGenerator {
       double givenTranslationTolerance, double givenRotationTolerance) {
     return new PathingCommandGenerator(robotProfile, robotPose, drive, subsystem, builder)
         .setTolerances(givenRotationTolerance, givenRotationTolerance)
-        .setAllianceFlipping(allianceFlip);
+        .setAllianceFlipping(allianceFlip)
+        .setPhysicsAlgorithmType(linearPhysics);
   }
-
+  /**
+   * Sets the physics algorithm used in path following. The linear algorithm propogates the current velocity
+   * out along the path, starting at the robot, until it comes accross a point at which it needs to slow down.
+   * A non-linear algorithm looks ahead and propogates velocities from points that will need to be slowed down on(turns).
+   * This yeilds more accurate results and allows tighter path following, but runs slower than the linear version.
+   * @param linear If the physics algorithm will search for slowdowns from the robot's perspective or will look ahead. A true value for this will run faster but yeild less accurate results than false;
+   * @return This generator
+   */
+  public PathingCommandGenerator setPhysicsAlgorithmType(boolean linear){
+    this.linearPhysics=linear;
+    return this;
+  }
   /**
    * Generates a new PathingCommand to go to the given supplied position.
    *
@@ -208,7 +220,8 @@ public class PathingCommandGenerator {
         builder.build(),
         subsystem,
         translationTolerance,
-        rotationTolerance);
+        rotationTolerance,
+        linearPhysics);
   }
 
   /**
