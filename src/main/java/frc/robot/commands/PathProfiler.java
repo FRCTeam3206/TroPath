@@ -58,7 +58,7 @@ public class PathProfiler {
                         + 2 * maxAcceleration * poseDist(nextPoint, currentPoint))));
         int index = profiledPath.indexOf(nextPoint);
         profiledPath.remove(index);
-        profiledPath.add(binarySearch(profiledPath.subList(0, index), nextPoint), nextPoint);
+        profiledPath.add(binaryVelocitySearch(profiledPath.subList(0, index), nextPoint), nextPoint);
       }
       if (profiledPath.contains(currentPoint.getLast())) {
         ProfiledPathPoint lastPoint = currentPoint.getLast();
@@ -74,7 +74,7 @@ public class PathProfiler {
         }
         int index = profiledPath.indexOf(lastPoint);
         profiledPath.remove(index);
-        profiledPath.add(binarySearch(profiledPath.subList(0, index), lastPoint), lastPoint);
+        profiledPath.add(binaryVelocitySearch(profiledPath.subList(0, index), lastPoint), lastPoint);
       }
       profiledPath.remove(currentPoint);
       currentPoint = profiledPath.get(0);
@@ -83,7 +83,7 @@ public class PathProfiler {
   }
 
   // Code for binary search courtesy of chat-gpt
-  public static int binarySearch(List<ProfiledPathPoint> list, ProfiledPathPoint item) {
+  public static int binaryVelocitySearch(List<ProfiledPathPoint> list, ProfiledPathPoint item) {
     int low = 0;
     int high = list.size() - 1;
 
@@ -164,10 +164,6 @@ public class PathProfiler {
 
     public int getIndex() {
       return index;
-    }
-
-    public String locationString() {
-      return "ProfiledPathPoint [last=" + last + ", next=" + next + ", location=" + location + "]";
     }
 
     public String toString() {
