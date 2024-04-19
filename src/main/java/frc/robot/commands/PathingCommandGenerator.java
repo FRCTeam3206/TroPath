@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -247,38 +248,38 @@ public class PathingCommandGenerator {
   }
 
   private Consumer<ChassisSpeeds> differentialRotationConsumer;
+  SlewRateLimiter limiter;
   private TrapezoidProfile diffRotationProfile;
-  private double diffRotationSpeed;
+  double rotationalVelocity;
   public void setDifferentialDrive(
       Consumer<DifferentialDriveWheelSpeeds> diffDrive, double trackWidth) {
-    isDifferential = true;
-    DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(trackWidth);
-    diffRotationProfile=new TrapezoidProfile(new Constraints(robotProfile.getMaxRotationalVelocity(), robotProfile.getMaxRotationalAcceleration()));
-    drive =
-        (ChassisSpeeds speeds) -> {
-          double theta =
-              new Rotation2d(Math.atan2(speeds.vyMetersPerSecond, speeds.vxMetersPerSecond)).minus(robotPose.get().getRotation()).getRadians();
-          diffRotationSpeed=diffRotationProfile.calculate(.02, new State(theta, diffRotationSpeed), new State(0, 0)).velocity;
-          SmartDashboard.putNumber("Move Vx",speeds.vxMetersPerSecond);
-          SmartDashboard.putNumber("Move Vy",speeds.vyMetersPerSecond);
-          SmartDashboard.putNumber("Theta",theta);
-          SmartDashboard.putNumber("Rot Speed",diffRotationSpeed);
-          double desiredLinearVelocity =
-              Math.sqrt(
-                  speeds.vxMetersPerSecond * speeds.vxMetersPerSecond
-                      + speeds.vyMetersPerSecond * speeds.vyMetersPerSecond);
-          double linearVelocity=(1-diffRotationSpeed/robotProfile.getMaxRotationalVelocity())*desiredLinearVelocity;
-          linearVelocity*=Math.cos(theta)*Math.cos(theta);
-          if(Math.cos(theta)<0)linearVelocity=0;
-          DifferentialDriveWheelSpeeds output =
-              kinematics.toWheelSpeeds(new ChassisSpeeds(linearVelocity, 0, -diffRotationSpeed));
-          diffDrive.accept(output);
-        };
-    differentialRotationConsumer =
-        (ChassisSpeeds speeds) -> {
-          diffDrive.accept(
-              kinematics.toWheelSpeeds(new ChassisSpeeds(0, 0, speeds.omegaRadiansPerSecond)));
-        };
+        limiter=new SlewRateLimiter(99999, 99999, 0);
+        isDifferential = true;
+        DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(trackWidth);
+        drive =
+            (ChassisSpeeds speeds) -> {
+              double theta =
+                  Math.atan2(speeds.vyMetersPerSecond, speeds.vxMetersPerSecond)
+                      - robotPose.get().getRotation().getRadians();
+              double velocity =
+                  Math.sqrt(
+                      speeds.vxMetersPerSecond * speeds.vxMetersPerSecond
+                          + speeds.vyMetersPerSecond * speeds.vyMetersPerSecond);
+              double linearVelocity = velocity * Math.cos(theta);
+              double desiredRotationalVelocity = (velocity) * Math.sin(theta) * 2 / trackWidth;
+              double rotationSign=Math.signum(desiredRotationalVelocity);
+              desiredRotationalVelocity=Math.abs(desiredRotationalVelocity);
+              rotationalVelocity=Math.min(desiredRotationalVelocity,Math.sqrt(rotationalVelocity*rotationalVelocity+2*Math.abs(theta)*robotProfile.getMaxRotationalAcceleration()))*rotationSign;
+              SmartDashboard.putNumber("Rotation Vel", rotationalVelocity);
+              DifferentialDriveWheelSpeeds output =
+                  kinematics.toWheelSpeeds(new ChassisSpeeds(linearVelocity, 0, rotationalVelocity));
+              diffDrive.accept(output);
+            };
+        differentialRotationConsumer =
+            (ChassisSpeeds speeds) -> {
+              diffDrive.accept(
+                  kinematics.toWheelSpeeds(new ChassisSpeeds(0, 0, speeds.omegaRadiansPerSecond)));
+            };
   }
 
   /**
