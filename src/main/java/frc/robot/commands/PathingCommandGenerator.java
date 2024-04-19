@@ -248,12 +248,9 @@ public class PathingCommandGenerator {
   }
 
   private Consumer<ChassisSpeeds> differentialRotationConsumer;
-  SlewRateLimiter limiter;
-  private TrapezoidProfile diffRotationProfile;
   double rotationalVelocity;
   public void setDifferentialDrive(
       Consumer<DifferentialDriveWheelSpeeds> diffDrive, double trackWidth) {
-        limiter=new SlewRateLimiter(99999, 99999, 0);
         isDifferential = true;
         DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(trackWidth);
         drive =
