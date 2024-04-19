@@ -65,7 +65,6 @@ public class PathingCommand extends Command {
         new TrapezoidProfile(
             new Constraints(
                 profile.getMaxRotationalVelocity(), profile.getMaxRotationalAcceleration()));
-    System.out.println("Pathing Command Max Velocity " + profile.getMaxVelocity());
     pathProfiler = new PathProfiler(profile.getMaxVelocity(), profile.getMaxAcceleration());
     return this;
   }

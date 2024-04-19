@@ -12,7 +12,6 @@ public class PathProfiler {
   public PathProfiler(double maxVelocity, double maxAcceleration) {
     this.maxVelocity = maxVelocity;
     this.maxAcceleration = maxAcceleration;
-    System.out.println("Max velocity " + maxVelocity);
   }
 
   Comparator<ProfiledPathPoint> pathPointVelocityComparator =
