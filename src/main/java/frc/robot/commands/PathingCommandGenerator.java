@@ -144,7 +144,10 @@ public class PathingCommandGenerator {
    * @param drive Consumer to drive the robot. Must take {@link DifferentialDriveWheelSpeeds} in
    *     meters per second
    * @param trackWidth The wheel to wheel distance on the drivetrain, in meters
-   * @param reversed If the robot will drive backwards toward the target instead of forwards
+   * @param reverseMode Type of reversing that will be used. DifferentialOrientationMode.FORWARD
+   *  means it will always drive forward, DifferentialOrientationMode.REVERSE means it will always
+   *  move backward, and DifferentialOrientationMode.AUTOMATIC means it will do whatever requires
+   *  the least rotation.
    * @param subsystem The drive subsystem (so it can be required).
    */
   public PathingCommandGenerator(
@@ -152,9 +155,9 @@ public class PathingCommandGenerator {
       Supplier<Pose2d> robotPose,
       Consumer<DifferentialDriveWheelSpeeds> drive,
       double trackWidth,
-      boolean reversed,
+      DifferentialOrientationMode reverseMode,
       Subsystem subsystem) {
-    this(robotProfile, robotPose, drive, trackWidth, reversed, subsystem, Field.CRESCENDO_2024);
+    this(robotProfile, robotPose, drive, trackWidth, reverseMode, subsystem, Field.CRESCENDO_2024);
   }
 
   /**
@@ -169,7 +172,10 @@ public class PathingCommandGenerator {
    * @param drive Consumer to drive the robot. Must take {@link DifferentialDriveWheelSpeeds} in
    *     meters per second
    * @param trackWidth The wheel to wheel distance on the drivetrain, in meters
-   * @param reversed If the robot will drive backwards toward the target instead of forwards
+   * @param reverseMode Type of reversing that will be used. DifferentialOrientationMode.FORWARD
+   *  means it will always drive forward, DifferentialOrientationMode.REVERSE means it will always
+   *  move backward, and DifferentialOrientationMode.AUTOMATIC means it will do whatever requires
+   *  the least rotation.
    * @param subsystem The drive subsystem (so it can be required).
    * @param fieldJsonName The name the custom field json file, which must be located in the deploy
    *     folder. NOT the full path. For example, {@code "my_field.json"}.
@@ -179,7 +185,7 @@ public class PathingCommandGenerator {
       Supplier<Pose2d> robotPose,
       Consumer<DifferentialDriveWheelSpeeds> drive,
       double trackWidth,
-      boolean reversed,
+      DifferentialOrientationMode reverseMode,
       Subsystem subsystem,
       String fieldJsonName) {
     this(
@@ -187,7 +193,7 @@ public class PathingCommandGenerator {
         robotPose,
         drive,
         trackWidth,
-        reversed,
+        reverseMode,
         subsystem,
         new PathfinderBuilder(Filesystem.getDeployDirectory() + "\\" + fieldJsonName));
   }
@@ -204,9 +210,11 @@ public class PathingCommandGenerator {
    * @param drive Consumer to drive the robot. Must take {@link DifferentialDriveWheelSpeeds} in
    *     meters per second
    * @param trackWidth The wheel to wheel distance on the drivetrain, in meters
-   * @param reversed If the robot will drive backwards toward the target instead of forwards
+   * @param reverseMode Type of reversing that will be used. DifferentialOrientationMode.FORWARD
+   *  means it will always drive forward, DifferentialOrientationMode.REVERSE means it will always
+   *  move backward, and DifferentialOrientationMode.AUTOMATIC means it will do whatever requires
+   *  the least rotation.
    * @param subsystem The drive subsystem (so it can be required).
-   * @param reversed If the robot will drive backwards toward the target instead of forwards
    * @param field The value of the desired field from the {@link Field} enum.
    */
   public PathingCommandGenerator(
@@ -214,10 +222,10 @@ public class PathingCommandGenerator {
       Supplier<Pose2d> robotPose,
       Consumer<DifferentialDriveWheelSpeeds> drive,
       double trackWidth,
-      boolean reversed,
+      DifferentialOrientationMode reverseMode,
       Subsystem subsystem,
       Field field) {
-    this(robotProfile, robotPose, drive, trackWidth, reversed, subsystem, new PathfinderBuilder(field));
+    this(robotProfile, robotPose, drive, trackWidth, reverseMode, subsystem, new PathfinderBuilder(field));
   }
 
   /**
@@ -233,7 +241,10 @@ public class PathingCommandGenerator {
    * @param drive Consumer to drive the robot. Must take {@link DifferentialDriveWheelSpeeds} in
    *     meters per second
    * @param trackWidth The wheel to wheel distance on the drivetrain, in meters
-   * @param reversed If the robot will drive backwards toward the target instead of forwards
+   * @param reverseMode Type of reversing that will be used. DifferentialOrientationMode.FORWARD
+   *  means it will always drive forward, DifferentialOrientationMode.REVERSE means it will always
+   *  move backward, and DifferentialOrientationMode.AUTOMATIC means it will do whatever requires
+   *  the least rotation.
    * @param subsystem The drive subsystem (so it can be required).
    * @param builder The PathfinderBuilder to be used by this command generator.
    */
@@ -242,12 +253,12 @@ public class PathingCommandGenerator {
       Supplier<Pose2d> robotPose,
       Consumer<DifferentialDriveWheelSpeeds> drive,
       double trackWidth,
-      boolean reversed,
+      DifferentialOrientationMode reverseMode,
       Subsystem subsystem,
       PathfinderBuilder builder) {
     this.robotProfile = robotProfile;
     this.robotPose = robotPose;
-    setDifferentialDrive(drive, trackWidth,reversed);
+    setDifferentialDrive(drive, trackWidth,reverseMode);
     this.subsystem = subsystem;
     AllianceUtil.setRobot(robotPose);
     this.builder = builder;
@@ -256,14 +267,20 @@ public class PathingCommandGenerator {
   private Consumer<ChassisSpeeds> differentialRotationConsumer;
   double rotationalVelocity;
   public void setDifferentialDrive(
-      Consumer<DifferentialDriveWheelSpeeds> diffDrive, double trackWidth, boolean reversed) {
+      Consumer<DifferentialDriveWheelSpeeds> diffDrive, double trackWidth, DifferentialOrientationMode reverseMode) {
         isDifferential = true;
         DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(trackWidth);
         drive =
             (ChassisSpeeds speeds) -> {
               double theta =
-                  new Rotation2d(Math.atan2(speeds.vyMetersPerSecond, speeds.vxMetersPerSecond)).minus(robotPose.get().getRotation()).plus(new Rotation2d(reversed?Math.PI:0)).getRadians();
-              double velocity =
+                  new Rotation2d(Math.atan2(speeds.vyMetersPerSecond, speeds.vxMetersPerSecond)).minus(robotPose.get().getRotation()).getRadians();
+              boolean reversed=false;
+              if(reverseMode==DifferentialOrientationMode.REVERSE)reversed=true;
+              if(reverseMode==DifferentialOrientationMode.AUTOMATIC){
+                reversed=Math.abs(theta)>Math.PI/2;
+              }
+              if(reversed)theta=new Rotation2d(theta).plus(new Rotation2d(Math.PI)).getRadians();
+                  double velocity =
                   Math.sqrt(
                       speeds.vxMetersPerSecond * speeds.vxMetersPerSecond
                           + speeds.vyMetersPerSecond * speeds.vyMetersPerSecond);
@@ -606,5 +623,9 @@ public class PathingCommandGenerator {
   public Command generateToDistFromPointCommand(
       Translation2d point, double distance) {
     return generateToDistFromPointCommand(point, distance, 0, new Rotation2d(), Math.PI);
+  }
+
+  public static enum DifferentialOrientationMode{
+    FORWARD,REVERSE,AUTOMATIC
   }
 }
