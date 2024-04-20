@@ -47,6 +47,7 @@ public class RobotContainer implements Logged {
             m_robotDrive::getPose,
             m_robotDrive::driveDifferential,
             DriveConstants.diffKinematics.trackWidthMeters,
+            true,
             m_robotDrive,
             Field.CHARGED_UP_2023).setPhysicsAlgorithmType(false);
     configureButtonBindings();

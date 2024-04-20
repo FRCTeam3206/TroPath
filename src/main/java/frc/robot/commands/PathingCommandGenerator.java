@@ -105,8 +105,7 @@ public class PathingCommandGenerator {
   }
 
   /**
-   * Please only use this constructor if you understand well how the code works and know why you
-   * don't want to use one of the other constructors. Constructs a PathingCommandGenerator to
+   * Please only use this if you know what you are doing. Constructs a PathingCommandGenerator to
    * generate {@code PathingCommand}s on a holonomic chassis with the given settings. This
    * constructor allows you to pass in a custom Pathfinder builder instead of one being created with
    * a field layout as the default, with a custom json, or with a Field value. The builder can later
@@ -145,6 +144,7 @@ public class PathingCommandGenerator {
    * @param drive Consumer to drive the robot. Must take {@link DifferentialDriveWheelSpeeds} in
    *     meters per second
    * @param trackWidth The wheel to wheel distance on the drivetrain, in meters
+   * @param reversed If the robot will drive backwards toward the target instead of forwards
    * @param subsystem The drive subsystem (so it can be required).
    */
   public PathingCommandGenerator(
@@ -152,8 +152,9 @@ public class PathingCommandGenerator {
       Supplier<Pose2d> robotPose,
       Consumer<DifferentialDriveWheelSpeeds> drive,
       double trackWidth,
+      boolean reversed,
       Subsystem subsystem) {
-    this(robotProfile, robotPose, drive, trackWidth, subsystem, Field.CRESCENDO_2024);
+    this(robotProfile, robotPose, drive, trackWidth, reversed, subsystem, Field.CRESCENDO_2024);
   }
 
   /**
@@ -168,6 +169,7 @@ public class PathingCommandGenerator {
    * @param drive Consumer to drive the robot. Must take {@link DifferentialDriveWheelSpeeds} in
    *     meters per second
    * @param trackWidth The wheel to wheel distance on the drivetrain, in meters
+   * @param reversed If the robot will drive backwards toward the target instead of forwards
    * @param subsystem The drive subsystem (so it can be required).
    * @param fieldJsonName The name the custom field json file, which must be located in the deploy
    *     folder. NOT the full path. For example, {@code "my_field.json"}.
@@ -177,6 +179,7 @@ public class PathingCommandGenerator {
       Supplier<Pose2d> robotPose,
       Consumer<DifferentialDriveWheelSpeeds> drive,
       double trackWidth,
+      boolean reversed,
       Subsystem subsystem,
       String fieldJsonName) {
     this(
@@ -184,6 +187,7 @@ public class PathingCommandGenerator {
         robotPose,
         drive,
         trackWidth,
+        reversed,
         subsystem,
         new PathfinderBuilder(Filesystem.getDeployDirectory() + "\\" + fieldJsonName));
   }
@@ -200,7 +204,9 @@ public class PathingCommandGenerator {
    * @param drive Consumer to drive the robot. Must take {@link DifferentialDriveWheelSpeeds} in
    *     meters per second
    * @param trackWidth The wheel to wheel distance on the drivetrain, in meters
+   * @param reversed If the robot will drive backwards toward the target instead of forwards
    * @param subsystem The drive subsystem (so it can be required).
+   * @param reversed If the robot will drive backwards toward the target instead of forwards
    * @param field The value of the desired field from the {@link Field} enum.
    */
   public PathingCommandGenerator(
@@ -208,9 +214,10 @@ public class PathingCommandGenerator {
       Supplier<Pose2d> robotPose,
       Consumer<DifferentialDriveWheelSpeeds> drive,
       double trackWidth,
+      boolean reversed,
       Subsystem subsystem,
       Field field) {
-    this(robotProfile, robotPose, drive, trackWidth, subsystem, new PathfinderBuilder(field));
+    this(robotProfile, robotPose, drive, trackWidth, reversed, subsystem, new PathfinderBuilder(field));
   }
 
   /**
@@ -226,6 +233,7 @@ public class PathingCommandGenerator {
    * @param drive Consumer to drive the robot. Must take {@link DifferentialDriveWheelSpeeds} in
    *     meters per second
    * @param trackWidth The wheel to wheel distance on the drivetrain, in meters
+   * @param reversed If the robot will drive backwards toward the target instead of forwards
    * @param subsystem The drive subsystem (so it can be required).
    * @param builder The PathfinderBuilder to be used by this command generator.
    */
@@ -234,11 +242,12 @@ public class PathingCommandGenerator {
       Supplier<Pose2d> robotPose,
       Consumer<DifferentialDriveWheelSpeeds> drive,
       double trackWidth,
+      boolean reversed,
       Subsystem subsystem,
       PathfinderBuilder builder) {
     this.robotProfile = robotProfile;
     this.robotPose = robotPose;
-    setDifferentialDrive(drive, trackWidth);
+    setDifferentialDrive(drive, trackWidth,reversed);
     this.subsystem = subsystem;
     AllianceUtil.setRobot(robotPose);
     this.builder = builder;
@@ -247,19 +256,18 @@ public class PathingCommandGenerator {
   private Consumer<ChassisSpeeds> differentialRotationConsumer;
   double rotationalVelocity;
   public void setDifferentialDrive(
-      Consumer<DifferentialDriveWheelSpeeds> diffDrive, double trackWidth) {
+      Consumer<DifferentialDriveWheelSpeeds> diffDrive, double trackWidth, boolean reversed) {
         isDifferential = true;
         DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(trackWidth);
         drive =
             (ChassisSpeeds speeds) -> {
               double theta =
-                  Math.atan2(speeds.vyMetersPerSecond, speeds.vxMetersPerSecond)
-                      - robotPose.get().getRotation().getRadians();
+                  new Rotation2d(Math.atan2(speeds.vyMetersPerSecond, speeds.vxMetersPerSecond)).minus(robotPose.get().getRotation()).plus(new Rotation2d(reversed?Math.PI:0)).getRadians();
               double velocity =
                   Math.sqrt(
                       speeds.vxMetersPerSecond * speeds.vxMetersPerSecond
                           + speeds.vyMetersPerSecond * speeds.vyMetersPerSecond);
-              double linearVelocity = velocity * Math.cos(theta);
+              double linearVelocity = velocity * Math.cos(theta)*(reversed?-1:1);
               double desiredRotationalVelocity = (velocity) * Math.sin(theta) * 2 / trackWidth;
               double rotationSign=Math.signum(desiredRotationalVelocity);
               desiredRotationalVelocity=Math.abs(desiredRotationalVelocity);
@@ -275,7 +283,6 @@ public class PathingCommandGenerator {
                   kinematics.toWheelSpeeds(new ChassisSpeeds(0, 0, speeds.omegaRadiansPerSecond)));
             };
   }
-
   /**
    * Sets the tolerances for this PathingCommandGenerator. These default to 5 cm and pi / 32
    * radians. The tolerances are the maximum allowed error for which the robot is considered to have
