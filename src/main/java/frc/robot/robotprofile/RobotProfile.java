@@ -35,7 +35,7 @@ public class RobotProfile {
     this.maxRotationalAcceleration = maxRotationalAcceleration;
     this.length = length;
     this.width = width;
-    this.safteyMultiplier=1;
+    this.safteyMultiplier = 1;
   }
 
   /**
