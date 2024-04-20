@@ -18,6 +18,7 @@ import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.RelativeTo;
 import frc.robot.commands.PathingCommandGenerator;
+import frc.robot.commands.PathingCommandGenerator.DifferentialOrientationMode;
 import frc.robot.robotprofile.RobotProfile;
 import frc.robot.subsystems.DriveSubsystem;
 import me.nabdev.pathfinding.utilities.FieldLoader.Field;
@@ -47,7 +48,6 @@ public class RobotContainer implements Logged {
             m_robotDrive::getPose,
             m_robotDrive::driveDifferential,
             DriveConstants.diffKinematics.trackWidthMeters,
-            PathingCommandGenerator.DifferentialOrientationMode.AUTOMATIC,
             m_robotDrive,
             Field.CHARGED_UP_2023).setPhysicsAlgorithmType(false);
     configureButtonBindings();
