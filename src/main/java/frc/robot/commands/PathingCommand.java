@@ -29,7 +29,8 @@ public class PathingCommand extends Command {
   private Field2d nextPoseFieldDisplay = new Field2d();
   private Field2d finalPoseFieldDisplay = new Field2d();
   private static final double dT = .02, eps = 1E-4;
-
+  private PathProfiler pathProfiler;
+  private boolean linearPhysics=false;
   /**
    * Constructs a PathingCommand. This method is called by the {@link PathingCommandGenerator}.
    * Please use this generator to make a PathingCommand.
@@ -42,10 +43,12 @@ public class PathingCommand extends Command {
       Pathfinder pathfinder,
       Subsystem subsystem,
       double translationTolerance,
-      double rotationTolerance) {
+      double rotationTolerance,
+      boolean linearPhysics) {
     this.goalPoseSupplier = goalSupplier;
     this.robotPose = currentPoseSupplier;
     this.drive = drive;
+    this.linearPhysics=linearPhysics;
     setRobotProfile(robotProfile);
     this.pathfinder = pathfinder;
     this.addRequirements(subsystem);
@@ -62,6 +65,7 @@ public class PathingCommand extends Command {
         new TrapezoidProfile(
             new Constraints(
                 profile.getMaxRotationalVelocity(), profile.getMaxRotationalAcceleration()));
+    pathProfiler = new PathProfiler(profile.getMaxVelocity(), profile.getMaxAcceleration());
     return this;
   }
 
@@ -101,17 +105,22 @@ public class PathingCommand extends Command {
     double total = Math.abs(dX) + Math.abs(dY);
     TrapezoidProfile.State nextState;
     start = System.currentTimeMillis();
-    if (path.size() <= 1) {
-      nextState =
-          new TrapezoidProfile.State(
-              usedPose.getTranslation().getDistance(goalPoseSupplier.get().getTranslation()), 0);
-    } else {
-      nextState = getNextState(path);
+    if(linearPhysics){
+      if (path.size() <= 1) {
+        nextState =
+            new TrapezoidProfile.State(
+                usedPose.getTranslation().getDistance(goalPoseSupplier.get().getTranslation()), 0);
+      } else {
+        nextState = getNextState(path);
+      }
+
+      velocity =
+          translationProfile.calculate(dT, new TrapezoidProfile.State(0, velocity), nextState)
+              .velocity;
+    }else{
+      velocity = pathProfiler.getNextRobotSpeed(velocity, robotPose.get(), path.asPose2dList());
     }
     SmartDashboard.putNumber("Physics Time", System.currentTimeMillis() - start);
-    velocity =
-        translationProfile.calculate(dT, new TrapezoidProfile.State(0, velocity), nextState)
-            .velocity;
     SmartDashboard.putNumber("Velocity", velocity);
     double xSpeed = dX / total * velocity;
     double ySpeed = dY / total * velocity;
