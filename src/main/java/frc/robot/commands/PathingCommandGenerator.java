@@ -448,7 +448,7 @@ public class PathingCommandGenerator {
       double offset,
       Rotation2d centerGoal,
       double maxAngleOff) {
-        return generateToDistFromPointCommand(point,()->distance.nearestValue(distance.nearestDirection(robotPose.get().getTranslation().getDistance(point))),offset,centerGoal,maxAngleOff);
+        return generateToDistFromPointCommand(point,()->distance.nearestValue(robotPose.get().getTranslation().getDistance(point)),offset,centerGoal,maxAngleOff);
       }
   /**
    * Generates a new PathingCommand to go to a supplied distance from a reference point.
