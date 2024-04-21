@@ -4,8 +4,13 @@ public class Range {
     private double min,max;
 
     public Range(double min, double max) {
-        this.min = min;
-        this.max = max;
+        if (min < max) {
+            this.min = min;
+            this.max = max;
+        } else {
+            this.min = max;
+            this.max = min;
+        }
     }
 
     public double getMin() {
