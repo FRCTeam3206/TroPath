@@ -29,7 +29,7 @@ public class PathingCommandGenerator {
   private final Subsystem subsystem;
   private double translationTolerance = .05, rotationTolerance = Math.PI / 32;
   private boolean allianceFlip = true;
-  private boolean linearPhysics=false;
+  private boolean linearPhysics = false;
   private boolean isDifferential = false;
 
   /**
@@ -243,47 +243,60 @@ public class PathingCommandGenerator {
     AllianceUtil.setRobot(robotPose);
     this.builder = builder;
   }
+
   private Consumer<ChassisSpeeds> differentialRotationConsumer;
   double rotationalVelocity;
-  private DifferentialOrientationMode differentialOrientationMode=DifferentialOrientationMode.AUTOMATIC;
-  public PathingCommandGenerator setDifferentialOrientationMode(DifferentialOrientationMode mode){
-    this.differentialOrientationMode=mode;
+  private DifferentialOrientationMode differentialOrientationMode =
+      DifferentialOrientationMode.AUTOMATIC;
+
+  public PathingCommandGenerator setDifferentialOrientationMode(DifferentialOrientationMode mode) {
+    this.differentialOrientationMode = mode;
     return this;
   }
+
   public void setDifferentialDrive(
       Consumer<DifferentialDriveWheelSpeeds> diffDrive, double trackWidth) {
-        isDifferential = true;
-        DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(trackWidth);
-        drive =
-            (ChassisSpeeds speeds) -> {
-              double theta =
-                  new Rotation2d(Math.atan2(speeds.vyMetersPerSecond, speeds.vxMetersPerSecond)).minus(robotPose.get().getRotation()).getRadians();
-              boolean reversed=false;
-              if(differentialOrientationMode==DifferentialOrientationMode.REVERSE)reversed=true;
-              if(differentialOrientationMode==DifferentialOrientationMode.AUTOMATIC){
-                reversed=Math.abs(theta)>Math.PI/2;
-              }
-              if(reversed)theta=new Rotation2d(theta).plus(new Rotation2d(Math.PI)).getRadians();
-                  double velocity =
-                  Math.sqrt(
-                      speeds.vxMetersPerSecond * speeds.vxMetersPerSecond
-                          + speeds.vyMetersPerSecond * speeds.vyMetersPerSecond);
-              double linearVelocity = velocity * Math.cos(theta)*(reversed?-1:1);
-              double desiredRotationalVelocity = (velocity) * Math.sin(theta) * 2 / trackWidth;
-              double rotationSign=Math.signum(desiredRotationalVelocity);
-              desiredRotationalVelocity=Math.abs(desiredRotationalVelocity);
-              rotationalVelocity=Math.min(desiredRotationalVelocity,Math.sqrt(rotationalVelocity*rotationalVelocity+2*Math.abs(theta)*robotProfile.getMaxRotationalAcceleration()))*rotationSign;
-              SmartDashboard.putNumber("Rotation Vel", rotationalVelocity);
-              DifferentialDriveWheelSpeeds output =
-                  kinematics.toWheelSpeeds(new ChassisSpeeds(linearVelocity, 0, rotationalVelocity));
-              diffDrive.accept(output);
-            };
-        differentialRotationConsumer =
-            (ChassisSpeeds speeds) -> {
-              diffDrive.accept(
-                  kinematics.toWheelSpeeds(new ChassisSpeeds(0, 0, speeds.omegaRadiansPerSecond)));
-            };
+    isDifferential = true;
+    DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(trackWidth);
+    drive =
+        (ChassisSpeeds speeds) -> {
+          double theta =
+              new Rotation2d(Math.atan2(speeds.vyMetersPerSecond, speeds.vxMetersPerSecond))
+                  .minus(robotPose.get().getRotation())
+                  .getRadians();
+          boolean reversed = false;
+          if (differentialOrientationMode == DifferentialOrientationMode.REVERSE) reversed = true;
+          if (differentialOrientationMode == DifferentialOrientationMode.AUTOMATIC) {
+            reversed = Math.abs(theta) > Math.PI / 2;
+          }
+          if (reversed) theta = new Rotation2d(theta).plus(new Rotation2d(Math.PI)).getRadians();
+          double velocity =
+              Math.sqrt(
+                  speeds.vxMetersPerSecond * speeds.vxMetersPerSecond
+                      + speeds.vyMetersPerSecond * speeds.vyMetersPerSecond);
+          double linearVelocity = velocity * Math.cos(theta) * (reversed ? -1 : 1);
+          double desiredRotationalVelocity = (velocity) * Math.sin(theta) * 2 / trackWidth;
+          double rotationSign = Math.signum(desiredRotationalVelocity);
+          desiredRotationalVelocity = Math.abs(desiredRotationalVelocity);
+          rotationalVelocity =
+              Math.min(
+                      desiredRotationalVelocity,
+                      Math.sqrt(
+                          rotationalVelocity * rotationalVelocity
+                              + 2 * Math.abs(theta) * robotProfile.getMaxRotationalAcceleration()))
+                  * rotationSign;
+          SmartDashboard.putNumber("Rotation Vel", rotationalVelocity);
+          DifferentialDriveWheelSpeeds output =
+              kinematics.toWheelSpeeds(new ChassisSpeeds(linearVelocity, 0, rotationalVelocity));
+          diffDrive.accept(output);
+        };
+    differentialRotationConsumer =
+        (ChassisSpeeds speeds) -> {
+          diffDrive.accept(
+              kinematics.toWheelSpeeds(new ChassisSpeeds(0, 0, speeds.omegaRadiansPerSecond)));
+        };
   }
+
   /**
    * Sets the tolerances for this PathingCommandGenerator. These default to 5 cm and pi / 32
    * radians. The tolerances are the maximum allowed error for which the robot is considered to have
@@ -349,18 +362,24 @@ public class PathingCommandGenerator {
         .setPhysicsAlgorithmType(linearPhysics)
         .setDifferentialOrientationMode(differentialOrientationMode);
   }
+
   /**
-   * Sets the physics algorithm used in path following. The linear algorithm propogates the current velocity
-   * out along the path, starting at the robot, until it comes accross a point at which it needs to slow down.
-   * A non-linear algorithm looks ahead and propogates velocities from points that will need to be slowed down on(turns).
-   * This yeilds more accurate results and allows tighter path following, but runs slower than the linear version.
-   * @param linear If the physics algorithm will search for slowdowns from the robot's perspective or will look ahead. A true value for this will run faster but yeild less accurate results than false;
+   * Sets the physics algorithm used in path following. The linear algorithm propogates the current
+   * velocity out along the path, starting at the robot, until it comes accross a point at which it
+   * needs to slow down. A non-linear algorithm looks ahead and propogates velocities from points
+   * that will need to be slowed down on(turns). This yeilds more accurate results and allows
+   * tighter path following, but runs slower than the linear version.
+   *
+   * @param linear If the physics algorithm will search for slowdowns from the robot's perspective
+   *     or will look ahead. A true value for this will run faster but yeild less accurate results
+   *     than false;
    * @return This generator
    */
-  public PathingCommandGenerator setPhysicsAlgorithmType(boolean linear){
-    this.linearPhysics=linear;
+  public PathingCommandGenerator setPhysicsAlgorithmType(boolean linear) {
+    this.linearPhysics = linear;
     return this;
   }
+
   /**
    * Generates a new PathingCommand to go to the given supplied position.
    *
@@ -453,7 +472,8 @@ public class PathingCommandGenerator {
 
   /**
    * Generates a new PathingCommand to go to a supplied distance from a reference point within a
-   * range of angles. For example, this can be used to go to a flexible shooting position or gamepiece pickup from various angles.
+   * range of angles. For example, this can be used to go to a flexible shooting position or
+   * gamepiece pickup from various angles.
    *
    * @param point The point to reference for the distance it is from it.
    * @param distance Supplier of the goal distance from the reference point in meters.
@@ -499,7 +519,8 @@ public class PathingCommandGenerator {
 
   /**
    * Generates a new PathingCommand to go to a set distance from a reference point within a range of
-   * angles. For example, this can be used to go to a flexible shooting position or gamepiece pickup from various angles.
+   * angles. For example, this can be used to go to a flexible shooting position or gamepiece pickup
+   * from various angles.
    *
    * @param point The point to reference for the distance it is from it.
    * @param distance The goal distance from the reference point in meters.
@@ -518,9 +539,11 @@ public class PathingCommandGenerator {
       double maxAngleOff) {
     return generateToDistFromPointCommand(point, () -> distance, offset, centerGoal, maxAngleOff);
   }
+
   /**
-   * Generates a new PathingCommand to go to a supplied distance from a reference point.
-   * For example, this can be used to go to a flexible shooting position or gamepiece pickup from various angles.
+   * Generates a new PathingCommand to go to a supplied distance from a reference point. For
+   * example, this can be used to go to a flexible shooting position or gamepiece pickup from
+   * various angles.
    *
    * @param point The point to reference for the distance it is from it.
    * @param distance A supplier for he goal distance from the reference point in meters.
@@ -529,14 +552,13 @@ public class PathingCommandGenerator {
    * @return A new PathingCommand.
    */
   public Command generateToDistFromPointCommand(
-      Translation2d point,
-      Supplier<Double> distance,
-      double offset) {
+      Translation2d point, Supplier<Double> distance, double offset) {
     return generateToDistFromPointCommand(point, distance, offset, new Rotation2d(), Math.PI);
   }
+
   /**
-   * Generates a new PathingCommand to go to a set distance from a reference point.
-   * For example, this can be used to go to a flexible shooting position or gamepiece pickup from various angles.
+   * Generates a new PathingCommand to go to a set distance from a reference point. For example,
+   * this can be used to go to a flexible shooting position or gamepiece pickup from various angles.
    *
    * @param point The point to reference for the distance it is from it.
    * @param distance The goal distance from the reference point in meters.
@@ -548,9 +570,11 @@ public class PathingCommandGenerator {
       Translation2d point, double distance, double offset) {
     return generateToDistFromPointCommand(point, distance, offset, new Rotation2d(), Math.PI);
   }
+
   /**
    * Generates a new PathingCommand to go to a supplied distance from a reference point within a
-   * range of angles. For example, this can be used to go to a flexible shooting position or gamepiece pickup from various angles.
+   * range of angles. For example, this can be used to go to a flexible shooting position or
+   * gamepiece pickup from various angles.
    *
    * @param point The point to reference for the distance it is from it.
    * @param distance Supplier of the goal distance from the reference point in meters.
@@ -560,15 +584,14 @@ public class PathingCommandGenerator {
    * @return A new PathingCommand.
    */
   public Command generateToDistFromPointCommand(
-      Translation2d point,
-      Supplier<Double> distance,
-      Rotation2d centerGoal,
-      double maxAngleOff) {
-        return generateToDistFromPointCommand(point,distance,0,centerGoal,maxAngleOff);
-      }
+      Translation2d point, Supplier<Double> distance, Rotation2d centerGoal, double maxAngleOff) {
+    return generateToDistFromPointCommand(point, distance, 0, centerGoal, maxAngleOff);
+  }
+
   /**
    * Generates a new PathingCommand to go to a set distance from a reference point within a range of
-   * angles. For example, this can be used to go to a flexible shooting position or gamepiece pickup from various angles.
+   * angles. For example, this can be used to go to a flexible shooting position or gamepiece pickup
+   * from various angles.
    *
    * @param point The point to reference for the distance it is from it.
    * @param distance The goal distance from the reference point in meters.
@@ -578,39 +601,38 @@ public class PathingCommandGenerator {
    * @return A new PathingCommand.
    */
   public Command generateToDistFromPointCommand(
-      Translation2d point,
-      double distance,
-      Rotation2d centerGoal,
-      double maxAngleOff) {
+      Translation2d point, double distance, Rotation2d centerGoal, double maxAngleOff) {
     return generateToDistFromPointCommand(point, () -> distance, 0, centerGoal, maxAngleOff);
   }
+
   /**
-   * Generates a new PathingCommand to go to a supplied distance from a reference point.
-   * For example, this can be used to go to a flexible shooting position or gamepiece pickup from various angles.
+   * Generates a new PathingCommand to go to a supplied distance from a reference point. For
+   * example, this can be used to go to a flexible shooting position or gamepiece pickup from
+   * various angles.
    *
    * @param point The point to reference for the distance it is from it.
    * @param distance A supplier for he goal distance from the reference point in meters.
    * @return A new PathingCommand.
    */
-  public Command generateToDistFromPointCommand(
-      Translation2d point,
-      Supplier<Double> distance) {
+  public Command generateToDistFromPointCommand(Translation2d point, Supplier<Double> distance) {
     return generateToDistFromPointCommand(point, distance, 0, new Rotation2d(), Math.PI);
   }
+
   /**
-   * Generates a new PathingCommand to go to a set distance from a reference point.
-   * For example, this can be used to go to a flexible shooting position or gamepiece pickup from various angles.
+   * Generates a new PathingCommand to go to a set distance from a reference point. For example,
+   * this can be used to go to a flexible shooting position or gamepiece pickup from various angles.
    *
    * @param point The point to reference for the distance it is from it.
    * @param distance The goal distance from the reference point in meters.
    * @return A new PathingCommand.
    */
-  public Command generateToDistFromPointCommand(
-      Translation2d point, double distance) {
+  public Command generateToDistFromPointCommand(Translation2d point, double distance) {
     return generateToDistFromPointCommand(point, distance, 0, new Rotation2d(), Math.PI);
   }
 
-  public static enum DifferentialOrientationMode{
-    FORWARD,REVERSE,AUTOMATIC
+  public static enum DifferentialOrientationMode {
+    FORWARD,
+    REVERSE,
+    AUTOMATIC
   }
 }

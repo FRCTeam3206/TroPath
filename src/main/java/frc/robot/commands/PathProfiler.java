@@ -57,7 +57,8 @@ public class PathProfiler {
                         + 2 * maxAcceleration * poseDist(nextPoint, currentPoint))));
         int index = profiledPath.indexOf(nextPoint);
         profiledPath.remove(index);
-        profiledPath.add(binaryVelocitySearch(profiledPath.subList(0, index), nextPoint), nextPoint);
+        profiledPath.add(
+            binaryVelocitySearch(profiledPath.subList(0, index), nextPoint), nextPoint);
       }
       if (profiledPath.contains(currentPoint.getLast())) {
         ProfiledPathPoint lastPoint = currentPoint.getLast();
@@ -73,7 +74,8 @@ public class PathProfiler {
         }
         int index = profiledPath.indexOf(lastPoint);
         profiledPath.remove(index);
-        profiledPath.add(binaryVelocitySearch(profiledPath.subList(0, index), lastPoint), lastPoint);
+        profiledPath.add(
+            binaryVelocitySearch(profiledPath.subList(0, index), lastPoint), lastPoint);
       }
       profiledPath.remove(currentPoint);
       currentPoint = profiledPath.get(0);
