@@ -30,7 +30,8 @@ public class PathingCommand extends Command {
   private Field2d finalPoseFieldDisplay = new Field2d();
   private static final double dT = .02, eps = 1E-4;
   private PathProfiler pathProfiler;
-  private boolean linearPhysics=false;
+  private boolean linearPhysics = false;
+
   /**
    * Constructs a PathingCommand. This method is called by the {@link PathingCommandGenerator}.
    * Please use this generator to make a PathingCommand.
@@ -48,7 +49,7 @@ public class PathingCommand extends Command {
     this.goalPoseSupplier = goalSupplier;
     this.robotPose = currentPoseSupplier;
     this.drive = drive;
-    this.linearPhysics=linearPhysics;
+    this.linearPhysics = linearPhysics;
     setRobotProfile(robotProfile);
     this.pathfinder = pathfinder;
     this.addRequirements(subsystem);
@@ -105,7 +106,7 @@ public class PathingCommand extends Command {
     double total = Math.abs(dX) + Math.abs(dY);
     TrapezoidProfile.State nextState;
     start = System.currentTimeMillis();
-    if(linearPhysics){
+    if (linearPhysics) {
       if (path.size() <= 1) {
         nextState =
             new TrapezoidProfile.State(
@@ -117,16 +118,16 @@ public class PathingCommand extends Command {
       velocity =
           translationProfile.calculate(dT, new TrapezoidProfile.State(0, velocity), nextState)
               .velocity;
-    }else{
+    } else {
       velocity = pathProfiler.getNextRobotSpeed(velocity, robotPose.get(), path.asPose2dList());
     }
     SmartDashboard.putNumber("Physics Time", System.currentTimeMillis() - start);
     SmartDashboard.putNumber("Velocity", velocity);
     double xSpeed = dX / total * velocity;
     double ySpeed = dY / total * velocity;
-    if(Double.isNaN(xSpeed)||Double.isNaN(ySpeed)){
-      xSpeed=0;
-      ySpeed=0;
+    if (Double.isNaN(xSpeed) || Double.isNaN(ySpeed)) {
+      xSpeed = 0;
+      ySpeed = 0;
     }
     drive.accept(new ChassisSpeeds(xSpeed, ySpeed, rotationalVelocity));
   }

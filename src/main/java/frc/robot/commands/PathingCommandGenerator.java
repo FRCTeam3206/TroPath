@@ -10,10 +10,8 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.robotprofile.RobotProfile;
 import frc.utils.AllianceUtil;
 import frc.utils.Range;
-
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-
 import me.nabdev.pathfinding.PathfinderBuilder;
 import me.nabdev.pathfinding.utilities.FieldLoader.Field;
 
@@ -29,7 +27,8 @@ public class PathingCommandGenerator {
   private final Subsystem subsystem;
   private double translationTolerance = .05, rotationTolerance = Math.PI / 32;
   private boolean allianceFlip = true;
-  private boolean linearPhysics=false;
+  private boolean linearPhysics = false;
+
   /**
    * Constructs a PathingCommandGenerator to generate {@code PathingCommand}s with the given
    * settings. Defaults to using the layout for the 2024 field. To use a custom field, add String or
@@ -196,18 +195,24 @@ public class PathingCommandGenerator {
         .setAllianceFlipping(allianceFlip)
         .setPhysicsAlgorithmType(linearPhysics);
   }
+
   /**
-   * Sets the physics algorithm used in path following. The linear algorithm propogates the current velocity
-   * out along the path, starting at the robot, until it comes accross a point at which it needs to slow down.
-   * A non-linear algorithm looks ahead and propogates velocities from points that will need to be slowed down on(turns).
-   * This yeilds more accurate results and allows tighter path following, but runs slower than the linear version.
-   * @param linear If the physics algorithm will search for slowdowns from the robot's perspective or will look ahead. A true value for this will run faster but yeild less accurate results than false;
+   * Sets the physics algorithm used in path following. The linear algorithm propogates the current
+   * velocity out along the path, starting at the robot, until it comes accross a point at which it
+   * needs to slow down. A non-linear algorithm looks ahead and propogates velocities from points
+   * that will need to be slowed down on(turns). This yeilds more accurate results and allows
+   * tighter path following, but runs slower than the linear version.
+   *
+   * @param linear If the physics algorithm will search for slowdowns from the robot's perspective
+   *     or will look ahead. A true value for this will run faster but yeild less accurate results
+   *     than false;
    * @return This generator
    */
-  public PathingCommandGenerator setPhysicsAlgorithmType(boolean linear){
-    this.linearPhysics=linear;
+  public PathingCommandGenerator setPhysicsAlgorithmType(boolean linear) {
+    this.linearPhysics = linear;
     return this;
   }
+
   /**
    * Generates a new PathingCommand to go to the given supplied position.
    *
@@ -273,15 +278,16 @@ public class PathingCommandGenerator {
 
   /**
    * Generates a new PathingCommand to go to a supplied distance from a reference point within a
-   * range of angles. For example, this can be used to go to a flexible shooting position or gamepiece pickup from various angles.
+   * range of angles. For example, this can be used to go to a flexible shooting position or
+   * gamepiece pickup from various angles.
    *
    * @param point The point to reference for the distance it is from it.
    * @param distance Supplier of the goal distance from the reference point in meters.
    * @param offset The offset of the robot's rotation relative to the target. 0 is the front of the
    *     robot facing the target.
    * @param centerGoal The center of the angle range to reference for the range.
-   * @param maxAngleOff The maximum acceptable angle value to be off by from the
-   *     centerGoal to be in range.
+   * @param maxAngleOff The maximum acceptable angle value to be off by from the centerGoal to be in
+   *     range.
    * @return A new PathingCommand.
    */
   public PathingCommand generateToDistFromPointCommand(
@@ -295,8 +301,7 @@ public class PathingCommandGenerator {
     return generateToPoseSupplierCommand(
         () -> {
           Translation2d max = new Translation2d(distance.get(), maxAngle);
-          Translation2d min =
-              new Translation2d(distance.get(), centerGoal.minus(maxAngleOff));
+          Translation2d min = new Translation2d(distance.get(), centerGoal.minus(maxAngleOff));
           SmartDashboard.putNumber(
               "Current Distance from point", robotPose.get().getTranslation().getDistance(point));
           Translation2d delta = robotPose.get().getTranslation().minus(point);
@@ -306,9 +311,11 @@ public class PathingCommandGenerator {
             double maxDist = max.getDistance(bestPoint);
             double minDist = min.getDistance(bestPoint);
             if (maxDist < minDist) {
-              return new Pose2d(max.plus(point), maxAngle.plus(new Rotation2d(Math.PI - offset.getRadians())));
+              return new Pose2d(
+                  max.plus(point), maxAngle.plus(new Rotation2d(Math.PI - offset.getRadians())));
             } else {
-              return new Pose2d(min.plus(point), minAngle.plus(new Rotation2d(Math.PI - offset.getRadians())));
+              return new Pose2d(
+                  min.plus(point), minAngle.plus(new Rotation2d(Math.PI - offset.getRadians())));
             }
           }
           return new Pose2d(
@@ -319,15 +326,16 @@ public class PathingCommandGenerator {
 
   /**
    * Generates a new PathingCommand to go to a set distance from a reference point within a range of
-   * angles. For example, this can be used to go to a flexible shooting position or gamepiece pickup from various angles.
+   * angles. For example, this can be used to go to a flexible shooting position or gamepiece pickup
+   * from various angles.
    *
    * @param point The point to reference for the distance it is from it.
    * @param distance The goal distance from the reference point in meters.
    * @param offset The offset of the robot's rotation relative to the target. 0 is the front of the
    *     robot facing the target. Pi is the back of the robot facing the target.
    * @param centerGoal The center of the angle range to reference for the range.
-   * @param maxAngleOff The maximum acceptable angle value to be off by from the
-   *     centerGoal to be in range.
+   * @param maxAngleOff The maximum acceptable angle value to be off by from the centerGoal to be in
+   *     range.
    * @return A new PathingCommand.
    */
   public PathingCommand generateToDistFromPointCommand(
@@ -338,9 +346,11 @@ public class PathingCommandGenerator {
       Rotation2d maxAngleOff) {
     return generateToDistFromPointCommand(point, () -> distance, offset, centerGoal, maxAngleOff);
   }
+
   /**
-   * Generates a new PathingCommand to go to a supplied distance from a reference point.
-   * For example, this can be used to go to a flexible shooting position or gamepiece pickup from various angles.
+   * Generates a new PathingCommand to go to a supplied distance from a reference point. For
+   * example, this can be used to go to a flexible shooting position or gamepiece pickup from
+   * various angles.
    *
    * @param point The point to reference for the distance it is from it.
    * @param distance A supplier for he goal distance from the reference point in meters.
@@ -349,14 +359,14 @@ public class PathingCommandGenerator {
    * @return A new PathingCommand.
    */
   public PathingCommand generateToDistFromPointCommand(
-      Translation2d point,
-      Supplier<Double> distance,
-      Rotation2d offset) {
-    return generateToDistFromPointCommand(point, distance, offset, new Rotation2d(), new Rotation2d(Math.PI));
+      Translation2d point, Supplier<Double> distance, Rotation2d offset) {
+    return generateToDistFromPointCommand(
+        point, distance, offset, new Rotation2d(), new Rotation2d(Math.PI));
   }
+
   /**
-   * Generates a new PathingCommand to go to a set distance from a reference point.
-   * For example, this can be used to go to a flexible shooting position or gamepiece pickup from various angles.
+   * Generates a new PathingCommand to go to a set distance from a reference point. For example,
+   * this can be used to go to a flexible shooting position or gamepiece pickup from various angles.
    *
    * @param point The point to reference for the distance it is from it.
    * @param distance The goal distance from the reference point in meters.
@@ -366,17 +376,20 @@ public class PathingCommandGenerator {
    */
   public PathingCommand generateToDistFromPointCommand(
       Translation2d point, double distance, Rotation2d offset) {
-    return generateToDistFromPointCommand(point, distance, offset, new Rotation2d(), new Rotation2d(Math.PI));
+    return generateToDistFromPointCommand(
+        point, distance, offset, new Rotation2d(), new Rotation2d(Math.PI));
   }
+
   /**
    * Generates a new PathingCommand to go to a supplied distance from a reference point within a
-   * range of angles. For example, this can be used to go to a flexible shooting position or gamepiece pickup from various angles.
+   * range of angles. For example, this can be used to go to a flexible shooting position or
+   * gamepiece pickup from various angles.
    *
    * @param point The point to reference for the distance it is from it.
    * @param distance Supplier of the goal distance from the reference point in meters.
    * @param centerGoal The center of the angle range to reference for the range.
-   * @param maxAngleOff The maximum acceptable angle value to be off by from the
-   *     centerGoal to be in range.
+   * @param maxAngleOff The maximum acceptable angle value to be off by from the centerGoal to be in
+   *     range.
    * @return A new PathingCommand.
    */
   public PathingCommand generateToDistFromPointCommand(
@@ -384,62 +397,68 @@ public class PathingCommandGenerator {
       Supplier<Double> distance,
       Rotation2d centerGoal,
       Rotation2d maxAngleOff) {
-        return generateToDistFromPointCommand(point,distance,new Rotation2d(),centerGoal,maxAngleOff);
+    return generateToDistFromPointCommand(
+        point, distance, new Rotation2d(), centerGoal, maxAngleOff);
   }
+
   /**
    * Generates a new PathingCommand to go to a set distance from a reference point within a range of
-   * angles. For example, this can be used to go to a flexible shooting position or gamepiece pickup from various angles.
+   * angles. For example, this can be used to go to a flexible shooting position or gamepiece pickup
+   * from various angles.
    *
    * @param point The point to reference for the distance it is from it.
    * @param distance The goal distance from the reference point in meters.
    * @param centerGoal The center of the angle range to reference for the range.
-   * @param maxAngleOff The maximum acceptable angle value to be off by from the
-   *     centerGoal to be in range.
+   * @param maxAngleOff The maximum acceptable angle value to be off by from the centerGoal to be in
+   *     range.
    * @return A new PathingCommand.
    */
   public PathingCommand generateToDistFromPointCommand(
-      Translation2d point,
-      double distance,
-      Rotation2d centerGoal,
-      Rotation2d maxAngleOff) {
-    return generateToDistFromPointCommand(point, () -> distance, new Rotation2d(), centerGoal, maxAngleOff);
+      Translation2d point, double distance, Rotation2d centerGoal, Rotation2d maxAngleOff) {
+    return generateToDistFromPointCommand(
+        point, () -> distance, new Rotation2d(), centerGoal, maxAngleOff);
   }
+
   /**
-   * Generates a new PathingCommand to go to a supplied distance from a reference point.
-   * For example, this can be used to go to a flexible shooting position or gamepiece pickup from various angles.
+   * Generates a new PathingCommand to go to a supplied distance from a reference point. For
+   * example, this can be used to go to a flexible shooting position or gamepiece pickup from
+   * various angles.
    *
    * @param point The point to reference for the distance it is from it.
    * @param distance A supplier for he goal distance from the reference point in meters.
    * @return A new PathingCommand.
    */
   public PathingCommand generateToDistFromPointCommand(
-      Translation2d point,
-      Supplier<Double> distance) {
-    return generateToDistFromPointCommand(point, distance, new Rotation2d(), new Rotation2d(), new Rotation2d(Math.PI));
+      Translation2d point, Supplier<Double> distance) {
+    return generateToDistFromPointCommand(
+        point, distance, new Rotation2d(), new Rotation2d(), new Rotation2d(Math.PI));
   }
+
   /**
-   * Generates a new PathingCommand to go to a set distance from a reference point.
-   * For example, this can be used to go to a flexible shooting position or gamepiece pickup from various angles.
+   * Generates a new PathingCommand to go to a set distance from a reference point. For example,
+   * this can be used to go to a flexible shooting position or gamepiece pickup from various angles.
    *
    * @param point The point to reference for the distance it is from it.
    * @param distance The goal distance from the reference point in meters.
    * @return A new PathingCommand.
    */
-  public PathingCommand generateToDistFromPointCommand(
-      Translation2d point, double distance) {
-    return generateToDistFromPointCommand(point, distance, new Rotation2d(), new Rotation2d(), new Rotation2d(Math.PI));
+  public PathingCommand generateToDistFromPointCommand(Translation2d point, double distance) {
+    return generateToDistFromPointCommand(
+        point, distance, new Rotation2d(), new Rotation2d(), new Rotation2d(Math.PI));
   }
+
   /**
    * Generates a new PathingCommand to go to a range of distances from a reference point within a
-   * range of angles. For example, this can be used to go to a flexible shooting position or gamepiece pickup from various angles.
+   * range of angles. For example, this can be used to go to a flexible shooting position or
+   * gamepiece pickup from various angles.
    *
    * @param point The point to reference for the distance it is from it.
    * @param distance A range of the goal distances from the reference point in meters.
    * @param offset The offset of the robot's rotation relative to the target. 0 is the front of the
    *     robot facing the target.
    * @param centerGoal The center of the angle range to reference for the range.
-   * @param maxAngleOff The maximum acceptable angle value to be off by from the
-   *     centerGoal to be in range.
+   * @param maxAngleOff The maximum acceptable angle value to be off by from the centerGoal to be in
+   *     range.
    * @return A new PathingCommand.
    */
   public PathingCommand generateToDistFromPointCommand(
@@ -448,11 +467,18 @@ public class PathingCommandGenerator {
       Rotation2d offset,
       Rotation2d centerGoal,
       Rotation2d maxAngleOff) {
-        return generateToDistFromPointCommand(point,()->distance.nearestValue(robotPose.get().getTranslation().getDistance(point)),offset,centerGoal,maxAngleOff);
-      }
+    return generateToDistFromPointCommand(
+        point,
+        () -> distance.nearestValue(robotPose.get().getTranslation().getDistance(point)),
+        offset,
+        centerGoal,
+        maxAngleOff);
+  }
+
   /**
-   * Generates a new PathingCommand to go to a supplied distance from a reference point.
-   * For example, this can be used to go to a flexible shooting position or gamepiece pickup from various angles.
+   * Generates a new PathingCommand to go to a supplied distance from a reference point. For
+   * example, this can be used to go to a flexible shooting position or gamepiece pickup from
+   * various angles.
    *
    * @param point The point to reference for the distance it is from it.
    * @param distance A range of the goal distances from the reference point in meters.
@@ -461,40 +487,40 @@ public class PathingCommandGenerator {
    * @return A new PathingCommand.
    */
   public PathingCommand generateToDistFromPointCommand(
-      Translation2d point,
-      Range distance,
-      Rotation2d offset) {
-    return generateToDistFromPointCommand(point, distance, offset, new Rotation2d(), new Rotation2d(Math.PI));
-      }
+      Translation2d point, Range distance, Rotation2d offset) {
+    return generateToDistFromPointCommand(
+        point, distance, offset, new Rotation2d(), new Rotation2d(Math.PI));
+  }
+
   /**
    * Generates a new PathingCommand to go to a range of distances from a reference point within a
-   * range of angles. For example, this can be used to go to a flexible shooting position or gamepiece pickup from various angles.
+   * range of angles. For example, this can be used to go to a flexible shooting position or
+   * gamepiece pickup from various angles.
    *
    * @param point The point to reference for the distance it is from it.
    * @param distance Range of the goal distances from the reference point in meters.
    * @param centerGoal The center of the angle range to reference for the range.
-   * @param maxAngleOff The maximum acceptable angle value to be off by from the
-   *     centerGoal to be in range.
+   * @param maxAngleOff The maximum acceptable angle value to be off by from the centerGoal to be in
+   *     range.
    * @return A new PathingCommand.
    */
   public PathingCommand generateToDistFromPointCommand(
-      Translation2d point,
-      Range distance,
-      Rotation2d centerGoal,
-      Rotation2d maxAngleOff) {
-        return generateToDistFromPointCommand(point,distance,new Rotation2d(),centerGoal,maxAngleOff);
-      }
+      Translation2d point, Range distance, Rotation2d centerGoal, Rotation2d maxAngleOff) {
+    return generateToDistFromPointCommand(
+        point, distance, new Rotation2d(), centerGoal, maxAngleOff);
+  }
+
   /**
-   * Generates a new PathingCommand to go to a range of distances from a reference point.
-   * For example, this can be used to go to a flexible shooting position or gamepiece pickup from various angles.
+   * Generates a new PathingCommand to go to a range of distances from a reference point. For
+   * example, this can be used to go to a flexible shooting position or gamepiece pickup from
+   * various angles.
    *
    * @param point The point to reference for the distance it is from it.
    * @param distance A range of the goal distances from the reference point in meters.
    * @return A new PathingCommand.
    */
-  public PathingCommand generateToDistFromPointCommand(
-      Translation2d point,
-      Range distance) {
-    return generateToDistFromPointCommand(point, distance, new Rotation2d(), new Rotation2d(), new Rotation2d(Math.PI));
+  public PathingCommand generateToDistFromPointCommand(Translation2d point, Range distance) {
+    return generateToDistFromPointCommand(
+        point, distance, new Rotation2d(), new Rotation2d(), new Rotation2d(Math.PI));
   }
 }
