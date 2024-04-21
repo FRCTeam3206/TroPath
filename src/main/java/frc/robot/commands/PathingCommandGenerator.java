@@ -279,8 +279,8 @@ public class PathingCommandGenerator {
    * @param distance Supplier of the goal distance from the reference point in meters.
    * @param offset The offset of the robot's rotation relative to the target. 0 is the front of the
    *     robot facing the target.
-   * @param centerGoal The center of the angle range in radians to reference for the range.
-   * @param maxAngleOff The maximum acceptable angle value in radians to be off by from the
+   * @param centerGoal The center of the angle range to reference for the range.
+   * @param maxAngleOff The maximum acceptable angle value to be off by from the
    *     centerGoal to be in range.
    * @return A new PathingCommand.
    */
@@ -325,8 +325,8 @@ public class PathingCommandGenerator {
    * @param distance The goal distance from the reference point in meters.
    * @param offset The offset of the robot's rotation relative to the target. 0 is the front of the
    *     robot facing the target. Pi is the back of the robot facing the target.
-   * @param centerGoal The center of the angle range in radians to reference for the range.
-   * @param maxAngleOff The maximum acceptable angle value in radians to be off by from the
+   * @param centerGoal The center of the angle range to reference for the range.
+   * @param maxAngleOff The maximum acceptable angle value to be off by from the
    *     centerGoal to be in range.
    * @return A new PathingCommand.
    */
@@ -374,8 +374,8 @@ public class PathingCommandGenerator {
    *
    * @param point The point to reference for the distance it is from it.
    * @param distance Supplier of the goal distance from the reference point in meters.
-   * @param centerGoal The center of the angle range in radians to reference for the range.
-   * @param maxAngleOff The maximum acceptable angle value in radians to be off by from the
+   * @param centerGoal The center of the angle range to reference for the range.
+   * @param maxAngleOff The maximum acceptable angle value to be off by from the
    *     centerGoal to be in range.
    * @return A new PathingCommand.
    */
@@ -392,8 +392,8 @@ public class PathingCommandGenerator {
    *
    * @param point The point to reference for the distance it is from it.
    * @param distance The goal distance from the reference point in meters.
-   * @param centerGoal The center of the angle range in radians to reference for the range.
-   * @param maxAngleOff The maximum acceptable angle value in radians to be off by from the
+   * @param centerGoal The center of the angle range to reference for the range.
+   * @param maxAngleOff The maximum acceptable angle value to be off by from the
    *     centerGoal to be in range.
    * @return A new PathingCommand.
    */
@@ -437,8 +437,8 @@ public class PathingCommandGenerator {
    * @param distance A range of the goal distances from the reference point in meters.
    * @param offset The offset of the robot's rotation relative to the target. 0 is the front of the
    *     robot facing the target.
-   * @param centerGoal The center of the angle range in radians to reference for the range.
-   * @param maxAngleOff The maximum acceptable angle value in radians to be off by from the
+   * @param centerGoal The center of the angle range to reference for the range.
+   * @param maxAngleOff The maximum acceptable angle value to be off by from the
    *     centerGoal to be in range.
    * @return A new PathingCommand.
    */
@@ -472,8 +472,8 @@ public class PathingCommandGenerator {
    *
    * @param point The point to reference for the distance it is from it.
    * @param distance Range of the goal distances from the reference point in meters.
-   * @param centerGoal The center of the angle range in radians to reference for the range.
-   * @param maxAngleOff The maximum acceptable angle value in radians to be off by from the
+   * @param centerGoal The center of the angle range to reference for the range.
+   * @param maxAngleOff The maximum acceptable angle value to be off by from the
    *     centerGoal to be in range.
    * @return A new PathingCommand.
    */
