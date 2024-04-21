@@ -124,7 +124,10 @@ public class PathingCommand extends Command {
     SmartDashboard.putNumber("Velocity", velocity);
     double xSpeed = dX / total * velocity;
     double ySpeed = dY / total * velocity;
-
+    if(Double.isNaN(xSpeed)||Double.isNaN(ySpeed)){
+      xSpeed=0;
+      ySpeed=0;
+    }
     drive.accept(new ChassisSpeeds(xSpeed, ySpeed, rotationalVelocity));
   }
 
