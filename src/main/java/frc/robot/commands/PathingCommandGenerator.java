@@ -287,33 +287,33 @@ public class PathingCommandGenerator {
   public PathingCommand generateToDistFromPointCommand(
       Translation2d point,
       Supplier<Double> distance,
-      double offset,
+      Rotation2d offset,
       Rotation2d centerGoal,
-      double maxAngleOff) {
-    final Rotation2d maxAngle = centerGoal.plus(new Rotation2d(maxAngleOff));
-    final Rotation2d minAngle = centerGoal.minus(new Rotation2d(maxAngleOff));
+      Rotation2d maxAngleOff) {
+    final Rotation2d maxAngle = centerGoal.plus(maxAngleOff);
+    final Rotation2d minAngle = centerGoal.minus(maxAngleOff);
     return generateToPoseSupplierCommand(
         () -> {
           Translation2d max = new Translation2d(distance.get(), maxAngle);
           Translation2d min =
-              new Translation2d(distance.get(), centerGoal.minus(new Rotation2d(maxAngleOff)));
+              new Translation2d(distance.get(), centerGoal.minus(maxAngleOff));
           SmartDashboard.putNumber(
               "Current Distance from point", robotPose.get().getTranslation().getDistance(point));
           Translation2d delta = robotPose.get().getTranslation().minus(point);
           Translation2d bestPoint = delta.times(distance.get() / delta.getNorm());
           Rotation2d angleOff = centerGoal.minus(bestPoint.getAngle());
-          if (Math.abs(angleOff.getRadians()) > maxAngleOff) {
+          if (Math.abs(angleOff.getRadians()) > maxAngleOff.getRadians()) {
             double maxDist = max.getDistance(bestPoint);
             double minDist = min.getDistance(bestPoint);
             if (maxDist < minDist) {
-              return new Pose2d(max.plus(point), maxAngle.plus(new Rotation2d(Math.PI - offset)));
+              return new Pose2d(max.plus(point), maxAngle.plus(new Rotation2d(Math.PI - offset.getRadians())));
             } else {
-              return new Pose2d(min.plus(point), minAngle.plus(new Rotation2d(Math.PI - offset)));
+              return new Pose2d(min.plus(point), minAngle.plus(new Rotation2d(Math.PI - offset.getRadians())));
             }
           }
           return new Pose2d(
               delta.times(distance.get() / delta.getNorm()).plus(point),
-              delta.getAngle().plus(new Rotation2d(Math.PI - offset)));
+              delta.getAngle().plus(new Rotation2d(Math.PI - offset.getRadians())));
         });
   }
 
@@ -333,9 +333,9 @@ public class PathingCommandGenerator {
   public PathingCommand generateToDistFromPointCommand(
       Translation2d point,
       double distance,
-      double offset,
+      Rotation2d offset,
       Rotation2d centerGoal,
-      double maxAngleOff) {
+      Rotation2d maxAngleOff) {
     return generateToDistFromPointCommand(point, () -> distance, offset, centerGoal, maxAngleOff);
   }
   /**
@@ -351,8 +351,8 @@ public class PathingCommandGenerator {
   public PathingCommand generateToDistFromPointCommand(
       Translation2d point,
       Supplier<Double> distance,
-      double offset) {
-    return generateToDistFromPointCommand(point, distance, offset, new Rotation2d(), Math.PI);
+      Rotation2d offset) {
+    return generateToDistFromPointCommand(point, distance, offset, new Rotation2d(), new Rotation2d(Math.PI));
   }
   /**
    * Generates a new PathingCommand to go to a set distance from a reference point.
@@ -365,8 +365,8 @@ public class PathingCommandGenerator {
    * @return A new PathingCommand.
    */
   public PathingCommand generateToDistFromPointCommand(
-      Translation2d point, double distance, double offset) {
-    return generateToDistFromPointCommand(point, distance, offset, new Rotation2d(), Math.PI);
+      Translation2d point, double distance, Rotation2d offset) {
+    return generateToDistFromPointCommand(point, distance, offset, new Rotation2d(), new Rotation2d(Math.PI));
   }
   /**
    * Generates a new PathingCommand to go to a supplied distance from a reference point within a
@@ -383,8 +383,8 @@ public class PathingCommandGenerator {
       Translation2d point,
       Supplier<Double> distance,
       Rotation2d centerGoal,
-      double maxAngleOff) {
-        return generateToDistFromPointCommand(point,distance,0,centerGoal,maxAngleOff);
+      Rotation2d maxAngleOff) {
+        return generateToDistFromPointCommand(point,distance,new Rotation2d(),centerGoal,maxAngleOff);
   }
   /**
    * Generates a new PathingCommand to go to a set distance from a reference point within a range of
@@ -401,8 +401,8 @@ public class PathingCommandGenerator {
       Translation2d point,
       double distance,
       Rotation2d centerGoal,
-      double maxAngleOff) {
-    return generateToDistFromPointCommand(point, () -> distance, 0, centerGoal, maxAngleOff);
+      Rotation2d maxAngleOff) {
+    return generateToDistFromPointCommand(point, () -> distance, new Rotation2d(), centerGoal, maxAngleOff);
   }
   /**
    * Generates a new PathingCommand to go to a supplied distance from a reference point.
@@ -415,7 +415,7 @@ public class PathingCommandGenerator {
   public PathingCommand generateToDistFromPointCommand(
       Translation2d point,
       Supplier<Double> distance) {
-    return generateToDistFromPointCommand(point, distance, 0, new Rotation2d(), Math.PI);
+    return generateToDistFromPointCommand(point, distance, new Rotation2d(), new Rotation2d(), new Rotation2d(Math.PI));
   }
   /**
    * Generates a new PathingCommand to go to a set distance from a reference point.
@@ -427,7 +427,7 @@ public class PathingCommandGenerator {
    */
   public PathingCommand generateToDistFromPointCommand(
       Translation2d point, double distance) {
-    return generateToDistFromPointCommand(point, distance, 0, new Rotation2d(), Math.PI);
+    return generateToDistFromPointCommand(point, distance, new Rotation2d(), new Rotation2d(), new Rotation2d(Math.PI));
   }
   /**
    * Generates a new PathingCommand to go to a range of distances from a reference point within a
@@ -445,9 +445,9 @@ public class PathingCommandGenerator {
   public PathingCommand generateToDistFromPointCommand(
       Translation2d point,
       Range distance,
-      double offset,
+      Rotation2d offset,
       Rotation2d centerGoal,
-      double maxAngleOff) {
+      Rotation2d maxAngleOff) {
         return generateToDistFromPointCommand(point,()->distance.nearestValue(robotPose.get().getTranslation().getDistance(point)),offset,centerGoal,maxAngleOff);
       }
   /**
@@ -463,8 +463,8 @@ public class PathingCommandGenerator {
   public PathingCommand generateToDistFromPointCommand(
       Translation2d point,
       Range distance,
-      double offset) {
-    return generateToDistFromPointCommand(point, distance, offset, new Rotation2d(), Math.PI);
+      Rotation2d offset) {
+    return generateToDistFromPointCommand(point, distance, offset, new Rotation2d(), new Rotation2d(Math.PI));
       }
   /**
    * Generates a new PathingCommand to go to a range of distances from a reference point within a
@@ -481,8 +481,8 @@ public class PathingCommandGenerator {
       Translation2d point,
       Range distance,
       Rotation2d centerGoal,
-      double maxAngleOff) {
-        return generateToDistFromPointCommand(point,distance,0,centerGoal,maxAngleOff);
+      Rotation2d maxAngleOff) {
+        return generateToDistFromPointCommand(point,distance,new Rotation2d(),centerGoal,maxAngleOff);
       }
   /**
    * Generates a new PathingCommand to go to a range of distances from a reference point.
@@ -495,6 +495,6 @@ public class PathingCommandGenerator {
   public PathingCommand generateToDistFromPointCommand(
       Translation2d point,
       Range distance) {
-    return generateToDistFromPointCommand(point, distance, 0, new Rotation2d(), Math.PI);
+    return generateToDistFromPointCommand(point, distance, new Rotation2d(), new Rotation2d(), new Rotation2d(Math.PI));
   }
 }
