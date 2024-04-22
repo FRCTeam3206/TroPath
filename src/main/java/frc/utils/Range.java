@@ -45,4 +45,8 @@ public class Range {
   public boolean contains(double val) {
     return Math.abs(nearestDirection(val)) == 0;
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> ad840c18adeedd6f122465e4f8bd91c3a349a945
