@@ -21,6 +21,7 @@ import frc.robot.commands.PathingCommandGenerator;
 import frc.robot.commands.PathingCommandGenerator.DifferentialOrientationMode;
 import frc.robot.robotprofile.RobotProfile;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.utils.Range;
 import me.nabdev.pathfinding.utilities.FieldLoader.Field;
 import monologue.Logged;
 
@@ -88,7 +89,11 @@ public class RobotContainer implements Logged {
         .button(2)
         .whileTrue(
             path.generateToDistFromPointCommand(
-                new Translation2d(8, 4), 1, Math.PI / 2, new Rotation2d(0), Math.PI / 2));
+                new Translation2d(8, 4),
+                new Range(.5, 1.5),
+                new Rotation2d(Math.PI / 2),
+                new Rotation2d(0),
+                new Rotation2d(Math.PI / 2)));
   }
 
   /**
