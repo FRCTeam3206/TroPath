@@ -18,8 +18,10 @@ import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.RelativeTo;
 import frc.robot.commands.PathingCommandGenerator;
+import frc.robot.commands.PathingCommandGenerator.DifferentialOrientationMode;
 import frc.robot.robotprofile.RobotProfile;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.utils.Range;
 import me.nabdev.pathfinding.utilities.FieldLoader.Field;
 import monologue.Logged;
 
@@ -43,13 +45,12 @@ public class RobotContainer implements Logged {
     // Configure the button bindings
     path =
         new PathingCommandGenerator(
-                new RobotProfile(3, 3, 2, 2, .9, .9),
-                m_robotDrive::getPose,
-                m_robotDrive::driveDifferential,
-                DriveConstants.diffKinematics.trackWidthMeters,
-                m_robotDrive,
-                Field.CHARGED_UP_2023)
-            .setPhysicsAlgorithmType(false);
+            new RobotProfile(3, 3, 2, 2, .9, .9),
+            m_robotDrive::getPose,
+            m_robotDrive::driveDifferential,
+            DriveConstants.diffKinematics.trackWidthMeters,
+            m_robotDrive,
+            Field.CHARGED_UP_2023).setPhysicsAlgorithmType(false);
     configureButtonBindings();
 
     // Configure default commands
@@ -88,7 +89,11 @@ public class RobotContainer implements Logged {
         .button(2)
         .whileTrue(
             path.generateToDistFromPointCommand(
-                new Translation2d(8, 4), 1, Math.PI / 2, new Rotation2d(0), Math.PI / 2));
+                new Translation2d(8, 4),
+                new Range(.5, 1.5),
+                new Rotation2d(Math.PI / 2),
+                new Rotation2d(0),
+                new Rotation2d(Math.PI / 2)));
   }
 
   /**
