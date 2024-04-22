@@ -185,13 +185,13 @@ public final class Constants {
 
     public static final AprilTag[] kAprilTags = {
       new AprilTag(7, new Pose3d(1.25, 4.5, Units.inchesToMeters(27.25), new Rotation3d(0, 0, 0))),
-      new AprilTag(
-          8,
-          new Pose3d(
-              1.25,
-              4.5 - Units.inchesToMeters(22.125),
-              Units.inchesToMeters(27.25),
-              new Rotation3d(0, 0, 0))),
+      // new AprilTag(
+      //     8,
+      //     new Pose3d(
+      //         1.25,
+      //         4.5 - Units.inchesToMeters(22.125),
+      //         Units.inchesToMeters(27.25),
+      //         new Rotation3d(0, 0, 0))),
       new AprilTag(
           4,
           new Pose3d(
