@@ -132,35 +132,24 @@ public class PathingCommandGenerator {
   }
 
   /**
-   * Sets the tolerances for this PathingCommandGenerator. These default to 5 cm and pi / 32
-   * radians. The tolerances are the maximum allowed error for which the robot is considered to have
-   * reached the goal and should be tuned to your robot. They should be as small as possible without
-   * being more precise than the robot can achieve well. If the tolerance is too small, the robot
-   * will spend longer than it should trying to get perfectly in position (and move the wheels in
-   * different directions as it tries to perfectly adjust). If it is at a good amount, it should
-   * stop as soon as it reaches the position (the wheels moving back and forth should not be
-   * noticeable).
-   *
-   * @param translationTolerance The translation tolerance to set. In meters. Defaults to 5 cm.
-   * @param rotationTolerance The rotation tolerance to set. In radians. Defaults to pi/32.
-   * @return The generator.
-   */
-  public PathingCommandGenerator setTolerances(
-      double translationTolerance, double rotationTolerance) {
-    this.translationTolerance = translationTolerance;
-    this.rotationTolerance = rotationTolerance;
-    return this;
-  }
-
-  /**
-   * Set whether to enable flipping the position based on the alliance. This defaults to true and
+   * Set whether to enable flipping the position based on the alliance. Defaults to true.
    *
    * @param flippingEnabled Whether to enable alliance flipping.
-   * @return The generator.
+   * @return A new {@link PathingCommandGenerator} with the modification. For example, to modify one
+   *     named {@code pather}, you could do {@code pather = pather.withAllianceFlipping(false);},
+   *     and this would have the same result as if the pather itself were modified. For this usage,
+   *     make sure to set it to the new pather, since it is a clone and would therefore otherwise
+   *     not be changed. However, because the PathingCommandGenerator returned by this is a clone,
+   *     you can set new pathing command generators to the original with this modification, and the
+   *     original will not be affected. For example, if you already have one called {@code pather},
+   *     doing {@code PathingCommandGenerator otherPather = pather.withAllianceFlipping(false);}
+   *     will not affect the original. You can also use this to make a change right before
+   *     generating a command without the original being affected.
    */
-  public PathingCommandGenerator setAllianceFlipping(boolean flippingEnabled) {
-    allianceFlip = flippingEnabled;
-    return this;
+  public PathingCommandGenerator withAllianceFlipping(boolean flippingEnabled) {
+    PathingCommandGenerator pather = this.clone();
+    pather.allianceFlip = flippingEnabled;
+    return pather;
   }
 
   private Pose2d getPoseForAlliance(Pose2d pose) {
@@ -179,21 +168,34 @@ public class PathingCommandGenerator {
   }
 
   /**
-   * Makes a new PathingCommandGenerator with the same settings. Please note that the builders are
-   * still linked, so if you change this one's builder, the builder of the one it was created from
-   * will be changed too.
+   * Sets the tolerances for this PathingCommandGenerator. These default to 5 cm and pi / 32
+   * radians. The tolerances are the maximum allowed error for which the robot is considered to have
+   * reached the goal and should be tuned to your robot. They should be as small as possible without
+   * being more precise than the robot can achieve well. If the tolerance is too small, the robot
+   * will spend longer than it should trying to get perfectly in position (and move the wheels in
+   * different directions as it tries to perfectly adjust). If it is at a good amount, it should
+   * stop as soon as it reaches the position (the wheels moving back and forth should not be
+   * noticeable).
    *
-   * @param givenTranslationTolerance The translational tolerance for the new
-   *     PathingCommandGenerator.
-   * @param givenRotationTolerance The rotational tolerance for the new PathingCommandGenerator.
-   * @return A new PathingCommandGenerator with different tolerances.
+   * @param translationTolerance The new translation tolerance. In meters. Defaults to 5 cm.
+   * @param rotationTolerance The new rotation tolerance. In radians. Defaults to pi/32.
+   * @return A new {@link PathingCommandGenerator} with the modification. For example, to modify one
+   *     named {@code pather}, you could do {@code pather = pather.withTolerances(0.01, Math.PI /
+   *     64);}, and this would have the same result as if the pather itself were modified. For this
+   *     usage, make sure to set it to the new pather, since it is a clone and would therefore
+   *     otherwise not be changed. However, because the PathingCommandGenerator returned by this is
+   *     a clone, you can set new pathing command generators to the original with this modification,
+   *     and the original will not be affected. For example, if you already have one called {@code
+   *     pather}, doing {@code PathingCommandGenerator otherPather = pather.withTolerances(0.01,
+   *     Math.PI / 64);} will not affect the original. You can also use this to make a change right
+   *     before generating a command without the original being affected.
    */
-  public PathingCommandGenerator withModifiedTolerances(
-      double givenTranslationTolerance, double givenRotationTolerance) {
-    return new PathingCommandGenerator(robotProfile, robotPose, drive, subsystem, builder)
-        .setTolerances(givenRotationTolerance, givenRotationTolerance)
-        .setAllianceFlipping(allianceFlip)
-        .setPhysicsAlgorithmType(linearPhysics);
+  public PathingCommandGenerator withTolerances(
+      double translationTolerance, double rotationTolerance) {
+    PathingCommandGenerator pather = this.clone();
+    pather.translationTolerance = translationTolerance;
+    pather.rotationTolerance = rotationTolerance;
+    return pather;
   }
 
   /**
@@ -206,11 +208,37 @@ public class PathingCommandGenerator {
    * @param linear If the physics algorithm will search for slowdowns from the robot's perspective
    *     or will look ahead. A true value for this will run faster but yeild less accurate results
    *     than false;
-   * @return This generator
+   * @return A new {@link PathingCommandGenerator} with the modification. For example, to modify one
+   *     named {@code pather}, you could do {@code pather = pather.withPhysicsAlgorithmType(true);},
+   *     and this would have the same result as if the pather itself were modified. For this usage,
+   *     make sure to set it to the new pather, since it is a clone and would therefore otherwise
+   *     not be changed. However, because the PathingCommandGenerator returned by this is a clone,
+   *     you can set new pathing command generators to the original with this modification, and the
+   *     original will not be affected. For example, if you already have one called {@code pather},
+   *     doing {@code PathingCommandGenerator otherPather = pather.withPhysicsAlgorithmType(true);}
+   *     will not affect the original. You can also use this to make a change right before
+   *     generating a command without the original being affected.
    */
-  public PathingCommandGenerator setPhysicsAlgorithmType(boolean linear) {
-    this.linearPhysics = linear;
-    return this;
+  public PathingCommandGenerator withPhysicsAlgorithmType(boolean linear) {
+    PathingCommandGenerator pather = this.clone();
+    pather.linearPhysics = linear;
+    return pather;
+  }
+
+  /**
+   * This method is used by other methods within this class. As the user, you should not need to use
+   * it. Makes a new PathingCommandGenerator with the same settings; builders are still linked, so
+   * changing this one's builder will change the builder of the one it was created from too.
+   *
+   * @return A new {@link PathingCommandGenerator} cloned from this one.
+   */
+  public PathingCommandGenerator clone() {
+    PathingCommandGenerator pather = new PathingCommandGenerator(robotProfile, robotPose, drive, subsystem, builder);
+    pather.translationTolerance = translationTolerance;
+    pather.rotationTolerance = rotationTolerance;
+    pather.linearPhysics = linearPhysics;
+    pather.allianceFlip = allianceFlip;
+    return pather;
   }
 
   /**

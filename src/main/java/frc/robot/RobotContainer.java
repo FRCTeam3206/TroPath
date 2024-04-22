@@ -48,7 +48,7 @@ public class RobotContainer implements Logged {
                 m_robotDrive::driveSpeed,
                 m_robotDrive,
                 Field.CHARGED_UP_2023)
-            .setPhysicsAlgorithmType(false);
+            .withPhysicsAlgorithmType(false);
     configureButtonBindings();
 
     // Configure default commands
