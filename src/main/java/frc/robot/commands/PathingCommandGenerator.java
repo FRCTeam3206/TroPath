@@ -380,33 +380,10 @@ public class PathingCommandGenerator {
    * @param supplier The supplier of the goal position.
    * @return A new PathingCommand.
    */
-  public Command generateToPoseSupplierCommand(Supplier<Pose2d> supplier) {
+  public PathingCommand generateToPoseSupplierCommand(Supplier<Pose2d> supplier) {
     Supplier<Pose2d> finalSupplier = () -> getPoseForAlliance(supplier.get());
     if (isDifferential) {
-      return new ActiveConditionalCommand(
-          new PathingCommand(
-              finalSupplier,
-              robotPose,
-              drive,
-              robotProfile,
-              builder.build(),
-              subsystem,
-              translationTolerance,
-              rotationTolerance,
-              linearPhysics),
-          new PathingCommand(
-              () -> new Pose2d(robotPose.get().getTranslation(), finalSupplier.get().getRotation()),
-              robotPose,
-              differentialRotationConsumer,
-              robotProfile,
-              builder.build(),
-              subsystem,
-              translationTolerance,
-              rotationTolerance,
-              linearPhysics),
-          () ->
-              robotPose.get().getTranslation().getDistance(finalSupplier.get().getTranslation())
-                  > translationTolerance);
+      return new DifferentialPathingCommand(finalSupplier, robotPose, drive, differentialRotationConsumer, robotProfile, builder.build(), subsystem, translationTolerance, rotationTolerance, linearPhysics);
     }
     return new PathingCommand(
         finalSupplier,
@@ -426,7 +403,7 @@ public class PathingCommandGenerator {
    * @param pose The goal position.
    * @return A new PathingCommand.
    */
-  public Command generateToPoseCommand(Pose2d pose) {
+  public PathingCommand generateToPoseCommand(Pose2d pose) {
     return generateToPoseSupplierCommand(() -> pose);
   }
 
@@ -438,7 +415,7 @@ public class PathingCommandGenerator {
    * @param t The goal rotation in meters.
    * @return A new PathingCommand.
    */
-  public Command generateToPoseCommand(double x, double y, double t) {
+  public PathingCommand generateToPoseCommand(double x, double y, double t) {
     return generateToPoseCommand(new Pose2d(x, y, new Rotation2d(t)));
   }
 
@@ -448,7 +425,7 @@ public class PathingCommandGenerator {
    * @param trans The translation.
    * @return A new PathingCommand.
    */
-  public Command generateToTranslationCommand(Translation2d trans) {
+  public PathingCommand generateToTranslationCommand(Translation2d trans) {
     return generateToPoseSupplierCommand(() -> new Pose2d(trans, robotPose.get().getRotation()));
   }
 
@@ -459,7 +436,7 @@ public class PathingCommandGenerator {
    * @param y The goal y position in meters.
    * @return A new PathingCommand.
    */
-  public Command generateToTranslationCommand(double x, double y) {
+  public PathingCommand generateToTranslationCommand(double x, double y) {
     return generateToPoseSupplierCommand(
         () -> new Pose2d(new Translation2d(x, y), robotPose.get().getRotation()));
   }
@@ -478,7 +455,7 @@ public class PathingCommandGenerator {
    *     range.
    * @return A new PathingCommand.
    */
-  public Command generateToDistFromPointCommand(
+  public PathingCommand generateToDistFromPointCommand(
       Translation2d point,
       Supplier<Double> distance,
       Rotation2d offset,
@@ -526,7 +503,7 @@ public class PathingCommandGenerator {
    *     range.
    * @return A new PathingCommand.
    */
-  public Command generateToDistFromPointCommand(
+  public PathingCommand generateToDistFromPointCommand(
       Translation2d point,
       double distance,
       Rotation2d offset,
@@ -546,7 +523,7 @@ public class PathingCommandGenerator {
    *     robot facing the target. Pi is the back of the robot facing the target.
    * @return A new PathingCommand.
    */
-  public Command generateToDistFromPointCommand(
+  public PathingCommand generateToDistFromPointCommand(
       Translation2d point, Supplier<Double> distance, Rotation2d offset) {
     return generateToDistFromPointCommand(
         point, distance, offset, new Rotation2d(), new Rotation2d(Math.PI));
@@ -562,7 +539,7 @@ public class PathingCommandGenerator {
    *     robot facing the target. Pi is the back of the robot facing the target.
    * @return A new PathingCommand.
    */
-  public Command generateToDistFromPointCommand(
+  public PathingCommand generateToDistFromPointCommand(
       Translation2d point, double distance, Rotation2d offset) {
     return generateToDistFromPointCommand(
         point, distance, offset, new Rotation2d(), new Rotation2d(Math.PI));
@@ -580,7 +557,7 @@ public class PathingCommandGenerator {
    *     range.
    * @return A new PathingCommand.
    */
-  public Command generateToDistFromPointCommand(
+  public PathingCommand generateToDistFromPointCommand(
       Translation2d point,
       Supplier<Double> distance,
       Rotation2d centerGoal,
@@ -601,7 +578,7 @@ public class PathingCommandGenerator {
    *     range.
    * @return A new PathingCommand.
    */
-  public Command generateToDistFromPointCommand(
+  public PathingCommand generateToDistFromPointCommand(
       Translation2d point, double distance, Rotation2d centerGoal, Rotation2d maxAngleOff) {
     return generateToDistFromPointCommand(
         point, () -> distance, new Rotation2d(), centerGoal, maxAngleOff);
@@ -616,7 +593,7 @@ public class PathingCommandGenerator {
    * @param distance A supplier for he goal distance from the reference point in meters.
    * @return A new PathingCommand.
    */
-  public Command generateToDistFromPointCommand(
+  public PathingCommand generateToDistFromPointCommand(
       Translation2d point,
       Supplier<Double> distance) {
     return generateToDistFromPointCommand(point, distance, new Rotation2d(), new Rotation2d(), new Rotation2d(Math.PI));
@@ -630,7 +607,7 @@ public class PathingCommandGenerator {
    * @param distance The goal distance from the reference point in meters.
    * @return A new PathingCommand.
    */
-  public Command generateToDistFromPointCommand(Translation2d point, double distance) {
+  public PathingCommand generateToDistFromPointCommand(Translation2d point, double distance) {
     return generateToDistFromPointCommand(
         point, distance, new Rotation2d(), new Rotation2d(), new Rotation2d(Math.PI));
   }
@@ -649,7 +626,7 @@ public class PathingCommandGenerator {
    *     range.
    * @return A new PathingCommand.
    */
-  public Command generateToDistFromPointCommand(
+  public PathingCommand generateToDistFromPointCommand(
       Translation2d point,
       Range distance,
       Rotation2d offset,
@@ -674,7 +651,7 @@ public class PathingCommandGenerator {
    *     robot facing the target. Pi is the back of the robot facing the target.
    * @return A new PathingCommand.
    */
-  public Command generateToDistFromPointCommand(
+  public PathingCommand generateToDistFromPointCommand(
       Translation2d point, Range distance, Rotation2d offset) {
     return generateToDistFromPointCommand(
         point, distance, offset, new Rotation2d(), new Rotation2d(Math.PI));
@@ -692,7 +669,7 @@ public class PathingCommandGenerator {
    *     range.
    * @return A new PathingCommand.
    */
-  public Command generateToDistFromPointCommand(
+  public PathingCommand generateToDistFromPointCommand(
       Translation2d point, Range distance, Rotation2d centerGoal, Rotation2d maxAngleOff) {
     return generateToDistFromPointCommand(
         point, distance, new Rotation2d(), centerGoal, maxAngleOff);
@@ -707,7 +684,7 @@ public class PathingCommandGenerator {
    * @param distance A range of the goal distances from the reference point in meters.
    * @return A new PathingCommand.
    */
-  public Command generateToDistFromPointCommand(Translation2d point, Range distance) {
+  public PathingCommand generateToDistFromPointCommand(Translation2d point, Range distance) {
     return generateToDistFromPointCommand(
         point, distance, new Rotation2d(), new Rotation2d(), new Rotation2d(Math.PI));
   }

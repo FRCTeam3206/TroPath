@@ -19,6 +19,7 @@ import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.RelativeTo;
 import frc.robot.commands.PathingCommandGenerator;
 import frc.robot.commands.PathingCommandGenerator.DifferentialOrientationMode;
+import frc.robot.robotprofile.Motor;
 import frc.robot.robotprofile.RobotProfile;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.utils.Range;
@@ -45,12 +46,12 @@ public class RobotContainer implements Logged {
     // Configure the button bindings
     path =
         new PathingCommandGenerator(
-            new RobotProfile(3, 3, 2, 2, .9, .9),
+            new RobotProfile(50, 3.0/39.37, .9, .9, Motor.NEO().gear(Motor.Gear.REV_HIGH)),
             m_robotDrive::getPose,
             m_robotDrive::driveDifferential,
             DriveConstants.diffKinematics.trackWidthMeters,
             m_robotDrive,
-            Field.CHARGED_UP_2023).setPhysicsAlgorithmType(false).setTolerances(.05, .05).setDifferentialOrientationMode(DifferentialOrientationMode.FORWARD);
+            Field.CHARGED_UP_2023).setPhysicsAlgorithmType(false).setDifferentialOrientationMode(DifferentialOrientationMode.FORWARD);
     configureButtonBindings();
 
     // Configure default commands

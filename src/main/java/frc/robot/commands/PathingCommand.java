@@ -18,19 +18,19 @@ import me.nabdev.pathfinding.structures.Path;
 
 /** A command to go to the given position. */
 public class PathingCommand extends Command {
-  private RobotProfile robotProfile;
-  private Supplier<Pose2d> robotPose;
-  private Consumer<ChassisSpeeds> drive;
-  private Pathfinder pathfinder;
-  private double velocity, rotationalVelocity = 0;
-  private TrapezoidProfile translationProfile, rotationProfile;
-  private Supplier<Pose2d> goalPoseSupplier;
-  private double translationTolerance = .05, rotationTolerance = Math.PI / 32;
-  private Field2d nextPoseFieldDisplay = new Field2d();
-  private Field2d finalPoseFieldDisplay = new Field2d();
-  private static final double dT = .02, eps = 1E-4;
-  private PathProfiler pathProfiler;
-  private boolean linearPhysics = false;
+  protected RobotProfile robotProfile;
+  protected Supplier<Pose2d> robotPose;
+  protected Consumer<ChassisSpeeds> drive;
+  protected Pathfinder pathfinder;
+  protected double velocity, rotationalVelocity = 0;
+  protected TrapezoidProfile translationProfile, rotationProfile;
+  protected Supplier<Pose2d> goalPoseSupplier;
+  protected double translationTolerance = .05, rotationTolerance = Math.PI / 32;
+  protected Field2d nextPoseFieldDisplay = new Field2d();
+  protected Field2d finalPoseFieldDisplay = new Field2d();
+  protected static final double dT = .02, eps = 1E-4;
+  protected PathProfiler pathProfiler;
+  protected boolean linearPhysics = false;
 
   /**
    * Constructs a PathingCommand. This method is called by the {@link PathingCommandGenerator}.
@@ -103,7 +103,6 @@ public class PathingCommand extends Command {
         new Pose2d(nextTargetPose.getTranslation(), goalPoseSupplier.get().getRotation()));
     double dX = nextTargetPose.getX() - robotPose.get().getX(),
         dY = nextTargetPose.getY() - robotPose.get().getY();
-    double total = Math.abs(dX) + Math.abs(dY);
     TrapezoidProfile.State nextState;
     start = System.currentTimeMillis();
     if (linearPhysics) {
@@ -179,7 +178,6 @@ public class PathingCommand extends Command {
 
   public boolean isFinished() {
     return (robotPose.get().getTranslation().getDistance(goalPoseSupplier.get().getTranslation())
-                + velocity * velocity / 2 / robotProfile.getMaxAcceleration()
             < translationTolerance
         && Math.abs(
                     robotPose
@@ -187,10 +185,6 @@ public class PathingCommand extends Command {
                         .getRotation()
                         .minus(goalPoseSupplier.get().getRotation())
                         .getRadians())
-                + rotationalVelocity
-                    * rotationalVelocity
-                    / 2
-                    / robotProfile.getMaxRotationalAcceleration()
             < rotationTolerance);
   }
 }
