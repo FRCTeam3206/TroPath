@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.robotprofile.RobotProfile;
-import frc.utils.CommandDuringPath;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
@@ -190,5 +189,44 @@ public class PathingCommand extends Command {
                     / 2
                     / robotProfile.getMaxRotationalAcceleration()
             < rotationTolerance);
+  }
+
+  private class CommandDuringPath {
+    private Command command;
+    private Predicate<Double> isActivate;
+
+    public CommandDuringPath(Command command, double startDistance, double endDistance) {
+      this.command = command;
+
+      // Uses inputting negatives to be told to not do start or end distance.
+      boolean hasStart = startDistance > 0;
+      boolean hasEnd = endDistance > 0;
+      if (hasStart && hasEnd) {
+        if (startDistance > endDistance) {
+          isActivate = (Double dist) -> dist < startDistance && dist > endDistance;
+        } else {
+          isActivate = (Double dist) -> dist < endDistance && dist > startDistance;
+        }
+      } else if (hasStart) {
+        isActivate = (Double dist) -> dist < startDistance;
+      } else if (hasEnd) {
+        isActivate = (Double dist) -> dist > endDistance;
+      } else {
+        isActivate = (Double dist) -> true;
+      }
+    }
+
+    public CommandDuringPath(Command command, Predicate<Double> isActivateGivenDist) {
+      this.command = command;
+      isActivate = isActivateGivenDist;
+    }
+
+    public Command getCommand() {
+      return command;
+    }
+
+    public boolean getIsActive(double dist) {
+      return isActivate.test(dist);
+    }
   }
 }
