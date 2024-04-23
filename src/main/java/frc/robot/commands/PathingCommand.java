@@ -7,7 +7,10 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.robotprofile.RobotProfile;
 
 import java.util.ArrayList;
@@ -33,9 +36,8 @@ public class PathingCommand extends Command {
   private static final double dT = .02;
   private PathProfiler pathProfiler;
   private boolean linearPhysics = false;
-  private ArrayList<CommandDuringPath> inactiveCommands = new ArrayList<CommandDuringPath>();
-  private ArrayList<CommandDuringPath> activeCommands = new ArrayList<CommandDuringPath>();
-
+  private ArrayList<CommandDuringPath> commands = new ArrayList<CommandDuringPath>();
+  private double distanceLeft=Double.MAX_VALUE;
   /**
    * Constructs a PathingCommand. This method is called by the {@link PathingCommandGenerator}.
    * Please use this generator to make a PathingCommand.
@@ -60,7 +62,6 @@ public class PathingCommand extends Command {
     SmartDashboard.putData("Next Pose", nextPoseFieldDisplay);
     SmartDashboard.putData("Final Pose", finalPoseFieldDisplay);
   }
-
   private PathingCommand setRobotProfile(RobotProfile profile) {
     this.robotProfile = profile;
     rotationProfile =
@@ -71,57 +72,44 @@ public class PathingCommand extends Command {
     return this;
   }
 
-  public void addCommandWithEndDist(Command command, double dist) {
-    inactiveCommands.add(new CommandDuringPath(command, -1, dist));
+  public PathingCommand addCommandAtDist(Command command, double dist) {
+    commands.add(new CommandDuringPath(command, -1, dist));
+    return this;
   }
 
-  public void addCommandWithStartDist(Command command, double startDist) {
-    inactiveCommands.add(new CommandDuringPath(command, startDist, -1));
+  public PathingCommand addCommandUntilDist(Command command, double startDist) {
+    commands.add(new CommandDuringPath(command, startDist, Double.MAX_VALUE));
+    return this;
   }
 
-  public void addCommandWithStartEndDist(Command command, double startDist, double endDist) {
-    inactiveCommands.add(new CommandDuringPath(command, startDist, endDist)); // The constructor will hand mixed up start and end by assuming intention of correct order.
+  public PathingCommand addCommandBetweenDist(Command command, double startDist, double endDist) {
+    if(startDist>endDist){
+      double savedStart=startDist;
+      startDist=endDist;
+      endDist=savedStart;
+    }
+    commands.add(new CommandDuringPath(command, startDist, endDist)); // The constructor will hand mixed up start and end by assuming intention of correct order.
+    return this;
   }
 
-  public void addCommandDistBasedCondition (Command command, Predicate<Double> isActive) {
-    inactiveCommands.add(new CommandDuringPath(command, isActive));
+  public PathingCommand addCommandDistBasedCondition (Command command, Predicate<Double> isActive) {
+    commands.add(new CommandDuringPath(command, isActive));
+    return this;
   }
-
-  private void checkInactiveCommands(double dist) {
-    for (int i = 0; i < inactiveCommands.size();) {
-      CommandDuringPath currentCommand = inactiveCommands.get(i);
-      if (currentCommand.getIsActive(dist)) {
-        currentCommand.getCommand().initialize();
-        inactiveCommands.remove(i);
-        activeCommands.add(currentCommand);
-      } else {
-        i++;
-      }
+  @Override
+  public void initialize(){
+    CommandScheduler scheduler=CommandScheduler.getInstance();
+    for(CommandDuringPath command:commands){
+      System.out.println("scheduling");
+      Command endWait=new WaitUntilCommand(()->!isScheduled()||!command.getIsActive(distanceLeft));
+      scheduler.removeComposedCommand(endWait);
+      scheduler.removeComposedCommand(command.getCommand());
+      Command runCommand=command.getCommand().raceWith(endWait);
+      scheduler.removeComposedCommand(runCommand);
+      Command addedCommand=new WaitUntilCommand(()->!isScheduled()||command.getIsActive(distanceLeft)).andThen(runCommand);
+      scheduler.schedule(addedCommand);
     }
   }
-
-  private void executeActiveCommands() {
-    for (int i = 0; i < activeCommands.size(); i++) {
-      activeCommands.get(i).getCommand().execute();
-    }
-  }
-
-  private void checkActiveCommands(double dist) {
-    for (int i = 0; i < activeCommands.size();) {
-      CommandDuringPath currentCommand = activeCommands.get(i);
-      if (!currentCommand.getIsActive(dist)) {
-        currentCommand.getCommand().end(true);
-        activeCommands.remove(i);
-        inactiveCommands.add(currentCommand);
-      } else if (currentCommand.getCommand().isFinished()) {
-        currentCommand.getCommand().end(false);
-        activeCommands.remove(i);
-      } else {
-        i++;
-      }
-    }
-  }
-
   public void execute() {
     finalPoseFieldDisplay.setRobotPose(goalPoseSupplier.get());
     double deltaRotation;
@@ -158,9 +146,7 @@ public class PathingCommand extends Command {
     } else {
       velocity = pathProfiler.getNextRobotSpeed(velocity, path.asPose2dList());
     }
-    checkInactiveCommands(pathProfiler.getDistanceToGoal());
-    executeActiveCommands();
-    checkActiveCommands(pathProfiler.getDistanceToGoal());
+    distanceLeft=pathProfiler.getDistanceToGoal();
     SmartDashboard.putNumber("Distance To Goal",pathProfiler.getDistanceToGoal());
     SmartDashboard.putNumber("Physics Time", System.currentTimeMillis() - start);
     SmartDashboard.putNumber("Velocity", velocity);
@@ -195,25 +181,9 @@ public class PathingCommand extends Command {
     private Command command;
     private Predicate<Double> isActivate;
 
-    public CommandDuringPath(Command command, double startDistance, double endDistance) {
+    public CommandDuringPath(Command command, double minDistance, double maxDistance) {
       this.command = command;
-
-      // Uses inputting negatives to be told to not do start or end distance.
-      boolean hasStart = startDistance > 0;
-      boolean hasEnd = endDistance > 0;
-      if (hasStart && hasEnd) {
-        if (startDistance > endDistance) {
-          isActivate = (Double dist) -> dist < startDistance && dist > endDistance;
-        } else {
-          isActivate = (Double dist) -> dist < endDistance && dist > startDistance;
-        }
-      } else if (hasStart) {
-        isActivate = (Double dist) -> dist < startDistance;
-      } else if (hasEnd) {
-        isActivate = (Double dist) -> dist > endDistance;
-      } else {
-        isActivate = (Double dist) -> true;
-      }
+      isActivate = (Double dist) ->dist < maxDistance && dist > minDistance;
     }
 
     public CommandDuringPath(Command command, Predicate<Double> isActivateGivenDist) {
