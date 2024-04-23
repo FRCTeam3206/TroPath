@@ -77,18 +77,18 @@ public class PathingCommand extends Command {
     return this;
   }
 
-  public PathingCommand addCommandUntilDist(Command command, double startDist) {
-    commands.add(new CommandDuringPath(command, startDist, Double.MAX_VALUE));
+  public PathingCommand addCommandUntilDist(Command command, double dist) {
+    commands.add(new CommandDuringPath(command, dist, Double.MAX_VALUE));
     return this;
   }
 
-  public PathingCommand addCommandBetweenDist(Command command, double startDist, double endDist) {
-    if(startDist>endDist){
-      double savedStart=startDist;
-      startDist=endDist;
-      endDist=savedStart;
+  public PathingCommand addCommandBetweenDist(Command command, double minDist, double maxDist) {
+    if(minDist>maxDist){
+      double savedStart=minDist;
+      minDist=maxDist;
+      maxDist=savedStart;
     }
-    commands.add(new CommandDuringPath(command, startDist, endDist)); // The constructor will hand mixed up start and end by assuming intention of correct order.
+    commands.add(new CommandDuringPath(command, minDist, maxDist));
     return this;
   }
 
