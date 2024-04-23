@@ -18,18 +18,17 @@ public class CommandDuringPath {
         boolean hasStart = startDistance > 0;
         boolean hasEnd = endDistance > 0;
         if (hasStart && hasEnd) {
-            isActivated = (Double dist) -> dist < startDistance && dist > endDistance;
+            if (startDistance > endDistance) {
+                isActivated = (Double dist) -> dist < startDistance && dist > endDistance;
+            } else {
+                isActivated = (Double dist) -> dist < endDistance && dist > startDistance;
+            }
         } else if (hasStart) {
             isActivated = (Double dist) -> dist < startDistance;
         } else if (hasEnd) {
             isActivated = (Double dist) -> dist > endDistance;
         } else {
             isActivated = (Double dist) -> true;
-        }
-
-        if (endDistance > startDistance) {
-            isActivated = (Double dist) -> false;
-            System.err.println("The distance from the goal at which this command starts is less than that at which it finishes.");
         }
     }
 
