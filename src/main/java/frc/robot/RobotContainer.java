@@ -51,7 +51,7 @@ public class RobotContainer implements Logged {
             m_robotDrive::driveDifferential,
             DriveConstants.diffKinematics.trackWidthMeters,
             m_robotDrive,
-            Field.CHARGED_UP_2023).setPhysicsAlgorithmType(false).setDifferentialOrientationMode(DifferentialOrientationMode.FORWARD);
+            Field.CHARGED_UP_2023).withPhysicsAlgorithmType(false).setDifferentialOrientationMode(DifferentialOrientationMode.FORWARD);
     configureButtonBindings();
 
     // Configure default commands
