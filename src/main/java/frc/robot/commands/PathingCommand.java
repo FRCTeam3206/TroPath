@@ -103,7 +103,6 @@ public class PathingCommand extends Command {
         new Pose2d(nextTargetPose.getTranslation(), goalPoseSupplier.get().getRotation()));
     double dX = nextTargetPose.getX() - robotPose.get().getX(),
         dY = nextTargetPose.getY() - robotPose.get().getY();
-    double total = Math.abs(dX) + Math.abs(dY);
     TrapezoidProfile.State nextState;
     start = System.currentTimeMillis();
     if (linearPhysics) {
@@ -123,8 +122,9 @@ public class PathingCommand extends Command {
     }
     SmartDashboard.putNumber("Physics Time", System.currentTimeMillis() - start);
     SmartDashboard.putNumber("Velocity", velocity);
-    double xSpeed = dX / total * velocity;
-    double ySpeed = dY / total * velocity;
+    double theta=Math.atan2(dY, dX);
+    double xSpeed = velocity*Math.cos(theta);
+    double ySpeed = velocity*Math.sin(theta);
     if (Double.isNaN(xSpeed) || Double.isNaN(ySpeed)) {
       xSpeed = 0;
       ySpeed = 0;
