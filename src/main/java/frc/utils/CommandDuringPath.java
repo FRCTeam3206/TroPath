@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 public class CommandDuringPath {
     private Command command;
-    private Predicate<Double> isActivated;
+    private Predicate<Double> isActivate;
 
     /**
      * This should not be used by the user.
@@ -19,29 +19,29 @@ public class CommandDuringPath {
         boolean hasEnd = endDistance > 0;
         if (hasStart && hasEnd) {
             if (startDistance > endDistance) {
-                isActivated = (Double dist) -> dist < startDistance && dist > endDistance;
+                isActivate = (Double dist) -> dist < startDistance && dist > endDistance;
             } else {
-                isActivated = (Double dist) -> dist < endDistance && dist > startDistance;
+                isActivate = (Double dist) -> dist < endDistance && dist > startDistance;
             }
         } else if (hasStart) {
-            isActivated = (Double dist) -> dist < startDistance;
+            isActivate = (Double dist) -> dist < startDistance;
         } else if (hasEnd) {
-            isActivated = (Double dist) -> dist > endDistance;
+            isActivate = (Double dist) -> dist > endDistance;
         } else {
-            isActivated = (Double dist) -> true;
+            isActivate = (Double dist) -> true;
         }
     }
 
-    public CommandDuringPath(Command command, Predicate<Double> isActivatedGivenDist) {
+    public CommandDuringPath(Command command, Predicate<Double> isActivateGivenDist) {
         this.command = command;
-        isActivated = isActivatedGivenDist;
+        isActivate = isActivateGivenDist;
     }
 
     public Command getCommand() {
         return command;
     }
 
-    public boolean getIsActivated(double dist) {
-        return isActivated.test(dist);
+    public boolean getIsActive(double dist) {
+        return isActivate.test(dist);
     }
 }
