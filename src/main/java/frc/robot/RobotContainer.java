@@ -50,7 +50,7 @@ public class RobotContainer implements Logged {
             m_robotDrive::driveDifferential,
             DriveConstants.diffKinematics.trackWidthMeters,
             m_robotDrive,
-            Field.CHARGED_UP_2023).setPhysicsAlgorithmType(false);
+            Field.CHARGED_UP_2023).setPhysicsAlgorithmType(false).setTolerances(.05, .05).setDifferentialOrientationMode(DifferentialOrientationMode.FORWARD);
     configureButtonBindings();
 
     // Configure default commands
@@ -84,7 +84,7 @@ public class RobotContainer implements Logged {
     //         () -> m_robotDrive.setX(),
     //         m_robotDrive));
 
-    m_driverController.button(1).whileTrue(path.generateToPoseCommand(5.45, 3.15, Math.PI));
+    m_driverController.button(1).whileTrue(path.generateToPoseCommand(6.3,4.6, Math.PI));
     m_driverController
         .button(2)
         .whileTrue(

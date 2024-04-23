@@ -270,13 +270,17 @@ public class PathingCommandGenerator {
                   Math.sqrt(
                       speeds.vxMetersPerSecond * speeds.vxMetersPerSecond
                           + speeds.vyMetersPerSecond * speeds.vyMetersPerSecond);
+              SmartDashboard.putNumber("In Velocity",velocity);
               double linearVelocity = velocity * Math.cos(theta)*(reversed?-1:1);
               if (!differentialOrientationMode.equals(DifferentialOrientationMode.AUTOMATIC) && Math.abs(theta) > Math.PI / 2) linearVelocity = 0;
               double desiredRotationalVelocity = (velocity) * Math.sin(theta) * 2 / trackWidth;
               double rotationSign=Math.signum(desiredRotationalVelocity);
               desiredRotationalVelocity=Math.abs(desiredRotationalVelocity);
               rotationalVelocity=Math.min(desiredRotationalVelocity,robotProfile.getMaxRotationalAcceleration()*.02+Math.abs(rotationalVelocity))*rotationSign;
+              //linearVelocity*=1-Math.abs(rotationalVelocity/robotProfile.getMaxRotationalVelocity());
+              //SmartDashboard.putNumber("Limiting Ratio", 1-Math.abs(rotationalVelocity/robotProfile.getMaxRotationalVelocity()));
               SmartDashboard.putNumber("Rotation Vel", rotationalVelocity);
+              SmartDashboard.putNumber("Final Velocity",linearVelocity);
               DifferentialDriveWheelSpeeds output =
                   kinematics.toWheelSpeeds(new ChassisSpeeds(linearVelocity, 0, rotationalVelocity));
               diffDrive.accept(output);

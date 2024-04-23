@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 public class ActiveConditionalCommand extends Command {
   Command onTrue, onFalse;
   Supplier<Boolean> condition;
-
+  boolean hasFinishedTrue=false;
   public ActiveConditionalCommand(Command onTrue, Command onFalse, Supplier<Boolean> condition) {
     this.onTrue = onTrue;
     this.onFalse = onFalse;
@@ -26,15 +26,21 @@ public class ActiveConditionalCommand extends Command {
   }
 
   public void execute() {
-    if (condition.get()) {
+    if (condition.get()&&!hasFinishedTrue) {
       onTrue.execute();
     } else {
       onFalse.execute();
+      hasFinishedTrue=true;
     }
   }
 
   @Override
   public boolean isFinished() {
+    if(onFalse.isFinished() && !condition.get())hasFinishedTrue=false;
     return (onTrue.isFinished() && condition.get()) || (onFalse.isFinished() && !condition.get());
+  }
+  @Override
+  public void end(boolean interrupt){
+    hasFinishedTrue=false;
   }
 }
