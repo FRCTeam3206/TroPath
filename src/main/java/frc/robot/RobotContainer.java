@@ -19,6 +19,7 @@ import frc.robot.Constants.RelativeTo;
 import frc.robot.commands.PathingCommandGenerator;
 import frc.robot.robotprofile.RobotProfile;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.DummySubsystem;
 import frc.utils.Range;
 import me.nabdev.pathfinding.utilities.FieldLoader.Field;
 import monologue.Logged;
@@ -32,7 +33,7 @@ import monologue.Logged;
 public class RobotContainer implements Logged {
   // The robot's subsystems
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
-
+  private final DummySubsystem subsystem = new DummySubsystem();
   // The driver's controller
   CommandXboxController m_driverController =
       new CommandXboxController(OIConstants.kDriverControllerPort);
@@ -48,7 +49,7 @@ public class RobotContainer implements Logged {
                 m_robotDrive::driveSpeed,
                 m_robotDrive,
                 Field.CHARGED_UP_2023)
-            .withPhysicsAlgorithmType(false);
+            .withPhysicsAlgorithmType(true);
     configureButtonBindings();
 
     // Configure default commands
@@ -82,7 +83,11 @@ public class RobotContainer implements Logged {
     //         () -> m_robotDrive.setX(),
     //         m_robotDrive));
 
-    m_driverController.button(1).whileTrue(path.generateToPoseCommand(5.45, 3.15, Math.PI));
+    m_driverController
+        .button(1)
+        .whileTrue(
+            path.generateToPoseCommand(5.45, 3.15, Math.PI)
+                .addCommandBetweenDist(subsystem.down(), 4, 2));
     m_driverController
         .button(2)
         .whileTrue(
@@ -92,6 +97,9 @@ public class RobotContainer implements Logged {
                 new Rotation2d(Math.PI / 2),
                 new Rotation2d(0),
                 new Rotation2d(Math.PI / 2)));
+    m_driverController.povUp().whileTrue(subsystem.up());
+    m_driverController.povDown().whileTrue(subsystem.down());
+    subsystem.setDefaultCommand(subsystem.zero());
   }
 
   /**

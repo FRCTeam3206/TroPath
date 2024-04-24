@@ -1,6 +1,9 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -8,10 +11,13 @@ import java.util.List;
 
 public class PathProfiler {
   private double maxVelocity, maxAcceleration;
+  private TrapezoidProfile linearPhysicsTrapezoidProfile;
 
   public PathProfiler(double maxVelocity, double maxAcceleration) {
     this.maxVelocity = maxVelocity;
     this.maxAcceleration = maxAcceleration;
+    linearPhysicsTrapezoidProfile =
+        new TrapezoidProfile(new Constraints(maxVelocity, maxAcceleration));
   }
 
   Comparator<ProfiledPathPoint> pathPointVelocityComparator =
@@ -22,9 +28,10 @@ public class PathProfiler {
           return o1.velocity > o2.velocity ? 1 : -1;
         }
       };
+  private double distanceLeft;
 
-  public double getNextRobotSpeed(
-      double inVelocity, Pose2d currentRobotPose, ArrayList<Pose2d> path) {
+  public double getNextRobotSpeed(double inVelocity, ArrayList<Pose2d> path) {
+    distanceLeft = 0;
     ArrayList<ProfiledPathPoint> profiledPath = new ArrayList<>();
     profiledPath.add(new ProfiledPathPoint(0).setLocation(path.get(0)).setVelocity(maxVelocity));
     int i = 1;
@@ -33,8 +40,9 @@ public class PathProfiler {
           new ProfiledPathPoint(i).setLocation(path.get(i)).setLast(profiledPath.get(i - 1)));
       profiledPath.get(i - 1).setNext(profiledPath.get(i));
       if (i == 1) continue;
-      double stopDist =
-          poseDist(profiledPath.get(i - 1), profiledPath.get(i)) / angle(profiledPath.get(i - 1));
+      double dist = poseDist(profiledPath.get(i - 1), profiledPath.get(i));
+      distanceLeft += dist;
+      double stopDist = dist / angle(profiledPath.get(i - 1));
       double maxAllowedVelocity = Math.sqrt(stopDist * 2 * maxAcceleration);
       if (Double.isInfinite(maxAllowedVelocity) || Double.isNaN(maxAllowedVelocity)) {
         maxAllowedVelocity = maxVelocity;
@@ -83,6 +91,35 @@ public class PathProfiler {
     return Math.min(currentPoint.getVelocity(), inVelocity + maxAcceleration * .02);
   }
 
+  public double nextVelocityLinear(double inVelocity, ArrayList<Pose2d> path) {
+    Pose2d lastPose = path.get(0);
+    distanceLeft = lastPose.getTranslation().getDistance(path.get(1).getTranslation());
+    State state;
+    boolean shouldContinue = false;
+    for (int i = 1; i < path.size() - 1; i++) {
+      Pose2d currentPose = path.get(i);
+      Pose2d nextPose = path.get(i + 1);
+      double nextDistance = nextPose.getTranslation().getDistance(currentPose.getTranslation());
+      double angle = angle(lastPose, currentPose, nextPose);
+      if (distanceLeft > maxVelocity * maxVelocity / maxAcceleration / 2
+          || shouldContinue
+          || angle < 1E-4) {
+        distanceLeft += nextDistance;
+        continue; // Don't do extra math, just find the distance of the path
+      }
+      double stopDist = nextDistance / angle;
+      double maxAllowedVelocity = Math.sqrt(stopDist * 2 * maxAcceleration);
+      if (maxAllowedVelocity < maxVelocity) {
+        state = new State(distanceLeft, maxAllowedVelocity);
+        shouldContinue = true;
+      }
+      distanceLeft += nextDistance;
+      lastPose = currentPose;
+    }
+    state = new State(distanceLeft, 0);
+    return linearPhysicsTrapezoidProfile.calculate(.02, new State(0, inVelocity), state).velocity;
+  }
+
   // Code for binary search courtesy of chat-gpt
   public static int binaryVelocitySearch(List<ProfiledPathPoint> list, ProfiledPathPoint item) {
     int low = 0;
@@ -102,10 +139,21 @@ public class PathProfiler {
     return low;
   }
 
+  public double getDistanceToGoal() {
+    return distanceLeft;
+  }
+
   private double angle(ProfiledPathPoint p1, ProfiledPathPoint p2, ProfiledPathPoint p3) {
     double d1 = poseDist(p1, p2);
     double d2 = poseDist(p2, p3);
     double d3 = poseDist(p3, p1);
+    return Math.PI - Math.acos((d1 * d1 + d2 * d2 - d3 * d3) / (2 * d1 * d2));
+  }
+
+  private double angle(Pose2d pose1, Pose2d pose2, Pose2d pose3) {
+    double d1 = pose1.getTranslation().getDistance(pose2.getTranslation());
+    double d2 = pose2.getTranslation().getDistance(pose3.getTranslation());
+    double d3 = pose3.getTranslation().getDistance(pose1.getTranslation());
     return Math.PI - Math.acos((d1 * d1 + d2 * d2 - d3 * d3) / (2 * d1 * d2));
   }
 
