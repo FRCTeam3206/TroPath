@@ -72,16 +72,38 @@ public class PathingCommand extends Command {
     return this;
   }
 
+  /**
+   * Add a command that will run in parallel with this command starting
+   * at the given dist and continuing until the goal position is reached.
+   * @param command The command to run.
+   * @param dist The distance from the goal at which to start running the command.
+   * @return This pathing command.
+   */
   public PathingCommand addCommandAtDist(Command command, double dist) {
     commands.add(new CommandDuringPath(command, -1, dist));
     return this;
   }
 
+  /**
+   * Add a command that will run in parallel with this command starting
+   * when this command starts and continuing until the robot is the given dist from the goal.
+   * @param command The command to run.
+   * @param dist The distance from the goal at which to stop running the command.
+   * @return This pathing command.
+   */
   public PathingCommand addCommandUntilDist(Command command, double dist) {
     commands.add(new CommandDuringPath(command, dist, Double.MAX_VALUE));
     return this;
   }
 
+  /**
+   * Add a command that will run in parallel with this command starting when the robot reaches the minDist
+   * from the goal position and ending when the robot gets to the maxDist from the goal position.
+   * @param command The command to run.
+   * @param minDist The distance from the goal at which to start running the command.
+   * @param maxDist The distance from the goal at which to stop running the command.
+   * @return This pathing command.
+   */
   public PathingCommand addCommandBetweenDist(Command command, double minDist, double maxDist) {
     if (minDist > maxDist) {
       double savedStart = minDist;
