@@ -73,8 +73,9 @@ public class PathingCommand extends Command {
   }
 
   /**
-   * Add a command that will run in parallel with this command starting
-   * at the given dist and continuing until the goal position is reached.
+   * Add a command that will run in parallel with this command starting at the given dist and
+   * continuing until the goal position of this pathing command is reached.
+   *
    * @param command The command to run.
    * @param dist The distance from the goal at which to start running the command.
    * @return This pathing command.
@@ -85,8 +86,9 @@ public class PathingCommand extends Command {
   }
 
   /**
-   * Add a command that will run in parallel with this command starting
-   * when this command starts and continuing until the robot is the given dist from the goal.
+   * Add a command that will run in parallel with this command starting when this command starts and
+   * continuing until the robot reaches the given dist from the goal.
+   *
    * @param command The command to run.
    * @param dist The distance from the goal at which to stop running the command.
    * @return This pathing command.
@@ -97,8 +99,10 @@ public class PathingCommand extends Command {
   }
 
   /**
-   * Add a command that will run in parallel with this command starting when the robot reaches the minDist
-   * from the goal position and ending when the robot gets to the maxDist from the goal position.
+   * Add a command that will run in parallel with this command starting when the robot reaches the
+   * minDist from the goal position and ending when the robot gets to the maxDist from the goal
+   * position.
+   *
    * @param command The command to run.
    * @param minDist The distance from the goal at which to start running the command.
    * @param maxDist The distance from the goal at which to stop running the command.
