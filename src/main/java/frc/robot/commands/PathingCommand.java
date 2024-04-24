@@ -104,8 +104,8 @@ public class PathingCommand extends Command {
    * position.
    *
    * @param command The command to run.
-   * @param minDist The distance from the goal at which to start running the command.
-   * @param maxDist The distance from the goal at which to stop running the command.
+   * @param minDist The distance from the goal at which to stop running the command.
+   * @param maxDist The distance from the goal at which to start running the command.
    * @return This pathing command.
    */
   public PathingCommand addCommandBetweenDist(Command command, double minDist, double maxDist) {
