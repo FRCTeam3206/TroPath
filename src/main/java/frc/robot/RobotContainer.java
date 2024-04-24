@@ -33,7 +33,7 @@ import monologue.Logged;
 public class RobotContainer implements Logged {
   // The robot's subsystems
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
-  private final DummySubsystem subsystem=new DummySubsystem();
+  private final DummySubsystem subsystem = new DummySubsystem();
   // The driver's controller
   CommandXboxController m_driverController =
       new CommandXboxController(OIConstants.kDriverControllerPort);
@@ -83,7 +83,11 @@ public class RobotContainer implements Logged {
     //         () -> m_robotDrive.setX(),
     //         m_robotDrive));
 
-    m_driverController.button(1).whileTrue(path.generateToPoseCommand(5.45, 3.15, Math.PI).addCommandBetweenDist(subsystem.down(), 4,2));
+    m_driverController
+        .button(1)
+        .whileTrue(
+            path.generateToPoseCommand(5.45, 3.15, Math.PI)
+                .addCommandBetweenDist(subsystem.down(), 4, 2));
     m_driverController
         .button(2)
         .whileTrue(

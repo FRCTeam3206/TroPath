@@ -233,7 +233,8 @@ public class PathingCommandGenerator {
    * @return A new {@link PathingCommandGenerator} cloned from this one.
    */
   public PathingCommandGenerator clone() {
-    PathingCommandGenerator pather = new PathingCommandGenerator(robotProfile, robotPose, drive, subsystem, builder);
+    PathingCommandGenerator pather =
+        new PathingCommandGenerator(robotProfile, robotPose, drive, subsystem, builder);
     pather.translationTolerance = translationTolerance;
     pather.rotationTolerance = rotationTolerance;
     pather.linearPhysics = linearPhysics;

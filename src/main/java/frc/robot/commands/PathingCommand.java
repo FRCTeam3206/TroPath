@@ -8,11 +8,9 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.robotprofile.RobotProfile;
-
 import java.util.ArrayList;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -37,7 +35,8 @@ public class PathingCommand extends Command {
   private PathProfiler pathProfiler;
   private boolean linearPhysics = false;
   private ArrayList<CommandDuringPath> commands = new ArrayList<CommandDuringPath>();
-  private double distanceLeft=Double.MAX_VALUE;
+  private double distanceLeft = Double.MAX_VALUE;
+
   /**
    * Constructs a PathingCommand. This method is called by the {@link PathingCommandGenerator}.
    * Please use this generator to make a PathingCommand.
@@ -62,6 +61,7 @@ public class PathingCommand extends Command {
     SmartDashboard.putData("Next Pose", nextPoseFieldDisplay);
     SmartDashboard.putData("Final Pose", finalPoseFieldDisplay);
   }
+
   private PathingCommand setRobotProfile(RobotProfile profile) {
     this.robotProfile = profile;
     rotationProfile =
@@ -83,33 +83,38 @@ public class PathingCommand extends Command {
   }
 
   public PathingCommand addCommandBetweenDist(Command command, double minDist, double maxDist) {
-    if(minDist>maxDist){
-      double savedStart=minDist;
-      minDist=maxDist;
-      maxDist=savedStart;
+    if (minDist > maxDist) {
+      double savedStart = minDist;
+      minDist = maxDist;
+      maxDist = savedStart;
     }
     commands.add(new CommandDuringPath(command, minDist, maxDist));
     return this;
   }
 
-  public PathingCommand addCommandDistBasedCondition (Command command, Predicate<Double> isActive) {
+  public PathingCommand addCommandDistBasedCondition(Command command, Predicate<Double> isActive) {
     commands.add(new CommandDuringPath(command, isActive));
     return this;
   }
+
   @Override
-  public void initialize(){
-    CommandScheduler scheduler=CommandScheduler.getInstance();
-    for(CommandDuringPath command:commands){
+  public void initialize() {
+    CommandScheduler scheduler = CommandScheduler.getInstance();
+    for (CommandDuringPath command : commands) {
       System.out.println("scheduling");
-      Command endWait=new WaitUntilCommand(()->!isScheduled()||!command.getIsActive(distanceLeft));
+      Command endWait =
+          new WaitUntilCommand(() -> !isScheduled() || !command.getIsActive(distanceLeft));
       scheduler.removeComposedCommand(endWait);
       scheduler.removeComposedCommand(command.getCommand());
-      Command runCommand=command.getCommand().raceWith(endWait);
+      Command runCommand = command.getCommand().raceWith(endWait);
       scheduler.removeComposedCommand(runCommand);
-      Command addedCommand=new WaitUntilCommand(()->!isScheduled()||command.getIsActive(distanceLeft)).andThen(runCommand);
+      Command addedCommand =
+          new WaitUntilCommand(() -> !isScheduled() || command.getIsActive(distanceLeft))
+              .andThen(runCommand);
       scheduler.schedule(addedCommand);
     }
   }
+
   public void execute() {
     finalPoseFieldDisplay.setRobotPose(goalPoseSupplier.get());
     double deltaRotation;
@@ -142,17 +147,17 @@ public class PathingCommand extends Command {
         dY = nextTargetPose.getY() - robotPose.get().getY();
     start = System.currentTimeMillis();
     if (linearPhysics) {
-      velocity=pathProfiler.nextVelocityLinear(velocity, path.asPose2dList());
+      velocity = pathProfiler.nextVelocityLinear(velocity, path.asPose2dList());
     } else {
       velocity = pathProfiler.getNextRobotSpeed(velocity, path.asPose2dList());
     }
-    distanceLeft=pathProfiler.getDistanceToGoal();
-    SmartDashboard.putNumber("Distance To Goal",pathProfiler.getDistanceToGoal());
+    distanceLeft = pathProfiler.getDistanceToGoal();
+    SmartDashboard.putNumber("Distance To Goal", pathProfiler.getDistanceToGoal());
     SmartDashboard.putNumber("Physics Time", System.currentTimeMillis() - start);
     SmartDashboard.putNumber("Velocity", velocity);
-    double theta=Math.atan2(dY, dX);
-    double xSpeed = velocity*Math.cos(theta);
-    double ySpeed = velocity*Math.sin(theta);
+    double theta = Math.atan2(dY, dX);
+    double xSpeed = velocity * Math.cos(theta);
+    double ySpeed = velocity * Math.sin(theta);
     if (Double.isNaN(xSpeed) || Double.isNaN(ySpeed)) {
       xSpeed = 0;
       ySpeed = 0;
@@ -183,7 +188,7 @@ public class PathingCommand extends Command {
 
     public CommandDuringPath(Command command, double minDistance, double maxDistance) {
       this.command = command;
-      isActivate = (Double dist) ->dist < maxDistance && dist > minDistance;
+      isActivate = (Double dist) -> dist < maxDistance && dist > minDistance;
     }
 
     public CommandDuringPath(Command command, Predicate<Double> isActivateGivenDist) {
