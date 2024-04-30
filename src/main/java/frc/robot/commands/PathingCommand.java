@@ -55,6 +55,8 @@ public class PathingCommand extends Command {
     this.robotPose = currentPoseSupplier;
     this.drive = drive;
     this.linearPhysics = linearPhysics;
+    this.translationTolerance = translationTolerance;
+    this.rotationTolerance = rotationTolerance;
     setRobotProfile(robotProfile);
     this.pathfinder = pathfinder;
     this.addRequirements(subsystem);
