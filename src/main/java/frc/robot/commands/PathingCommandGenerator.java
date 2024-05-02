@@ -281,6 +281,7 @@ public class PathingCommandGenerator {
               Math.sqrt(
                   speeds.vxMetersPerSecond * speeds.vxMetersPerSecond
                       + speeds.vyMetersPerSecond * speeds.vyMetersPerSecond);
+          System.out.println("Weighting: "+weighting);
           theta =
               Math.atan(
                   Math.tan(theta)

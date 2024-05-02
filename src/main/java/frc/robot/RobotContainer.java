@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import java.io.IOException;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -41,8 +43,9 @@ public class RobotContainer implements Logged {
       new CommandXboxController(OIConstants.kDriverControllerPort);
   PathingCommandGenerator path;
 
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
-  public RobotContainer() {
+  /** The container for the robot. Contains subsystems, OI devices, and commands. 
+ * @throws IOException */
+  public RobotContainer() throws IOException {
     // Configure the button bindings
     path =
         new PathingCommandGenerator(
@@ -53,7 +56,8 @@ public class RobotContainer implements Logged {
                 m_robotDrive,
                 Field.CHARGED_UP_2023)
             .withPhysicsAlgorithmType(false)
-            .setDifferentialOrientationMode(DifferentialOrientationMode.FORWARD);
+            .setDifferentialOrientationMode(DifferentialOrientationMode.FORWARD)
+            .withDifferentialWeighting(0.7);
     configureButtonBindings();
 
     // Configure default commands
