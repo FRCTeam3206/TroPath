@@ -12,6 +12,8 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.robotprofile.RobotProfile;
 import frc.utils.AllianceUtil;
 import frc.utils.Range;
+
+import java.io.IOException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import me.nabdev.pathfinding.PathfinderBuilder;
@@ -408,6 +410,33 @@ public class PathingCommandGenerator {
   }
 
   /**
+   * For commands using differential drive, sets the weighting between rotational and linear velocity.
+   * A higher value gives a higher weight to rotation, while a lower value gives a higher weight to 
+   * linear. Giving a higher weight to linear will make it focus more on going quickly, while a higher
+   * weight for rotational will make it focus more on going accurately.
+   * 
+   * @param weighting The weighting to be used, from 0 to 1. Defaults to 0.5.
+   * @return A new {@link PathingCommandGenerator} with the modification. For example, to modify one
+   *     named {@code pather}, you could do {@code pather = pather.withDifferentialWeighting(0.6);},
+   *     and this would have the same result as if the pather itself were modified. For this usage,
+   *     make sure to set it to the new pather, since it is a clone and would therefore otherwise
+   *     not be changed. However, because the PathingCommandGenerator returned by this is a clone,
+   *     you can set new pathing command generators to the original with this modification, and the
+   *     original will not be affected. For example, if you already have one called {@code pather},
+   *     doing {@code PathingCommandGenerator otherPather = pather.withDifferentialWeighting(0.6);}
+   *     will not affect the original. You can also use this to make a change right before
+   *     generating a command without the original being affected.
+ * @throws IOException 
+   */
+  public PathingCommandGenerator withDifferentialWeighting(double weighting) throws IOException {
+    if (weighting < 0 || weighting > 1) throw new IOException(
+      "The weighting for differential drive to balance between rotational and linear acceleration has been attempted to be set to " + weighting + ". This value must be between 0 and 1.");
+    PathingCommandGenerator pather = this.clone();
+    pather.weighting = weighting;
+    return pather;
+  }
+
+  /**
    * This method is used by other methods within this class. As the user, you should not need to use
    * it. Makes a new PathingCommandGenerator with the same settings; builders are still linked, so
    * changing this one's builder will change the builder of the one it was created from too.
@@ -432,6 +461,7 @@ public class PathingCommandGenerator {
     pather.linearPhysics = linearPhysics;
     pather.allianceFlip = allianceFlip;
     pather.differentialOrientationMode = differentialOrientationMode;
+    pather.weighting = weighting;
     return pather;
   }
 
