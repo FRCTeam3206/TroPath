@@ -34,9 +34,11 @@ public class PathingCommandGenerator {
   private double weighting = 0.5;
   private Consumer<ChassisSpeeds> differentialRotationConsumer;
   double rotationalVelocity;
-  private DifferentialOrientationMode differentialOrientationMode=DifferentialOrientationMode.AUTOMATIC;
+  private DifferentialOrientationMode differentialOrientationMode =
+      DifferentialOrientationMode.AUTOMATIC;
   private Consumer<DifferentialDriveWheelSpeeds> differentialLinearSpeedsConsumer;
   private double trackWidth;
+
   /**
    * Constructs a PathingCommandGenerator to generate {@code PathingCommand}s on a holonomic chassis
    * with the given settings. Defaults to using the layout for the 2024 field. To use a custom
@@ -244,57 +246,72 @@ public class PathingCommandGenerator {
     this.robotProfile = robotProfile;
     this.robotPose = robotPose;
     setDifferentialDrive(drive, trackWidth);
-    this.differentialLinearSpeedsConsumer=drive;
-    this.trackWidth=trackWidth;
+    this.differentialLinearSpeedsConsumer = drive;
+    this.trackWidth = trackWidth;
     this.subsystem = subsystem;
     AllianceUtil.setRobot(robotPose);
     this.builder = builder;
   }
-  public PathingCommandGenerator setDifferentialOrientationMode(DifferentialOrientationMode mode){
-    PathingCommandGenerator pather=clone();
-    pather.differentialOrientationMode=mode;
+
+  public PathingCommandGenerator setDifferentialOrientationMode(DifferentialOrientationMode mode) {
+    PathingCommandGenerator pather = clone();
+    pather.differentialOrientationMode = mode;
     return pather;
   }
+
   public void setDifferentialDrive(
       Consumer<DifferentialDriveWheelSpeeds> diffDrive, double trackWidth) {
-        isDifferential = true;
-        DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(trackWidth);
-        drive =
-            (ChassisSpeeds speeds) -> {
-              double theta =
-                  new Rotation2d(Math.atan2(speeds.vyMetersPerSecond, speeds.vxMetersPerSecond)).minus(robotPose.get().getRotation()).getRadians();
-              boolean reversed=false;
-              if(differentialOrientationMode==DifferentialOrientationMode.REVERSE)reversed=true;
-              if(differentialOrientationMode==DifferentialOrientationMode.AUTOMATIC){
-                reversed=Math.abs(theta)>Math.PI/2;
-              }
-              if(reversed)theta=new Rotation2d(theta).plus(new Rotation2d(Math.PI)).getRadians();
-                  double velocity =
-                  Math.sqrt(
-                      speeds.vxMetersPerSecond * speeds.vxMetersPerSecond
-                          + speeds.vyMetersPerSecond * speeds.vyMetersPerSecond);
-              theta = Math.atan(Math.tan(theta) * ((weighting < 0.5 ? 2 * weighting : (1 / (2 * (1 - weighting))))));
-              SmartDashboard.putNumber("In Velocity",velocity);
-              double linearVelocity = velocity * Math.cos(theta)*(reversed?-1:1);
-              if (!differentialOrientationMode.equals(DifferentialOrientationMode.AUTOMATIC) && Math.abs(theta) > Math.PI / 2) linearVelocity = 0;
-              double desiredRotationalVelocity = (velocity) * Math.sin(theta) * 2 / trackWidth;
-              double rotationSign=Math.signum(desiredRotationalVelocity);
-              desiredRotationalVelocity=Math.abs(desiredRotationalVelocity);
-              rotationalVelocity=Math.min(desiredRotationalVelocity,robotProfile.getMaxRotationalAcceleration()*.02+Math.abs(rotationalVelocity))*rotationSign;
-              //linearVelocity*=1-Math.abs(rotationalVelocity/robotProfile.getMaxRotationalVelocity());
-              //SmartDashboard.putNumber("Limiting Ratio", 1-Math.abs(rotationalVelocity/robotProfile.getMaxRotationalVelocity()));
-              SmartDashboard.putNumber("Rotation Vel", rotationalVelocity);
-              SmartDashboard.putNumber("Final Velocity",linearVelocity);
-              DifferentialDriveWheelSpeeds output =
-                  kinematics.toWheelSpeeds(new ChassisSpeeds(linearVelocity, 0, rotationalVelocity));
-              diffDrive.accept(output);
-            };
-        differentialRotationConsumer =
-            (ChassisSpeeds speeds) -> {
-              diffDrive.accept(
-                  kinematics.toWheelSpeeds(new ChassisSpeeds(0, 0, speeds.omegaRadiansPerSecond)));
-            };
+    isDifferential = true;
+    DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(trackWidth);
+    drive =
+        (ChassisSpeeds speeds) -> {
+          double theta =
+              new Rotation2d(Math.atan2(speeds.vyMetersPerSecond, speeds.vxMetersPerSecond))
+                  .minus(robotPose.get().getRotation())
+                  .getRadians();
+          boolean reversed = false;
+          if (differentialOrientationMode == DifferentialOrientationMode.REVERSE) reversed = true;
+          if (differentialOrientationMode == DifferentialOrientationMode.AUTOMATIC) {
+            reversed = Math.abs(theta) > Math.PI / 2;
+          }
+          if (reversed) theta = new Rotation2d(theta).plus(new Rotation2d(Math.PI)).getRadians();
+          double velocity =
+              Math.sqrt(
+                  speeds.vxMetersPerSecond * speeds.vxMetersPerSecond
+                      + speeds.vyMetersPerSecond * speeds.vyMetersPerSecond);
+          theta =
+              Math.atan(
+                  Math.tan(theta)
+                      * ((weighting < 0.5 ? 2 * weighting : (1 / (2 * (1 - weighting))))));
+          SmartDashboard.putNumber("In Velocity", velocity);
+          double linearVelocity = velocity * Math.cos(theta) * (reversed ? -1 : 1);
+          if (!differentialOrientationMode.equals(DifferentialOrientationMode.AUTOMATIC)
+              && Math.abs(theta) > Math.PI / 2) linearVelocity = 0;
+          double desiredRotationalVelocity = (velocity) * Math.sin(theta) * 2 / trackWidth;
+          double rotationSign = Math.signum(desiredRotationalVelocity);
+          desiredRotationalVelocity = Math.abs(desiredRotationalVelocity);
+          rotationalVelocity =
+              Math.min(
+                      desiredRotationalVelocity,
+                      robotProfile.getMaxRotationalAcceleration() * .02
+                          + Math.abs(rotationalVelocity))
+                  * rotationSign;
+          // linearVelocity*=1-Math.abs(rotationalVelocity/robotProfile.getMaxRotationalVelocity());
+          // SmartDashboard.putNumber("Limiting Ratio",
+          // 1-Math.abs(rotationalVelocity/robotProfile.getMaxRotationalVelocity()));
+          SmartDashboard.putNumber("Rotation Vel", rotationalVelocity);
+          SmartDashboard.putNumber("Final Velocity", linearVelocity);
+          DifferentialDriveWheelSpeeds output =
+              kinematics.toWheelSpeeds(new ChassisSpeeds(linearVelocity, 0, rotationalVelocity));
+          diffDrive.accept(output);
+        };
+    differentialRotationConsumer =
+        (ChassisSpeeds speeds) -> {
+          diffDrive.accept(
+              kinematics.toWheelSpeeds(new ChassisSpeeds(0, 0, speeds.omegaRadiansPerSecond)));
+        };
   }
+
   /**
    * Set whether to enable flipping the position based on the alliance. Defaults to true.
    *
@@ -359,7 +376,7 @@ public class PathingCommandGenerator {
     PathingCommandGenerator pather = this.clone();
     pather.translationTolerance = translationTolerance;
     pather.rotationTolerance = rotationTolerance;
-    pather.differentialOrientationMode=differentialOrientationMode;
+    pather.differentialOrientationMode = differentialOrientationMode;
     return pather;
   }
 
@@ -399,10 +416,17 @@ public class PathingCommandGenerator {
    */
   public PathingCommandGenerator clone() {
     PathingCommandGenerator pather;
-    if(!isDifferential)
+    if (!isDifferential)
       pather = new PathingCommandGenerator(robotProfile, robotPose, drive, subsystem, builder);
     else
-      pather = new PathingCommandGenerator(robotProfile, robotPose, differentialLinearSpeedsConsumer,trackWidth,subsystem,builder);
+      pather =
+          new PathingCommandGenerator(
+              robotProfile,
+              robotPose,
+              differentialLinearSpeedsConsumer,
+              trackWidth,
+              subsystem,
+              builder);
     pather.translationTolerance = translationTolerance;
     pather.rotationTolerance = rotationTolerance;
     pather.linearPhysics = linearPhysics;
@@ -420,7 +444,17 @@ public class PathingCommandGenerator {
   public PathingCommand generateToPoseSupplierCommand(Supplier<Pose2d> supplier) {
     Supplier<Pose2d> finalSupplier = () -> getPoseForAlliance(supplier.get());
     if (isDifferential) {
-      return new DifferentialPathingCommand(finalSupplier, robotPose, drive, differentialRotationConsumer, robotProfile, builder.build(), subsystem, translationTolerance, rotationTolerance, linearPhysics);
+      return new DifferentialPathingCommand(
+          finalSupplier,
+          robotPose,
+          drive,
+          differentialRotationConsumer,
+          robotProfile,
+          builder.build(),
+          subsystem,
+          translationTolerance,
+          rotationTolerance,
+          linearPhysics);
     }
     return new PathingCommand(
         finalSupplier,
@@ -631,12 +665,12 @@ public class PathingCommandGenerator {
    * @return A new PathingCommand.
    */
   public PathingCommand generateToDistFromPointCommand(
-      Translation2d point,
-      Supplier<Double> distance) {
-    return generateToDistFromPointCommand(point, distance, new Rotation2d(), new Rotation2d(), new Rotation2d(Math.PI));
+      Translation2d point, Supplier<Double> distance) {
+    return generateToDistFromPointCommand(
+        point, distance, new Rotation2d(), new Rotation2d(), new Rotation2d(Math.PI));
   }
 
-   /**
+  /**
    * Generates a new PathingCommand to go to a set distance from a reference point. For example,
    * this can be used to go to a flexible shooting position or gamepiece pickup from various angles.
    *
@@ -726,7 +760,9 @@ public class PathingCommandGenerator {
         point, distance, new Rotation2d(), new Rotation2d(), new Rotation2d(Math.PI));
   }
 
-  public static enum DifferentialOrientationMode{
-    FORWARD,REVERSE,AUTOMATIC
+  public static enum DifferentialOrientationMode {
+    FORWARD,
+    REVERSE,
+    AUTOMATIC
   }
 }

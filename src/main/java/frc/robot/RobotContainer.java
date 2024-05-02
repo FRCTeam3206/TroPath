@@ -46,12 +46,14 @@ public class RobotContainer implements Logged {
     // Configure the button bindings
     path =
         new PathingCommandGenerator(
-            new RobotProfile(50, 3.0/39.37, .9, .9, Motor.NEO().gear(Motor.Gear.REV_HIGH)),
-            m_robotDrive::getPose,
-            m_robotDrive::driveDifferential,
-            DriveConstants.diffKinematics.trackWidthMeters,
-            m_robotDrive,
-            Field.CHARGED_UP_2023).withPhysicsAlgorithmType(false).setDifferentialOrientationMode(DifferentialOrientationMode.FORWARD);
+                new RobotProfile(50, 3.0 / 39.37, .9, .9, Motor.NEO().gear(Motor.Gear.REV_HIGH)),
+                m_robotDrive::getPose,
+                m_robotDrive::driveDifferential,
+                DriveConstants.diffKinematics.trackWidthMeters,
+                m_robotDrive,
+                Field.CHARGED_UP_2023)
+            .withPhysicsAlgorithmType(false)
+            .setDifferentialOrientationMode(DifferentialOrientationMode.FORWARD);
     configureButtonBindings();
 
     // Configure default commands
@@ -85,7 +87,7 @@ public class RobotContainer implements Logged {
     //         () -> m_robotDrive.setX(),
     //         m_robotDrive));
 
-    m_driverController.button(1).whileTrue(path.generateToPoseCommand(6.3,4.6, Math.PI));
+    m_driverController.button(1).whileTrue(path.generateToPoseCommand(6.3, 4.6, Math.PI));
     m_driverController
         .button(2)
         .whileTrue(

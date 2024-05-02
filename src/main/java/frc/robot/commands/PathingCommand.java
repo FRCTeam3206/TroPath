@@ -122,9 +122,9 @@ public class PathingCommand extends Command {
     }
     SmartDashboard.putNumber("Physics Time", System.currentTimeMillis() - start);
     SmartDashboard.putNumber("Velocity", velocity);
-    double theta=Math.atan2(dY, dX);
-    double xSpeed = velocity*Math.cos(theta);
-    double ySpeed = velocity*Math.sin(theta);
+    double theta = Math.atan2(dY, dX);
+    double xSpeed = velocity * Math.cos(theta);
+    double ySpeed = velocity * Math.sin(theta);
     if (Double.isNaN(xSpeed) || Double.isNaN(ySpeed)) {
       xSpeed = 0;
       ySpeed = 0;
@@ -180,11 +180,11 @@ public class PathingCommand extends Command {
     return (robotPose.get().getTranslation().getDistance(goalPoseSupplier.get().getTranslation())
             < translationTolerance
         && Math.abs(
-                    robotPose
-                        .get()
-                        .getRotation()
-                        .minus(goalPoseSupplier.get().getRotation())
-                        .getRadians())
+                robotPose
+                    .get()
+                    .getRotation()
+                    .minus(goalPoseSupplier.get().getRotation())
+                    .getRadians())
             < rotationTolerance);
   }
 }

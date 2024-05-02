@@ -290,7 +290,7 @@ public class DriveSubsystem extends SubsystemBase implements Logged {
   public void driveDifferential(DifferentialDriveWheelSpeeds speeds) {
     ChassisSpeeds swerveSpeeds = DriveConstants.diffKinematics.toChassisSpeeds(speeds);
     drive(
-        swerveSpeeds.vxMetersPerSecond/ DriveConstants.kMaxSpeedMetersPerSecond,
+        swerveSpeeds.vxMetersPerSecond / DriveConstants.kMaxSpeedMetersPerSecond,
         0,
         swerveSpeeds.omegaRadiansPerSecond / DriveConstants.kMaxAngularSpeed,
         RelativeTo.kRobotRelative,
