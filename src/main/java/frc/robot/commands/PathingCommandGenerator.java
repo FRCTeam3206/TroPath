@@ -276,7 +276,10 @@ public class PathingCommandGenerator {
           if (differentialOrientationMode == DifferentialOrientationMode.AUTOMATIC) {
             reversed = Math.abs(theta) > Math.PI / 2;
           }
-          if (reversed) theta = new Rotation2d(theta).plus(new Rotation2d(Math.PI)).getRadians();
+          if (reversed) {
+            theta = new Rotation2d(theta).plus(new Rotation2d(Math.PI)).getRadians();
+          }
+          if (Math.abs(theta) > Math.PI / 2) theta = Math.signum(theta) * Math.PI / 2;
           double velocity =
               Math.sqrt(
                   speeds.vxMetersPerSecond * speeds.vxMetersPerSecond
