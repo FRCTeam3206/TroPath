@@ -31,6 +31,7 @@ public class PathingCommandGenerator {
   private boolean allianceFlip = true;
   private boolean linearPhysics = false;
   private boolean isDifferential = false;
+  private double weighting = 0.5;
   private Consumer<ChassisSpeeds> differentialRotationConsumer;
   double rotationalVelocity;
   private DifferentialOrientationMode differentialOrientationMode=DifferentialOrientationMode.AUTOMATIC;
@@ -272,6 +273,7 @@ public class PathingCommandGenerator {
                   Math.sqrt(
                       speeds.vxMetersPerSecond * speeds.vxMetersPerSecond
                           + speeds.vyMetersPerSecond * speeds.vyMetersPerSecond);
+              theta = Math.atan(Math.tan(theta) * ((weighting < 0.5 ? 2 * weighting : (1 / (2 * (1 - weighting))))));
               SmartDashboard.putNumber("In Velocity",velocity);
               double linearVelocity = velocity * Math.cos(theta)*(reversed?-1:1);
               if (!differentialOrientationMode.equals(DifferentialOrientationMode.AUTOMATIC) && Math.abs(theta) > Math.PI / 2) linearVelocity = 0;
