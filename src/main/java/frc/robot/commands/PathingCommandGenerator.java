@@ -276,15 +276,13 @@ public class PathingCommandGenerator {
           if (differentialOrientationMode == DifferentialOrientationMode.AUTOMATIC) {
             reversed = Math.abs(theta) > Math.PI / 2;
           }
-          if (reversed) {
-            theta = new Rotation2d(theta).plus(new Rotation2d(Math.PI)).getRadians();
-          }
-          if (Math.abs(theta) > Math.PI / 2) theta = Math.signum(theta) * Math.PI / 2;
+          if (reversed) theta = new Rotation2d(theta).plus(new Rotation2d(Math.PI)).getRadians();
+          if (Math.abs(theta) > Math.PI / 2) theta = Math.signum(theta) * Math.PI / 2; // This maximizes the amount of rotation if it's off by pi
           double velocity =
               Math.sqrt(
                   speeds.vxMetersPerSecond * speeds.vxMetersPerSecond
                       + speeds.vyMetersPerSecond * speeds.vyMetersPerSecond);
-          System.out.println("Weighting: "+weighting);
+          SmartDashboard.putNumber("Weighting", weighting);
           theta =
               Math.atan(
                   Math.tan(theta)

@@ -43,9 +43,8 @@ public class RobotContainer implements Logged {
       new CommandXboxController(OIConstants.kDriverControllerPort);
   PathingCommandGenerator path;
 
-  /** The container for the robot. Contains subsystems, OI devices, and commands. 
- * @throws IOException */
-  public RobotContainer() throws IOException {
+  /** The container for the robot. Contains subsystems, OI devices, and commands. */
+  public RobotContainer() {
     // Configure the button bindings
     path =
         new PathingCommandGenerator(
@@ -57,7 +56,12 @@ public class RobotContainer implements Logged {
                 Field.CHARGED_UP_2023)
             .withPhysicsAlgorithmType(false)
             .setDifferentialOrientationMode(DifferentialOrientationMode.FORWARD)
-            .withDifferentialWeighting(0.7);
+            .withTolerances(.1, Math.PI / 32);
+    try {
+        path = path.withDifferentialWeighting(0.75);
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
     configureButtonBindings();
 
     // Configure default commands
