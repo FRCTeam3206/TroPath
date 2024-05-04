@@ -59,7 +59,7 @@ public class RobotContainer implements Logged {
             .withTolerances(.1, Math.PI / 32);
     try {
         path = path.withDifferentialWeighting(0.75);
-    } catch (IOException e) {
+    } catch (IllegalArgumentException e) {
         e.printStackTrace();
     }
     configureButtonBindings();
