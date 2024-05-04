@@ -430,8 +430,8 @@ public class PathingCommandGenerator {
    *     generating a command without the original being affected.
  * @throws IOException 
    */
-  public PathingCommandGenerator withDifferentialWeighting(double weighting) throws IOException {
-    if (weighting < 0 || weighting > 1) throw new IOException(
+  public PathingCommandGenerator withDifferentialWeighting(double weighting) throws IllegalArgumentException {
+    if (weighting < 0 || weighting > 1) throw new IllegalArgumentException(
       "The weighting for differential drive to balance between rotational and linear acceleration has been attempted to be set to " + weighting + ". This value must be between 0 and 1.");
     PathingCommandGenerator pather = this.clone();
     pather.weighting = weighting;
