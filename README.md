@@ -1,22 +1,5 @@
-# MAXSwerve Java Template v2023.1
+# TroPath
 
-See [the online changelog](https://github.com/REVrobotics/MAXSwerve-Java-Template/blob/main/CHANGELOG.md) for information about updates to the template that may have been released since you created your project.
+This repository builds on Oxplorer's automatic path-generating system (see https://github.com/FRCTeam3044/Oxplorer) with a built-in physics-based path following option as well as easy-to-implement flexible goals. For setup, you need to give it a supplier of the robot's current position, a method to drive the robot relative to the field, and a few constants about the robot. With this, it can automatically generate a pathing command to bring the robot to a desired position (including options such as within certain angles on an arc). You can also give it a custom position supplier for unique situations. All methods you can use have thorough documentation, so refer to those for more information on specific use. This repository is built on the MAXSwerve Java Template; you can find the TroPath-specific code in this repository in src/main/java/frc (specifically in utils, robot/commands, and robot/robotprofile).
 
-## Description
-
-A template project for an FRC swerve drivetrain that uses REV MAXSwerve Modules.
-
-Note that this is meant to be used with a drivetrain composed of four MAXSwerve Modules, each configured with two SPARKS MAX, a NEO as the driving motor, a NEO 550 as the turning motor, and a REV Through Bore Encoder as the absolute turning encoder.
-
-To get started, make sure you have calibrated the zero offsets for the absolute encoders in the Hardware Client using the `Absolute Encoder` tab under the associated turning SPARK MAX devices.
-
-## Prerequisites
-
-* SPARK MAX Firmware v1.6.2 - Adds features that are required for swerve
-* REVLib v2023.1.2 - Includes APIs for the new firmware features
-
-## Configuration
-
-It is possible that this project will not work for your robot right out of the box. Various things like the CAN IDs, PIDF gains, chassis configuration, etc. must be determined for your own robot!
-
-These values can be adjusted in the `Constants.java` file.
+For an example of a full implementation in 2025, see https://github.com/FRCTeam3206/2025-Reefscape
